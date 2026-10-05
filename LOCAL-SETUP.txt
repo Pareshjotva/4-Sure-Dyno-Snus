@@ -1,0 +1,26 @@
+Dyno Snus code — local setup
+============================
+
+1) Is zip ko extract karo:
+   C:\clinte\dyno-snus\
+
+2) PowerShell / CMD me:
+   cd C:\clinte\dyno-snus
+   npm install
+   npm run dev
+
+3) Browser me kholo:
+   http://127.0.0.1:4329
+
+Demo login:
+  Admin:    admin@4sureinternational.ca / Admin@2026
+  Retailer: retailer@demo.com / Retailer@2026
+
+GitHub pe push (optional):
+  cd C:\clinte\dyno-snus
+  git init -b main
+  git add -A
+  git commit -m "Add Dyno Snus website"
+  git remote add origin https://github.com/paresh-ahir/4-Sure-Dyno-Snus.git
+  git push -u origin main
+  (GitHub password ke jagah Personal Access Token use karo)
