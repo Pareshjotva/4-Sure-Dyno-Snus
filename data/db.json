@@ -1,0 +1,243 @@
+{
+  "site": {
+    "companyName": "4 Sure International",
+    "productLine": "Dyno Snus",
+    "tagline": "From Global to Local",
+    "phone": "403-828-6370",
+    "email": "octavio4sure@gmail.com",
+    "website": "4sureinternational.ca",
+    "address": "Edmonton, AB T6V 0M7",
+    "salesContact": "Octavio Silva",
+    "minOrderPacks": 20,
+    "ageRequirement": 19
+  },
+  "products": [
+    {
+      "id": "prod_extreme",
+      "slug": "dyno-extreme-snus",
+      "name": "Dyno Extreme Slim",
+      "shortName": "Dyno Extreme",
+      "tagline": "Ultra-strong. Natural tobacco. Built for experienced adults.",
+      "description": "Take intensity to the next level with Dyno Extreme Slim. Made for experienced users, this ultra-strong pouch combines a natural tobacco flavour with a powerful nicotine hit, delivering a bold, long-lasting experience for adult consumers seeking maximum strength. Soft pouches, spit-free and easy to use.",
+      "flavour": "Signature mint with a smooth, cool natural tobacco profile",
+      "nicotinePerPortionMg": 18,
+      "nicotinePerGramMg": 27,
+      "pouchesPerPack": "Approx. 73–75 slim pouches",
+      "packSize": "50 g resealable soft pack",
+      "format": "Slim white pouch for a comfortable, discreet fit",
+      "origin": "Produced in Norway",
+      "features": [
+        "Soft mesh pouch technology for consistent release",
+        "Triple-layer aluminum pouch for freshness",
+        "Canadian plain packaging, resealable 50 g pack",
+        "Spit-free and smoke-free format",
+        "Discreet placement for modern indoor restrictions"
+      ],
+      "image": "/images/dyno-extreme.jpg",
+      "overviewImage": "/images/extreme-overview.jpg",
+      "active": true,
+      "sortOrder": 1
+    },
+    {
+      "id": "prod_blast",
+      "slug": "dyno-blast-snus",
+      "name": "Dyno Blast White Slim",
+      "shortName": "Dyno Blast",
+      "tagline": "Light cooling. Fast-release nicotine. Soft white pouches.",
+      "description": "Dyno Blast White Slims deliver a light cooling experience with a high, fast-releasing dose of nicotine. Soft white pouches, spit-free and easy to use — a strong value option for adult consumers who want cooling refreshment with reliable strength.",
+      "flavour": "Light cooling white-pouch flavour with smooth, intense nicotine satisfaction",
+      "nicotinePerPortionMg": 13,
+      "nicotinePerGramMg": 20,
+      "pouchesPerPack": "Approx. 73–75 slim pouches",
+      "packSize": "50 g resealable soft pack",
+      "format": "Slim blast white pouch for discreet comfort",
+      "origin": "Produced in Norway",
+      "tobaccoFreePercent": 97,
+      "features": [
+        "97% tobacco-free white pouch option",
+        "Soft all-white mesh pouches for consistent release",
+        "Triple-layer aluminum pouch for ultimate freshness",
+        "Canadian plain packaging, resealable 50 g pack",
+        "Spit-free and smoke-free format"
+      ],
+      "image": "/images/dyno-blast.jpg",
+      "overviewImage": "/images/blast-overview.jpg",
+      "active": true,
+      "sortOrder": 2
+    }
+  ],
+  "pricing": [
+    {
+      "id": "price_bc_extreme",
+      "province": "British Columbia",
+      "provinceCode": "BC",
+      "productId": "prod_extreme",
+      "packQty": "Approx. 73–75",
+      "casePack": "20 × 50 g / case",
+      "wholesale": 40,
+      "ptt": 32.5,
+      "msrpMin": 95,
+      "msrpMax": 105,
+      "marginMin": 24,
+      "marginMax": 31
+    },
+    {
+      "id": "price_bc_blast",
+      "province": "British Columbia",
+      "provinceCode": "BC",
+      "productId": "prod_blast",
+      "packQty": "Approx. 73–75",
+      "casePack": "20 × 50 g / case",
+      "wholesale": 40,
+      "ptt": 32.5,
+      "msrpMin": 95,
+      "msrpMax": 105,
+      "marginMin": 24,
+      "marginMax": 31
+    },
+    {
+      "id": "price_ab_extreme",
+      "province": "Alberta",
+      "provinceCode": "AB",
+      "productId": "prod_extreme",
+      "packQty": "Approx. 73–75",
+      "casePack": "20 × 50 g / case",
+      "wholesale": 40,
+      "ptt": 17.5,
+      "msrpMin": 80,
+      "msrpMax": 90,
+      "marginMin": 28,
+      "marginMax": 36
+    },
+    {
+      "id": "price_ab_blast",
+      "province": "Alberta",
+      "provinceCode": "AB",
+      "productId": "prod_blast",
+      "packQty": "Approx. 73–75",
+      "casePack": "20 × 50 g / case",
+      "wholesale": 40,
+      "ptt": 17.5,
+      "msrpMin": 80,
+      "msrpMax": 90,
+      "marginMin": 28,
+      "marginMax": 36
+    },
+    {
+      "id": "price_on_extreme",
+      "province": "Ontario",
+      "provinceCode": "ON",
+      "productId": "prod_extreme",
+      "packQty": "Approx. 73–75",
+      "casePack": "20 × 50 g / case",
+      "wholesale": 40,
+      "ptt": 9.24,
+      "msrpMin": 65,
+      "msrpMax": 75,
+      "marginMin": 24,
+      "marginMax": 34
+    },
+    {
+      "id": "price_on_blast",
+      "province": "Ontario",
+      "provinceCode": "ON",
+      "productId": "prod_blast",
+      "packQty": "Approx. 73–75",
+      "casePack": "20 × 50 g / case",
+      "wholesale": 40,
+      "ptt": 9.24,
+      "msrpMin": 65,
+      "msrpMax": 75,
+      "marginMin": 24,
+      "marginMax": 34
+    }
+  ],
+  "incentives": [
+    {
+      "id": "tier_1",
+      "name": "Growth Partner",
+      "minPacks": 20,
+      "maxPacks": 40,
+      "discountPercent": 5,
+      "savePerPack": 2
+    },
+    {
+      "id": "tier_2",
+      "name": "Premium",
+      "minPacks": 41,
+      "maxPacks": 60,
+      "discountPercent": 10,
+      "savePerPack": 4
+    },
+    {
+      "id": "tier_3",
+      "name": "Volume",
+      "minPacks": 80,
+      "maxPacks": null,
+      "discountPercent": 15,
+      "savePerPack": 6
+    }
+  ],
+  "users": [
+    {
+      "id": "user_admin",
+      "email": "admin@4sureinternational.ca",
+      "passwordHash": "$2b$10$KuA54MP.6xzsz.2eg./Y8ely6FH.nOl.MvoCcNVXtp8GdeFe0mA1W",
+      "name": "Site Admin",
+      "role": "admin",
+      "company": "4 Sure International Inc.",
+      "phone": "403-828-6370",
+      "province": "AB",
+      "address": "Edmonton, AB T6V 0M7",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "active": true
+    },
+    {
+      "id": "user_retailer",
+      "email": "retailer@demo.com",
+      "passwordHash": "$2b$10$8uz0qmEGF/6ysFNdxMU27.4H8aYF1Mwyyi6TRltYG2ZSDxvx2ckiS",
+      "name": "Alex Mercer",
+      "role": "retailer",
+      "company": "Pacific Smoke Retail Co.",
+      "phone": "604-555-0142",
+      "province": "BC",
+      "address": "Vancouver, BC",
+      "licenceNumber": "BC-TOB-DEMO-2026",
+      "createdAt": "2026-01-15T00:00:00.000Z",
+      "active": true
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_001",
+      "orderNumber": "DYN-2026-1001",
+      "userId": "user_retailer",
+      "userName": "Alex Mercer",
+      "company": "Pacific Smoke Retail Co.",
+      "province": "BC",
+      "items": [
+        {
+          "productId": "prod_extreme",
+          "productName": "Dyno Extreme Slim",
+          "quantity": 12,
+          "unitPrice": 40
+        },
+        {
+          "productId": "prod_blast",
+          "productName": "Dyno Blast White Slim",
+          "quantity": 8,
+          "unitPrice": 40
+        }
+      ],
+      "subtotal": 800,
+      "discountPercent": 5,
+      "discountAmount": 40,
+      "total": 760,
+      "status": "confirmed",
+      "notes": "Minimum order met — free shipping.",
+      "createdAt": "2026-02-10T15:20:00.000Z",
+      "updatedAt": "2026-02-11T09:00:00.000Z"
+    }
+  ],
+  "leads": []
+}
