@@ -1,6 +1,6 @@
 import { HeroSlideshow } from "@/components/home/hero-slideshow";
 import { SiteShell } from "@/components/layout/site-shell";
-import { ParallaxLayer, RevealOnScroll } from "@/components/motion/parallax";
+import { RevealOnScroll } from "@/components/motion/parallax";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getIncentives, getProducts, getSite } from "@/lib/db";
@@ -60,32 +60,27 @@ export default async function HomePage() {
       >
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <RevealOnScroll>
-            <div className="mb-10 max-w-2xl">
-              <Badge className="bg-cyan text-white">Two products</Badge>
-              <h2 className="mt-4 font-display text-4xl text-white sm:text-6xl">
-                Dyno Extreme & Dyno Blast
-              </h2>
-              <p className="mt-3 text-slate-ink">
-                Snus slim pouches built for adult retail — ultra-strong tobacco
-                or light-cooling white format. Spit-free. Discreet. Canadian
-                plain packaging ready.
-              </p>
-            </div>
-          </RevealOnScroll>
-
-          <RevealOnScroll delay={80}>
             <div className="relative mb-10 overflow-hidden rounded-2xl border border-white/10 bg-black">
-              <ParallaxLayer speed={0.12} className="relative">
-                <Image
-                  src="/images/dyno-tins.jpg"
-                  alt="Dyno Blast White and Dyno Extreme open tins"
-                  width={1800}
-                  height={747}
-                  quality={85}
-                  sizes="(max-width:1024px) 100vw, 1120px"
-                  className="h-auto w-full object-cover"
-                />
-              </ParallaxLayer>
+              <Image
+                src="/images/banner-12345.png"
+                alt="Open Dyno tins with white and brown slim pouches"
+                width={1801}
+                height={873}
+                quality={90}
+                sizes="(max-width:1152px) 100vw, 1152px"
+                className="h-80 w-full object-cover object-[center_42%] sm:h-auto sm:object-contain"
+              />
+              <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black via-black/70 to-transparent p-4 sm:p-8">
+                <Badge className="bg-cyan text-white">Two products</Badge>
+                <h2 className="mt-2 max-w-3xl font-display text-3xl leading-none text-white sm:mt-3 sm:text-5xl lg:text-6xl">
+                  Dyno Extreme & Dyno Blast
+                </h2>
+                <p className="mt-2 max-w-xl text-xs leading-relaxed text-white/80 sm:mt-3 sm:text-base">
+                  Snus slim pouches built for adult retail — ultra-strong tobacco
+                  or light-cooling white format. Spit-free. Discreet. Canadian
+                  plain packaging ready.
+                </p>
+              </div>
             </div>
           </RevealOnScroll>
 
@@ -222,18 +217,16 @@ export default async function HomePage() {
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <RevealOnScroll>
           <div className="surface overflow-hidden rounded-2xl">
-            <div className="grid lg:grid-cols-2">
-              <div className="relative min-h-72 overflow-hidden bg-black">
-                <ParallaxLayer className="absolute inset-[-10%] h-[120%] w-full" speed={0.18}>
-                  <Image
-                    src="/images/dyno-products-hero.jpg"
-                    alt="Dyno Snus red tins and refill pouch"
-                    fill
-                    sizes="(max-width:1024px) 100vw, 50vw"
-                    className="object-cover"
-                  />
-                </ParallaxLayer>
-              </div>
+            <div className="grid lg:grid-cols-2 lg:items-center">
+              <Image
+                src="/images/wholesale-banner.png"
+                alt="Dyno pouch and red tins with the Health Canada warning"
+                width={1082}
+                height={874}
+                quality={90}
+                sizes="(max-width:1024px) 100vw, 576px"
+                className="h-auto w-full"
+              />
               <div className="flex flex-col justify-center p-8 sm:p-10">
                 <h2 className="font-display text-4xl text-white">
                   Ready to open a provincial wholesale account?
