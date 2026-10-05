@@ -1,3 +1,4 @@
+import { HeroSlideshow } from "@/components/home/hero-slideshow";
 import { SiteShell } from "@/components/layout/site-shell";
 import { ParallaxLayer, RevealOnScroll } from "@/components/motion/parallax";
 import { Badge } from "@/components/ui/badge";
@@ -19,23 +20,10 @@ export default async function HomePage() {
 
   return (
     <SiteShell>
-      <section className="relative min-h-[88vh] overflow-hidden">
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <ParallaxLayer className="absolute inset-[-12%] h-[124%] w-full" speed={0.22}>
-            <Image
-              src="/images/dyno-products-hero.jpg"
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-center"
-            />
-          </ParallaxLayer>
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/45" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
-        </div>
+      <section className="relative overflow-hidden bg-black">
+        <HeroSlideshow />
 
-        <div className="mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-24 sm:px-6 lg:justify-center lg:pb-24">
+        <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-4 py-8 sm:px-6 lg:absolute lg:inset-0 lg:justify-center lg:py-0">
           <div className="animate-rise max-w-2xl">
             <h1 className="font-display text-5xl leading-none text-white sm:text-7xl lg:text-8xl">
               Dyno Snus
