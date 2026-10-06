@@ -39,20 +39,20 @@ export default async function IncentivesPage() {
             >
               <p
                 className={`text-xs font-semibold uppercase tracking-[0.18em] ${
-                  i === 2 ? "text-cyan-soft" : "text-cyan"
+                  i === 2 ? "text-white" : "text-cyan"
                 }`}
               >
                 Tier {i + 1} · {tier.name}
               </p>
-              <p className="mt-4 font-display text-5xl">
+              <p className="mt-4 font-display text-5xl text-white">
                 {tier.discountPercent}%
               </p>
-              <p className={`mt-2 text-sm ${i === 2 ? "text-white/75" : "text-slate-ink"}`}>
+              <p className="mt-2 text-sm text-white/85">
                 {tier.minPacks}
                 {tier.maxPacks ? `–${tier.maxPacks}` : "+"} packs (50 g) per
                 calendar month
               </p>
-              <p className={`mt-4 text-sm font-semibold ${i === 2 ? "text-cyan-soft" : "text-navy"}`}>
+              <p className="mt-4 text-sm font-semibold text-white">
                 Save ${tier.savePerPack.toFixed(2)} / 50 g pack
               </p>
             </div>
@@ -68,31 +68,37 @@ export default async function IncentivesPage() {
             className="h-auto w-full rounded-2xl"
           />
           <div>
-            <h2 className="font-display text-3xl text-navy">How it works</h2>
-            <ol className="mt-5 space-y-4 text-sm text-slate-ink">
+            <h2 className="font-display text-3xl text-white">How it works</h2>
+            <ol className="mt-5 space-y-4 text-sm text-white/80">
               <li className="surface rounded-xl p-4">
-                <strong className="text-navy">1. Place qualifying orders</strong>
-                <p className="mt-1">
+                <strong className="font-display text-xl text-white">
+                  1. Place qualifying orders
+                </strong>
+                <p className="mt-1 text-white/80">
                   Order Dyno Snus during the calendar month as a registered
                   retailer.
                 </p>
               </li>
               <li className="surface rounded-xl p-4">
-                <strong className="text-navy">2. Hit your tier threshold</strong>
-                <p className="mt-1">
+                <strong className="font-display text-xl text-white">
+                  2. Hit your tier threshold
+                </strong>
+                <p className="mt-1 text-white/80">
                   Accumulate packs across multiple orders, or qualify in a
                   single purchase.
                 </p>
               </li>
               <li className="surface rounded-xl p-4">
-                <strong className="text-navy">3. Receive the discount</strong>
-                <p className="mt-1">
+                <strong className="font-display text-xl text-white">
+                  3. Receive the discount
+                </strong>
+                <p className="mt-1 text-white/80">
                   Single-order qualifiers may see the discount on the invoice.
                   Multi-order volume may credit as a month-end rebate.
                 </p>
               </li>
             </ol>
-            <p className="mt-4 text-xs text-navy/55">
+            <p className="mt-4 text-xs text-white/70">
               Calendar-month qualification resets each month. Volume does not
               carry forward.
             </p>

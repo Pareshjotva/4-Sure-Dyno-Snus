@@ -4,6 +4,8 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminHomePage() {
   const session = await requireSession("admin");
   if (!session) redirect("/login");
@@ -79,14 +81,16 @@ export default async function AdminHomePage() {
           <div className="space-y-3">
             {leads.slice(0, 4).map((lead) => (
               <div key={lead.id} className="surface rounded-xl p-4 text-sm">
-                <p className="font-semibold text-navy">{lead.name}</p>
-                <p className="text-navy/60">
-                  {lead.company || lead.email} · {lead.status}
+                <p className="font-semibold text-white">{lead.name}</p>
+                <p className="text-white/75">
+                  {lead.email}
+                  {lead.phone ? ` · ${lead.phone}` : ""} · {lead.status}
                 </p>
+                <p className="mt-2 text-white/80">{lead.message}</p>
               </div>
             ))}
             {leads.length === 0 && (
-              <p className="text-sm text-slate-ink">No leads yet.</p>
+              <p className="text-sm text-white/70">No contact inquiries yet.</p>
             )}
           </div>
         </section>

@@ -30,13 +30,13 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
         <article key={lead.id} className="surface rounded-2xl p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="font-semibold text-navy">{lead.name}</p>
-              <p className="text-sm text-slate-ink">
+              <p className="font-semibold text-white">{lead.name}</p>
+              <p className="text-sm text-white/80">
                 {lead.email}
                 {lead.phone ? ` · ${lead.phone}` : ""}
               </p>
-              <p className="text-xs text-navy/55">
-                {lead.company || "—"} · {lead.province || "—"} ·{" "}
+              <p className="text-xs text-white/60">
+                {lead.company || "No company"} · {lead.province || "No province"} ·{" "}
                 {formatDate(lead.createdAt)}
               </p>
             </div>
@@ -56,13 +56,13 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
               <option value="closed">closed</option>
             </Select>
           </div>
-          <p className="mt-3 text-sm leading-relaxed text-slate-ink">
+          <p className="mt-3 text-sm leading-relaxed text-white/90">
             {lead.message}
           </p>
         </article>
       ))}
       {leads.length === 0 && (
-        <p className="text-sm text-slate-ink">No leads yet.</p>
+        <p className="text-sm text-white/70">No contact inquiries yet.</p>
       )}
     </div>
   );
