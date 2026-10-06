@@ -52,7 +52,7 @@ export default async function HomePage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="h-auto min-h-11 w-full whitespace-normal px-2 py-2.5 text-center text-xs leading-tight sm:h-12 sm:px-6 sm:text-base"
+                  className="h-auto min-h-11 w-full whitespace-normal bg-black px-2 py-2.5 text-center text-xs leading-tight hover:bg-black sm:h-12 sm:px-6 sm:text-base"
                 >
                   View products
                 </Button>
