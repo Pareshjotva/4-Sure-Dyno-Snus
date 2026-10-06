@@ -10,7 +10,7 @@ import type { Product } from "@/lib/types";
 import { Pencil, Plus, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 
 type Draft = {
   name: string;
@@ -30,6 +30,9 @@ type Draft = {
   overviewImage: string;
 };
 
+const DEFAULT_IMAGE = "/images/dyno-extreme.jpg";
+const DEFAULT_OVERVIEW = "/images/extreme-overview.jpg";
+
 const emptyDraft = (): Draft => ({
   name: "",
   shortName: "",
@@ -44,8 +47,8 @@ const emptyDraft = (): Draft => ({
   format: "Slim pouch",
   origin: "Produced in Norway",
   active: true,
-  image: "/images/dyno-extreme.jpg",
-  overviewImage: "/images/extreme-overview.jpg",
+  image: DEFAULT_IMAGE,
+  overviewImage: DEFAULT_OVERVIEW,
 });
 
 function toDraft(product: Product): Draft {
@@ -78,11 +81,6 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-
-  const editingProduct = useMemo(
-    () => rows.find((p) => p.id === editingId) ?? null,
-    [rows, editingId]
-  );
 
   function openCreate() {
     setMode("create");
@@ -192,19 +190,21 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   }
 
   async function uploadPhoto(field: "image" | "overviewImage", file: File) {
-    if (!editingId) {
-      setError("Save the product first, then upload photos.");
-      return;
-    }
     setBusy(true);
     setError("");
+    if (!editingId && draft[field].startsWith("/uploads/products/")) {
+      await fetch(
+        `/api/admin/products/upload?path=${encodeURIComponent(draft[field])}`,
+        { method: "DELETE" }
+      );
+    }
     const form = new FormData();
     form.append("field", field);
     form.append("file", file);
-    const res = await fetch(`/api/admin/products/${editingId}/image`, {
-      method: "POST",
-      body: form,
-    });
+    const url = editingId
+      ? `/api/admin/products/${editingId}/image`
+      : "/api/admin/products/upload";
+    const res = await fetch(url, { method: "POST", body: form });
     const json = await res.json();
     setBusy(false);
     if (!res.ok) {
@@ -212,16 +212,36 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
       return;
     }
     setDraft((d) => ({ ...d, [field]: json.path }));
-    setRows((prev) =>
-      prev.map((p) => (p.id === editingId ? json.product : p))
+    if (editingId && json.product) {
+      setRows((prev) =>
+        prev.map((p) => (p.id === editingId ? json.product : p))
+      );
+      await refreshList();
+    }
+    setMessage(
+      editingId
+        ? `${field === "image" ? "Main" : "Overview"} photo updated`
+        : `${field === "image" ? "Main" : "Overview"} photo ready. Save the product to keep it.`
     );
-    setMessage(`${field === "image" ? "Main" : "Overview"} photo updated`);
-    await refreshList();
   }
 
   async function deletePhoto(field: "image" | "overviewImage") {
-    if (!editingId) return;
     if (!confirm("Remove this product photo?")) return;
+    if (!editingId) {
+      const current = draft[field];
+      if (current.startsWith("/uploads/products/")) {
+        await fetch(
+          `/api/admin/products/upload?path=${encodeURIComponent(current)}`,
+          { method: "DELETE" }
+        );
+      }
+      setDraft((d) => ({
+        ...d,
+        [field]: field === "image" ? DEFAULT_IMAGE : DEFAULT_OVERVIEW,
+      }));
+      setMessage("Photo removed");
+      return;
+    }
     setBusy(true);
     const res = await fetch(
       `/api/admin/products/${editingId}/image?field=${field}`,
@@ -354,62 +374,55 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
         </Button>
       </div>
 
-      {mode === "edit" && editingProduct && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {(
-            [
-              ["image", "Main photo"],
-              ["overviewImage", "Overview photo"],
-            ] as const
-          ).map(([field, label]) => (
-            <div key={field} className="surface rounded-xl p-4">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-cyan">
-                {label}
-              </p>
-              <div className="relative mb-3 aspect-video overflow-hidden rounded-lg bg-black">
-                <Image
-                  src={draft[field]}
-                  alt={label}
-                  fill
-                  className="object-cover"
-                  sizes="400px"
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-white/20 px-3 py-2 text-sm text-white hover:border-cyan">
-                  <Upload size={14} />
-                  Upload
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/gif"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) uploadPhoto(field, file);
-                      e.currentTarget.value = "";
-                    }}
-                  />
-                </label>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="danger"
-                  onClick={() => deletePhoto(field)}
-                  disabled={busy}
-                >
-                  <Trash2 size={14} /> Remove
-                </Button>
-              </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {(
+          [
+            ["image", "Main photo"],
+            ["overviewImage", "Overview photo"],
+          ] as const
+        ).map(([field, label]) => (
+          <div key={field} className="surface rounded-xl p-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-cyan">
+              {label}
+            </p>
+            <div className="relative mb-3 aspect-video overflow-hidden rounded-lg bg-black">
+              <Image
+                src={draft[field]}
+                alt={label}
+                fill
+                className="object-cover"
+                sizes="400px"
+              />
             </div>
-          ))}
-        </div>
-      )}
-
-      {mode === "create" && (
-        <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/65">
-          Create the product first, then upload photos from the edit screen.
-        </p>
-      )}
+            <div className="flex flex-wrap gap-2">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-white/20 px-3 py-2 text-sm text-white hover:border-cyan">
+                <Upload size={14} />
+                Upload
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  className="hidden"
+                  disabled={busy}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadPhoto(field, file);
+                    e.currentTarget.value = "";
+                  }}
+                />
+              </label>
+              <Button
+                type="button"
+                size="sm"
+                variant="danger"
+                onClick={() => deletePhoto(field)}
+                disabled={busy}
+              >
+                <Trash2 size={14} /> Remove
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <div className="surface space-y-4 rounded-2xl p-5">
         <label className="flex items-center gap-2 text-sm text-white">
