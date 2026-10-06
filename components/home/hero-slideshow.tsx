@@ -3,24 +3,25 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+/** Shared frame matches the taller banner so slide 1 is full-bleed and 2–3 stay letterboxed. */
+const FRAME_WIDTH = 1802;
+const FRAME_HEIGHT = 873;
+
 const SLIDES = [
   {
     src: "/images/hero-banner-01.png",
     alt: "Three red Dyno tins with the winged skull logo",
     width: 1802,
-    height: 873,
   },
   {
     src: "/images/hero-banner-02.png",
     alt: "Open Dyno tins filled with white and brown slim pouches",
     width: 2172,
-    height: 724,
   },
   {
     src: "/images/hero-banner-03.png",
     alt: "Dyno pouch and red tins with the Health Canada warning",
     width: 2171,
-    height: 724,
   },
 ];
 
@@ -37,21 +38,21 @@ export function HeroSlideshow() {
   }, [index]);
 
   return (
-    <div className="relative">
+    <div
+      className="relative w-full overflow-hidden bg-black"
+      style={{ aspectRatio: `${FRAME_WIDTH} / ${FRAME_HEIGHT}` }}
+    >
       {SLIDES.map((slide, i) => (
         <Image
           key={slide.src}
           src={slide.src}
           alt={slide.alt}
-          width={slide.width}
-          height={slide.height}
+          fill
           priority={i === 0}
           quality={90}
-          sizes="100vw"
-          className={`h-auto w-full transition-opacity duration-700 ${
-            i === index
-              ? "relative opacity-100"
-              : "pointer-events-none absolute inset-x-0 top-0 opacity-0"
+          sizes={`(min-width: ${slide.width}px) ${slide.width}px, 100vw`}
+          className={`object-contain object-center transition-opacity duration-700 ${
+            i === index ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         />
       ))}
