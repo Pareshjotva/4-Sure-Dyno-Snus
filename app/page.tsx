@@ -38,15 +38,22 @@ export default async function HomePage() {
               licensed adult tobacco retailers — produced in Norway, distributed
               by {site.companyName}.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/register">
-                <Button size="lg" className="animate-pulse-red">
+            <div className="mt-8 flex items-stretch gap-2 sm:gap-3">
+              <Link href="/register" className="flex min-w-0 flex-1">
+                <Button
+                  size="lg"
+                  className="animate-pulse-red h-auto min-h-11 w-full whitespace-normal px-2 py-2.5 text-center text-xs leading-tight sm:h-12 sm:px-6 sm:text-base"
+                >
                   Open wholesale account
                   <ArrowRight size={16} />
                 </Button>
               </Link>
-              <Link href="#products">
-                <Button size="lg" variant="outline">
+              <Link href="#products" className="flex min-w-0 flex-1">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-auto min-h-11 w-full whitespace-normal px-2 py-2.5 text-center text-xs leading-tight sm:h-12 sm:px-6 sm:text-base"
+                >
                   View products
                 </Button>
               </Link>
@@ -71,7 +78,7 @@ export default async function HomePage() {
                 sizes="(max-width:1152px) 100vw, 1152px"
                 className="h-80 w-full object-cover object-[center_42%] sm:h-auto sm:object-contain"
               />
-              <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black via-black/70 to-transparent p-4 sm:p-8">
+              <div className="absolute inset-0 bg-gradient-to-b from-black via-black/85 to-black/50 p-4 sm:inset-x-0 sm:bottom-auto sm:bg-gradient-to-b sm:from-black sm:via-black/70 sm:to-transparent sm:p-8">
                 <Badge className="bg-cyan text-white">Two products</Badge>
                 <h2 className="mt-2 max-w-3xl font-display text-3xl leading-none text-white sm:mt-3 sm:text-5xl lg:text-6xl">
                   Dyno Extreme & Dyno Blast
@@ -236,12 +243,19 @@ export default async function HomePage() {
                   Confirm your province, share retailer licence details, and
                   start ordering Dyno Extreme Slim and Dyno Blast White Slim.
                 </p>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <Link href="/contact">
-                    <Button>Talk to sales</Button>
+                <div className="mt-6 flex items-stretch gap-2 sm:gap-3">
+                  <Link href="/contact" className="flex min-w-0 flex-1">
+                    <Button className="h-auto min-h-11 w-full whitespace-normal px-2 py-2.5 text-center text-xs leading-tight sm:h-11 sm:px-5 sm:text-sm">
+                      Talk to sales
+                    </Button>
                   </Link>
-                  <Link href="/pricing">
-                    <Button variant="outline">BC pricing sheet</Button>
+                  <Link href="/pricing" className="flex min-w-0 flex-1">
+                    <Button
+                      variant="outline"
+                      className="h-auto min-h-11 w-full whitespace-normal px-2 py-2.5 text-center text-xs leading-tight sm:h-11 sm:px-5 sm:text-sm"
+                    >
+                      BC pricing sheet
+                    </Button>
                   </Link>
                 </div>
                 <p className="mt-6 text-sm text-white/45">

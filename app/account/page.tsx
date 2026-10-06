@@ -53,12 +53,19 @@ export default async function AccountHomePage() {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Link href="/account/order/new">
-          <Button>Place new order</Button>
+      <div className="mt-6 flex items-stretch gap-2 sm:gap-3">
+        <Link href="/account/order/new" className="flex min-w-0 flex-1 sm:flex-none">
+          <Button className="h-auto min-h-11 w-full whitespace-normal px-3 py-2.5 text-center text-sm sm:w-auto">
+            Place new order
+          </Button>
         </Link>
-        <Link href="/pricing">
-          <Button variant="outline">View pricing</Button>
+        <Link href="/pricing" className="flex min-w-0 flex-1 sm:flex-none">
+          <Button
+            variant="outline"
+            className="h-auto min-h-11 w-full whitespace-normal px-3 py-2.5 text-center text-sm sm:w-auto"
+          >
+            View pricing
+          </Button>
         </Link>
       </div>
 

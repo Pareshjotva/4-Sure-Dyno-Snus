@@ -49,7 +49,7 @@ export function AgeGate() {
         <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-cyan">
           Age verification
         </p>
-        <h2 className="mt-3 text-center font-display text-4xl text-white">
+        <h2 className="mt-3 text-center font-display text-3xl text-white sm:text-4xl">
           Are you 19 or older?
         </h2>
         <p className="mt-3 text-center text-sm leading-relaxed text-slate-ink">
@@ -57,11 +57,15 @@ export function AgeGate() {
           adult consumers of legal age. Nicotine is highly addictive. This site
           does not sell to minors.
         </p>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Button className="flex-1" onClick={confirm}>
+        <div className="mt-6 grid grid-cols-2 gap-2">
+          <Button className="h-auto min-h-11 w-full whitespace-normal px-2 text-sm" onClick={confirm}>
             Yes, I am 19+
           </Button>
-          <Button className="flex-1" variant="outline" onClick={deny}>
+          <Button
+            className="h-auto min-h-11 w-full whitespace-normal border-2 border-white/80 px-2 text-sm text-white"
+            variant="outline"
+            onClick={deny}
+          >
             No, exit
           </Button>
         </div>

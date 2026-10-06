@@ -46,8 +46,8 @@ export function HeroSlideshow() {
           }`}
         />
       ))}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/90 via-black/45 to-transparent" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/25" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/25 sm:bg-gradient-to-r sm:from-black/90 sm:via-black/45 sm:to-transparent" />
+      <div className="pointer-events-none absolute inset-0 hidden bg-gradient-to-t from-black/50 via-transparent to-black/25 sm:block" />
 
       <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-2 sm:bottom-6">
         {SLIDES.map((slide, i) => (

@@ -109,12 +109,19 @@ export default async function ProductDetailPage({ params }: Props) {
               </ul>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/register">
-                <Button>Order as retailer</Button>
+            <div className="mt-8 flex items-stretch gap-2 sm:gap-3">
+              <Link href="/register" className="flex min-w-0 flex-1">
+                <Button className="h-auto min-h-11 w-full whitespace-normal px-2 py-2.5 text-center text-xs leading-tight sm:h-11 sm:px-5 sm:text-sm">
+                  Order as retailer
+                </Button>
               </Link>
-              <Link href="/pricing">
-                <Button variant="outline">View wholesale pricing</Button>
+              <Link href="/pricing" className="flex min-w-0 flex-1">
+                <Button
+                  variant="outline"
+                  className="h-auto min-h-11 w-full whitespace-normal px-2 py-2.5 text-center text-xs leading-tight sm:h-11 sm:px-5 sm:text-sm"
+                >
+                  View wholesale pricing
+                </Button>
               </Link>
             </div>
 
