@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["mongodb"],
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [75, 85, 90],

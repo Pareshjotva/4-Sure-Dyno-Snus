@@ -1,135 +1,137 @@
-import { promises as fs } from "fs";
-import path from "path";
+import type { Collection, Document } from "mongodb";
+import { getDb } from "./mongo";
 import type {
   ContactLead,
-  Database,
+  IncentiveTier,
   Order,
   Product,
   ProvincePricing,
+  SiteContent,
   User,
 } from "./types";
 
-const DB_PATH = path.join(process.cwd(), "data", "db.json");
+type WithMongoId<T> = T & { _id?: unknown };
 
-async function readDb(): Promise<Database> {
-  const raw = await fs.readFile(DB_PATH, "utf8");
-  return JSON.parse(raw) as Database;
+function strip<T>(doc: WithMongoId<T> | null): T | null {
+  if (!doc) return null;
+  const { _id: _ignored, ...rest } = doc;
+  return rest as T;
 }
 
-async function writeDb(db: Database): Promise<void> {
-  await fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), "utf8");
+async function collection<T extends Document>(name: string): Promise<Collection<T>> {
+  const db = await getDb();
+  return db.collection<T>(name);
 }
 
 export async function getSite() {
-  const db = await readDb();
-  return db.site;
+  const site = await (await collection<SiteContent & { id: string }>("site")).findOne({
+    id: "site",
+  });
+  if (!site) throw new Error("Site settings are missing");
+  return strip(site)!;
 }
 
 export async function getProducts(activeOnly = true) {
-  const db = await readDb();
-  const list = db.products.sort((a, b) => a.sortOrder - b.sortOrder);
-  return activeOnly ? list.filter((p) => p.active) : list;
+  const products = await collection<Product>("products");
+  const filter = activeOnly ? { active: true } : {};
+  return products.find(filter).sort({ sortOrder: 1 }).toArray().then((rows) => rows.map((row) => strip(row)!));
 }
 
 export async function getProductBySlug(slug: string) {
-  const db = await readDb();
-  return db.products.find((p) => p.slug === slug) ?? null;
+  const products = await collection<Product>("products");
+  return strip(await products.findOne({ slug }));
 }
 
 export async function getProductById(id: string) {
-  const db = await readDb();
-  return db.products.find((p) => p.id === id) ?? null;
+  const products = await collection<Product>("products");
+  return strip(await products.findOne({ id }));
 }
 
 export async function updateProduct(
   id: string,
   patch: Partial<Product>
 ): Promise<Product | null> {
-  const db = await readDb();
-  const index = db.products.findIndex((p) => p.id === id);
-  if (index === -1) return null;
-  db.products[index] = { ...db.products[index], ...patch, id };
-  await writeDb(db);
-  return db.products[index];
+  const products = await collection<Product>("products");
+  const updated = await products.findOneAndUpdate(
+    { id },
+    { $set: { ...patch, id } },
+    { returnDocument: "after" }
+  );
+  return strip(updated);
 }
 
 export async function createProduct(
   input: Omit<Product, "id" | "sortOrder"> & { sortOrder?: number }
 ): Promise<Product> {
-  const db = await readDb();
-  const slugTaken = db.products.some((p) => p.slug === input.slug);
-  if (slugTaken) throw new Error("Slug already exists");
-  const maxSort = db.products.reduce((m, p) => Math.max(m, p.sortOrder), 0);
+  const products = await collection<Product>("products");
+  const taken = await products.findOne({ slug: input.slug });
+  if (taken) throw new Error("Slug already exists");
+  const highest = await products.find().sort({ sortOrder: -1 }).limit(1).next();
   const record: Product = {
     ...input,
     id: `prod_${Date.now()}`,
-    sortOrder: input.sortOrder ?? maxSort + 1,
+    sortOrder: input.sortOrder ?? (highest?.sortOrder ?? 0) + 1,
   };
-  db.products.push(record);
-  await writeDb(db);
+  await products.insertOne(record);
   return record;
 }
 
 export async function deleteProduct(id: string): Promise<boolean> {
-  const db = await readDb();
-  const before = db.products.length;
-  db.products = db.products.filter((p) => p.id !== id);
-  if (db.products.length === before) return false;
-  await writeDb(db);
-  return true;
+  const products = await collection<Product>("products");
+  const result = await products.deleteOne({ id });
+  return result.deletedCount === 1;
 }
 
 export async function getPricing(provinceCode?: string) {
-  const db = await readDb();
-  if (!provinceCode) return db.pricing;
-  return db.pricing.filter(
-    (p) => p.provinceCode.toLowerCase() === provinceCode.toLowerCase()
-  );
+  const pricing = await collection<ProvincePricing>("pricing");
+  const filter = provinceCode
+    ? { provinceCode: { $regex: `^${provinceCode}$`, $options: "i" } }
+    : {};
+  const rows = await pricing.find(filter).toArray();
+  return rows.map((row) => strip(row)!);
 }
 
-export async function updatePricing(
-  id: string,
-  patch: Partial<ProvincePricing>
-) {
-  const db = await readDb();
-  const index = db.pricing.findIndex((p) => p.id === id);
-  if (index === -1) return null;
-  db.pricing[index] = { ...db.pricing[index], ...patch, id };
-  await writeDb(db);
-  return db.pricing[index];
+export async function updatePricing(id: string, patch: Partial<ProvincePricing>) {
+  const pricing = await collection<ProvincePricing>("pricing");
+  const updated = await pricing.findOneAndUpdate(
+    { id },
+    { $set: { ...patch, id } },
+    { returnDocument: "after" }
+  );
+  return strip(updated);
 }
 
 export async function getIncentives() {
-  const db = await readDb();
-  return db.incentives;
+  const incentives = await collection<IncentiveTier>("incentives");
+  const rows = await incentives.find().toArray();
+  return rows.map((row) => strip(row)!);
 }
 
 export async function getUsers() {
-  const db = await readDb();
-  return db.users;
+  const users = await collection<User>("users");
+  const rows = await users.find().toArray();
+  return rows.map((row) => strip(row)!);
 }
 
 export async function getUserByEmail(email: string) {
-  const db = await readDb();
-  return (
-    db.users.find((u) => u.email.toLowerCase() === email.toLowerCase()) ?? null
+  const users = await collection<User>("users");
+  return strip(
+    await users.findOne({
+      email: { $regex: `^${email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" },
+    })
   );
 }
 
 export async function getUserById(id: string) {
-  const db = await readDb();
-  return db.users.find((u) => u.id === id) ?? null;
+  const users = await collection<User>("users");
+  return strip(await users.findOne({ id }));
 }
 
 export async function createUser(
-  user: Omit<User, "id" | "createdAt" | "active"> & {
-    active?: boolean;
-  }
+  user: Omit<User, "id" | "createdAt" | "active"> & { active?: boolean }
 ) {
-  const db = await readDb();
-  const existing = db.users.find(
-    (u) => u.email.toLowerCase() === user.email.toLowerCase()
-  );
+  const users = await collection<User>("users");
+  const existing = await getUserByEmail(user.email);
   if (existing) throw new Error("Email already registered");
   const record: User = {
     ...user,
@@ -137,108 +139,106 @@ export async function createUser(
     createdAt: new Date().toISOString(),
     active: user.active ?? true,
   };
-  db.users.push(record);
-  await writeDb(db);
+  await users.insertOne(record);
   return record;
 }
 
 export async function updateUser(id: string, patch: Partial<User>) {
-  const db = await readDb();
-  const index = db.users.findIndex((u) => u.id === id);
-  if (index === -1) return null;
-  db.users[index] = { ...db.users[index], ...patch, id };
-  await writeDb(db);
-  return db.users[index];
+  const users = await collection<User>("users");
+  const updated = await users.findOneAndUpdate(
+    { id },
+    { $set: { ...patch, id } },
+    { returnDocument: "after" }
+  );
+  return strip(updated);
 }
 
 export async function getOrders(userId?: string) {
-  const db = await readDb();
-  const list = db.orders.sort(
-    (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
-  );
-  return userId ? list.filter((o) => o.userId === userId) : list;
+  const orders = await collection<Order>("orders");
+  const filter = userId ? { userId } : {};
+  const rows = await orders.find(filter).sort({ createdAt: -1 }).toArray();
+  return rows.map((row) => strip(row)!);
 }
 
 export async function getOrderById(id: string) {
-  const db = await readDb();
-  return db.orders.find((o) => o.id === id) ?? null;
+  const orders = await collection<Order>("orders");
+  return strip(await orders.findOne({ id }));
 }
 
 export async function createOrder(
   order: Omit<Order, "id" | "orderNumber" | "createdAt" | "updatedAt">
 ) {
-  const db = await readDb();
-  const seq = 1000 + db.orders.length + 1;
+  const orders = await collection<Order>("orders");
+  const count = await orders.countDocuments();
   const now = new Date().toISOString();
   const record: Order = {
     ...order,
     id: `ord_${Date.now()}`,
-    orderNumber: `DYN-2026-${seq}`,
+    orderNumber: `DYN-2026-${1000 + count + 1}`,
     createdAt: now,
     updatedAt: now,
   };
-  db.orders.unshift(record);
-  await writeDb(db);
+  await orders.insertOne(record);
   return record;
 }
 
 export async function updateOrder(id: string, patch: Partial<Order>) {
-  const db = await readDb();
-  const index = db.orders.findIndex((o) => o.id === id);
-  if (index === -1) return null;
-  db.orders[index] = {
-    ...db.orders[index],
-    ...patch,
-    id,
-    updatedAt: new Date().toISOString(),
-  };
-  await writeDb(db);
-  return db.orders[index];
+  const orders = await collection<Order>("orders");
+  const updated = await orders.findOneAndUpdate(
+    { id },
+    { $set: { ...patch, id, updatedAt: new Date().toISOString() } },
+    { returnDocument: "after" }
+  );
+  return strip(updated);
 }
 
 export async function getLeads() {
-  const db = await readDb();
-  return db.leads.sort(
-    (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
-  );
+  const leads = await collection<ContactLead>("leads");
+  const rows = await leads.find().sort({ createdAt: -1 }).toArray();
+  return rows.map((row) => strip(row)!);
 }
 
 export async function createLead(
   lead: Omit<ContactLead, "id" | "createdAt" | "status">
 ) {
-  const db = await readDb();
+  const leads = await collection<ContactLead>("leads");
   const record: ContactLead = {
     ...lead,
     id: `lead_${Date.now()}`,
     createdAt: new Date().toISOString(),
     status: "new",
   };
-  db.leads.unshift(record);
-  await writeDb(db);
+  await leads.insertOne(record);
   return record;
 }
 
 export async function updateLead(id: string, patch: Partial<ContactLead>) {
-  const db = await readDb();
-  const index = db.leads.findIndex((l) => l.id === id);
-  if (index === -1) return null;
-  db.leads[index] = { ...db.leads[index], ...patch, id };
-  await writeDb(db);
-  return db.leads[index];
+  const leads = await collection<ContactLead>("leads");
+  const updated = await leads.findOneAndUpdate(
+    { id },
+    { $set: { ...patch, id } },
+    { returnDocument: "after" }
+  );
+  return strip(updated);
 }
 
 export async function getDashboardStats() {
-  const db = await readDb();
-  const retailers = db.users.filter((u) => u.role === "retailer");
-  const revenue = db.orders
-    .filter((o) => o.status !== "cancelled")
-    .reduce((sum, o) => sum + o.total, 0);
+  const [products, users, orders, leads] = await Promise.all([
+    getProducts(false),
+    getUsers(),
+    getOrders(),
+    getLeads(),
+  ]);
+  const retailers = users.filter((user) => user.role === "retailer");
+  const revenue = orders
+    .filter((order) => order.status !== "cancelled")
+    .reduce((sum, order) => sum + order.total, 0);
   return {
-    products: db.products.filter((p) => p.active).length,
+    products: products.filter((product) => product.active).length,
     retailers: retailers.length,
-    orders: db.orders.length,
-    pendingOrders: db.orders.filter((o) => o.status === "pending").length,
-    leads: db.leads.filter((l) => l.status === "new").length,
+    orders: orders.length,
+    pendingOrders: orders.filter((order) => order.status === "pending").length,
+    leads: leads.filter((lead) => lead.status === "new").length,
     revenue,
   };
 }

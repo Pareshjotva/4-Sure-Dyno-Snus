@@ -20,11 +20,11 @@ export default async function HomePage() {
 
   return (
     <SiteShell>
-      <section className="relative overflow-hidden bg-black">
+      <section className="relative h-[75vh] overflow-hidden bg-black">
         <HeroSlideshow />
 
-        <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-4 py-8 sm:px-6 lg:absolute lg:inset-0 lg:justify-center lg:py-0">
-          <div className="animate-rise max-w-2xl">
+        <div className="pointer-events-none absolute inset-0 z-10 mx-auto flex max-w-6xl flex-col justify-end px-4 pb-14 pt-6 sm:px-6 sm:pb-16 lg:justify-center">
+          <div className="pointer-events-auto animate-rise max-w-2xl">
             <h1 className="font-display text-5xl leading-none text-white sm:text-7xl lg:text-8xl">
               Dyno Snus
             </h1>

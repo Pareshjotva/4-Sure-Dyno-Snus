@@ -3,25 +3,18 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-/** Shared frame matches the taller banner so slide 1 is full-bleed and 2–3 stay letterboxed. */
-const FRAME_WIDTH = 1802;
-const FRAME_HEIGHT = 873;
-
 const SLIDES = [
   {
     src: "/images/hero-banner-01.png",
     alt: "Three red Dyno tins with the winged skull logo",
-    width: 1802,
   },
   {
     src: "/images/hero-banner-02.png",
     alt: "Open Dyno tins filled with white and brown slim pouches",
-    width: 2172,
   },
   {
     src: "/images/hero-banner-03.png",
     alt: "Dyno pouch and red tins with the Health Canada warning",
-    width: 2171,
   },
 ];
 
@@ -38,10 +31,7 @@ export function HeroSlideshow() {
   }, [index]);
 
   return (
-    <div
-      className="relative w-full overflow-hidden bg-black"
-      style={{ aspectRatio: `${FRAME_WIDTH} / ${FRAME_HEIGHT}` }}
-    >
+    <div className="absolute inset-0">
       {SLIDES.map((slide, i) => (
         <Image
           key={slide.src}
@@ -50,8 +40,8 @@ export function HeroSlideshow() {
           fill
           priority={i === 0}
           quality={90}
-          sizes={`(min-width: ${slide.width}px) ${slide.width}px, 100vw`}
-          className={`object-contain object-center transition-opacity duration-700 ${
+          sizes="100vw"
+          className={`object-cover object-center transition-opacity duration-700 ${
             i === index ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         />
