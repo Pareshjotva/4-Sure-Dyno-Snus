@@ -60,14 +60,13 @@ export default async function IncentivesPage() {
         </div>
 
         <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:items-center">
-          <div className="relative min-h-72 overflow-hidden rounded-2xl">
-            <Image
-              src="/images/incentive-program.jpg"
-              alt="Dyno Snus retailer incentive tiers"
-              fill
-              className="object-cover"
-            />
-          </div>
+          <Image
+            src="/images/incentive-program.jpg"
+            alt="Dyno Snus retailer incentive tiers"
+            width={1200}
+            height={675}
+            className="h-auto w-full rounded-2xl"
+          />
           <div>
             <h2 className="font-display text-3xl text-navy">How it works</h2>
             <ol className="mt-5 space-y-4 text-sm text-slate-ink">

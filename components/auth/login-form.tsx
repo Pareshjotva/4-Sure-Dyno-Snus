@@ -1,30 +1,47 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
+import type { FieldErrors } from "@/lib/form-errors";
+import { loginSchema } from "@/lib/form-schemas";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 export function LoginForm() {
   const router = useRouter();
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    setFormError("");
     const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+    const parsed = loginSchema.safeParse(data);
+    if (!parsed.success) {
+      const next: FieldErrors = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0];
+        if (typeof key === "string" && !next[key]) next[key] = issue.message;
+      }
+      setErrors(next);
+      return;
+    }
+
+    setLoading(true);
+    setErrors({});
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(parsed.data),
     });
     const json = await res.json();
     setLoading(false);
     if (!res.ok) {
-      setError(json.error || "Login failed");
+      setErrors(json.fieldErrors || {});
+      setFormError(json.fieldErrors ? "" : json.error || "Sign-in failed. Try again.");
       return;
     }
     router.push(json.user.role === "admin" ? "/admin" : "/account");
@@ -32,20 +49,30 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="surface space-y-4 rounded-2xl p-6">
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      className="surface space-y-4 rounded-2xl p-6"
+    >
       <div>
         <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/70">
           Email
         </label>
-        <Input name="email" type="email" required placeholder="you@store.com" />
+        <Input name="email" type="email" placeholder="you@store.com" />
+        <FieldError message={errors.email} />
       </div>
       <div>
         <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/70">
           Password
         </label>
-        <Input name="password" type="password" required minLength={6} />
+        <Input name="password" type="password" />
+        <FieldError message={errors.password} />
       </div>
-      {error && <p className="text-sm text-warn-red">{error}</p>}
+      {formError && (
+        <p className="text-sm text-warn-red" role="alert">
+          {formError}
+        </p>
+      )}
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Signing in…" : "Sign in"}
       </Button>
@@ -55,11 +82,6 @@ export function LoginForm() {
           Open an account
         </Link>
       </p>
-      <div className="rounded-lg bg-mist p-3 text-xs text-white/70">
-        <p className="font-semibold text-white">Demo access</p>
-        <p>Admin: admin@4sureinternational.ca / Admin@2026</p>
-        <p>Retailer: retailer@demo.com / Retailer@2026</p>
-      </div>
     </form>
   );
 }

@@ -1,8 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import type { FieldErrors } from "@/lib/form-errors";
+import { productSchema } from "@/lib/form-schemas";
 import type { Product } from "@/lib/types";
 import { Pencil, Plus, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
@@ -74,6 +77,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const editingProduct = useMemo(
     () => rows.find((p) => p.id === editingId) ?? null,
@@ -86,6 +90,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
     setDraft(emptyDraft());
     setMessage("");
     setError("");
+    setFieldErrors({});
   }
 
   function openEdit(product: Product) {
@@ -94,6 +99,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
     setDraft(toDraft(product));
     setMessage("");
     setError("");
+    setFieldErrors({});
   }
 
   function backToList(next?: Product[]) {
@@ -109,9 +115,20 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    setBusy(true);
     setError("");
     setMessage("");
+    const parsed = productSchema.safeParse(draft);
+    if (!parsed.success) {
+      const next: FieldErrors = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0];
+        if (typeof key === "string" && !next[key]) next[key] = issue.message;
+      }
+      setFieldErrors(next);
+      return;
+    }
+    setFieldErrors({});
+    setBusy(true);
     try {
       if (mode === "create") {
         const res = await fetch("/api/admin/products", {
@@ -120,7 +137,13 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
           body: JSON.stringify(draft),
         });
         const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "Create failed");
+        if (!res.ok) {
+          if (json.fieldErrors) {
+            setFieldErrors(json.fieldErrors);
+            return;
+          }
+          throw new Error(json.error || "Unable to create the product. Try again.");
+        }
         setRows((prev) => [...prev, json.product]);
         setMessage("Product created");
         backToList([...rows, json.product]);
@@ -131,7 +154,13 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
           body: JSON.stringify(draft),
         });
         const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "Update failed");
+        if (!res.ok) {
+          if (json.fieldErrors) {
+            setFieldErrors(json.fieldErrors);
+            return;
+          }
+          throw new Error(json.error || "Unable to update the product. Try again.");
+        }
         const next = rows.map((p) => (p.id === editingId ? json.product : p));
         setRows(next);
         setMessage("Product updated");
@@ -310,7 +339,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={onSubmit} noValidate className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-2xl text-white">
           {mode === "create" ? "Add product" : "Edit product"}
@@ -399,10 +428,10 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
               Name
             </label>
             <Input
-              required
               value={draft.name}
               onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
             />
+            <FieldError message={fieldErrors.name} />
           </div>
           <div>
             <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
@@ -414,6 +443,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
                 setDraft((d) => ({ ...d, shortName: e.target.value }))
               }
             />
+            <FieldError message={fieldErrors.shortName} />
           </div>
         </div>
         <div>
@@ -425,30 +455,31 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
             value={draft.slug}
             onChange={(e) => setDraft((d) => ({ ...d, slug: e.target.value }))}
           />
+          <FieldError message={fieldErrors.slug} />
         </div>
         <div>
           <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
             Tagline
           </label>
-          <Input
-            required
+            <Input
             value={draft.tagline}
             onChange={(e) =>
               setDraft((d) => ({ ...d, tagline: e.target.value }))
             }
           />
+          <FieldError message={fieldErrors.tagline} />
         </div>
         <div>
           <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
             Description
           </label>
           <Textarea
-            required
             value={draft.description}
             onChange={(e) =>
               setDraft((d) => ({ ...d, description: e.target.value }))
             }
           />
+          <FieldError message={fieldErrors.description} />
         </div>
         <div>
           <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
@@ -460,6 +491,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
               setDraft((d) => ({ ...d, flavour: e.target.value }))
             }
           />
+          <FieldError message={fieldErrors.flavour} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -468,7 +500,6 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
             </label>
             <Input
               type="number"
-              required
               value={draft.nicotinePerPortionMg}
               onChange={(e) =>
                 setDraft((d) => ({
@@ -477,6 +508,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
                 }))
               }
             />
+            <FieldError message={fieldErrors.nicotinePerPortionMg} />
           </div>
           <div>
             <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
@@ -484,7 +516,6 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
             </label>
             <Input
               type="number"
-              required
               value={draft.nicotinePerGramMg}
               onChange={(e) =>
                 setDraft((d) => ({
@@ -493,6 +524,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
                 }))
               }
             />
+            <FieldError message={fieldErrors.nicotinePerGramMg} />
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">

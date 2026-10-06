@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth";
 import { createProduct } from "@/lib/db";
+import { zodFieldErrors } from "@/lib/form-errors";
+import { productSchema } from "@/lib/form-schemas";
 import { z } from "zod";
 
 function slugify(value: string) {
@@ -11,33 +13,13 @@ function slugify(value: string) {
     .slice(0, 80);
 }
 
-const schema = z.object({
-  name: z.string().min(2),
-  shortName: z.string().min(2).optional(),
-  tagline: z.string().min(2),
-  description: z.string().min(10),
-  flavour: z.string().min(2).optional(),
-  nicotinePerPortionMg: z.number().nonnegative(),
-  nicotinePerGramMg: z.number().nonnegative(),
-  pouchesPerPack: z.string().optional(),
-  packSize: z.string().optional(),
-  format: z.string().optional(),
-  origin: z.string().optional(),
-  tobaccoFreePercent: z.number().optional(),
-  features: z.array(z.string()).optional(),
-  image: z.string().optional(),
-  overviewImage: z.string().optional(),
-  active: z.boolean().optional(),
-  slug: z.string().optional(),
-});
-
 export async function POST(req: Request) {
   const session = await requireSession("admin");
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const body = schema.parse(await req.json());
+    const body = productSchema.parse(await req.json());
     const slug = body.slug?.trim() || slugify(body.name);
     const product = await createProduct({
       slug,
@@ -52,18 +34,28 @@ export async function POST(req: Request) {
       packSize: body.packSize || "50 g resealable soft pack",
       format: body.format || "Slim pouch",
       origin: body.origin || "Produced in Norway",
-      tobaccoFreePercent: body.tobaccoFreePercent,
-      features: body.features?.length
-        ? body.features
-        : ["Soft mesh pouch technology", "Canadian plain packaging"],
+      features: ["Soft mesh pouch technology", "Canadian plain packaging"],
       image: body.image || "/images/dyno-extreme.jpg",
       overviewImage: body.overviewImage || body.image || "/images/extreme-overview.jpg",
       active: body.active ?? true,
     });
     return NextResponse.json({ ok: true, product });
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Unable to create product.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    if (err instanceof z.ZodError) {
+      return NextResponse.json(
+        { fieldErrors: zodFieldErrors(err) },
+        { status: 400 }
+      );
+    }
+    if (err instanceof Error && err.message === "Slug already exists") {
+      return NextResponse.json(
+        { fieldErrors: { slug: "That slug is already used. Choose another." } },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { error: "Unable to create the product. Try again." },
+      { status: 400 }
+    );
   }
 }

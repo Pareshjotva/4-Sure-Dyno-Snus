@@ -6,21 +6,10 @@ import {
   getProductById,
   getSite,
 } from "@/lib/db";
+import { zodFieldErrors } from "@/lib/form-errors";
+import { orderSchema } from "@/lib/form-schemas";
 import { resolveIncentive } from "@/lib/site";
 import { z } from "zod";
-
-const schema = z.object({
-  province: z.string().min(2),
-  notes: z.string().optional(),
-  items: z
-    .array(
-      z.object({
-        productId: z.string(),
-        quantity: z.number().int().min(1).max(500),
-      })
-    )
-    .min(1),
-});
 
 export async function POST(req: Request) {
   const session = await requireSession("retailer");
@@ -29,7 +18,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const body = schema.parse(await req.json());
+    const body = orderSchema.parse(await req.json());
     const site = await getSite();
     const incentives = await getIncentives();
 
@@ -39,7 +28,11 @@ export async function POST(req: Request) {
       const product = await getProductById(item.productId);
       if (!product || !product.active) {
         return NextResponse.json(
-          { error: "Invalid product in cart." },
+          {
+            fieldErrors: {
+              items: "One of the selected products is no longer available.",
+            },
+          },
           { status: 400 }
         );
       }
@@ -55,7 +48,9 @@ export async function POST(req: Request) {
     if (packCount < site.minOrderPacks) {
       return NextResponse.json(
         {
-          error: `Minimum order is ${site.minOrderPacks} packs (50 g).`,
+          fieldErrors: {
+            packs: `Minimum order is ${site.minOrderPacks} packs (50 g).`,
+          },
         },
         { status: 400 }
       );
@@ -89,7 +84,16 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ ok: true, order });
-  } catch {
-    return NextResponse.json({ error: "Could not place order." }, { status: 400 });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json(
+        { fieldErrors: zodFieldErrors(err) },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { error: "Could not place the order. Try again." },
+      { status: 400 }
+    );
   }
 }

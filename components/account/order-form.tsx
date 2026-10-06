@@ -1,9 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import type { FieldErrors } from "@/lib/form-errors";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 
@@ -25,7 +27,8 @@ export function OrderForm({
   const [qty, setQty] = useState<Record<string, number>>(
     Object.fromEntries(products.map((p) => [p.id, 0]))
   );
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const packCount = useMemo(
@@ -36,17 +39,34 @@ export function OrderForm({
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError("");
+    setFormError("");
+    const next: FieldErrors = {};
+    for (const product of products) {
+      const amount = qty[product.id] || 0;
+      if (!Number.isInteger(amount)) {
+        next[`qty_${product.id}`] = "Enter a whole number of packs.";
+      } else if (amount < 0) {
+        next[`qty_${product.id}`] = "Quantity cannot be negative.";
+      } else if (amount > 500) {
+        next[`qty_${product.id}`] = "Quantity cannot be more than 500 packs.";
+      }
+    }
     const form = new FormData(e.currentTarget);
     const items = products
       .filter((p) => (qty[p.id] || 0) > 0)
       .map((p) => ({ productId: p.id, quantity: qty[p.id] }));
 
     if (items.length === 0) {
-      setError("Add at least one product.");
+      next.items = "Add at least one product.";
+    } else if (packCount < minOrderPacks) {
+      next.packs = `Minimum order is ${minOrderPacks} packs (50 g).`;
+    }
+    if (Object.keys(next).length) {
+      setErrors(next);
       return;
     }
 
+    setErrors({});
     setLoading(true);
     const res = await fetch("/api/orders", {
       method: "POST",
@@ -60,7 +80,10 @@ export function OrderForm({
     const json = await res.json();
     setLoading(false);
     if (!res.ok) {
-      setError(json.error || "Order failed");
+      setErrors(json.fieldErrors || {});
+      setFormError(
+        json.fieldErrors ? "" : json.error || "Could not place the order. Try again."
+      );
       return;
     }
     router.push("/account/orders");
@@ -68,7 +91,7 @@ export function OrderForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={onSubmit} noValidate className="space-y-5">
       <div className="surface space-y-4 rounded-2xl p-5">
         {products.map((product) => (
           <div
@@ -79,21 +102,25 @@ export function OrderForm({
               <p className="font-semibold text-navy">{product.name}</p>
               <p className="text-xs text-navy/55">$40.00 / 50 g pack</p>
             </div>
-            <Input
-              type="number"
-              min={0}
-              max={500}
-              className="w-28"
-              value={qty[product.id] || 0}
-              onChange={(e) =>
-                setQty((prev) => ({
-                  ...prev,
-                  [product.id]: Number(e.target.value || 0),
-                }))
-              }
-            />
+            <div>
+              <Input
+                type="number"
+                min={0}
+                max={500}
+                className="w-28"
+                value={qty[product.id] || 0}
+                onChange={(e) =>
+                  setQty((prev) => ({
+                    ...prev,
+                    [product.id]: Number(e.target.value || 0),
+                  }))
+                }
+              />
+              <FieldError message={errors[`qty_${product.id}`]} />
+            </div>
           </div>
         ))}
+        <FieldError message={errors.items} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -106,6 +133,7 @@ export function OrderForm({
             <option value="AB">Alberta</option>
             <option value="ON">Ontario</option>
           </Select>
+          <FieldError message={errors.province} />
         </div>
         <div className="surface rounded-xl p-4 text-sm">
           <p>
@@ -115,6 +143,7 @@ export function OrderForm({
           <p className="mt-1">
             Subtotal before incentives: <strong>${subtotal.toFixed(2)}</strong>
           </p>
+          <FieldError message={errors.packs} />
         </div>
       </div>
 
@@ -125,7 +154,11 @@ export function OrderForm({
         <Textarea name="notes" placeholder="Delivery notes, preferred timing…" />
       </div>
 
-      {error && <p className="text-sm text-warn-red">{error}</p>}
+      {formError && (
+        <p className="text-sm text-warn-red" role="alert">
+          {formError}
+        </p>
+      )}
       <Button type="submit" disabled={loading}>
         {loading ? "Submitting…" : "Submit order"}
       </Button>
