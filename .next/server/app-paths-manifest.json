@@ -1,1 +1,14 @@
-{}
+{
+  "/admin/leads/page": "app/admin/leads/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/admin/products/page": "app/admin/products/page.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
+  "/api/auth/logout/route": "app/api/auth/logout/route.js",
+  "/api/contact/route": "app/api/contact/route.js",
+  "/contact/page": "app/contact/page.js",
+  "/incentives/page": "app/incentives/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/products/[slug]/page": "app/products/[slug]/page.js",
+  "/register/page": "app/register/page.js"
+}
