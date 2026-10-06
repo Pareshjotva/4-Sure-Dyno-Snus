@@ -1,4 +1,5 @@
 import { HeroSlideshow } from "@/components/home/hero-slideshow";
+import { EmailLinks } from "@/components/layout/email-links";
 import { SiteShell } from "@/components/layout/site-shell";
 import { RevealOnScroll } from "@/components/motion/parallax";
 import { Badge } from "@/components/ui/badge";
@@ -244,7 +245,12 @@ export default async function HomePage() {
                   </Link>
                 </div>
                 <p className="mt-6 text-sm text-white/45">
-                  {site.salesContact} · {site.phone} · {site.email}
+                  {site.salesContact} · {site.phone} ·{" "}
+                  <EmailLinks
+                    primary={site.email}
+                    separator="dot"
+                    className="hover:text-white"
+                  />
                 </p>
               </div>
             </div>

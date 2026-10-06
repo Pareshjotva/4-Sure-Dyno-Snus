@@ -1,7 +1,8 @@
+import { ProfileProgress } from "@/components/account/profile-progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { requireSession } from "@/lib/auth";
-import { getOrders, getSite } from "@/lib/db";
+import { getOrders, getSite, getUserById } from "@/lib/db";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -9,9 +10,10 @@ import { redirect } from "next/navigation";
 export default async function AccountHomePage() {
   const session = await requireSession("retailer");
   if (!session) redirect("/login");
-  const [orders, site] = await Promise.all([
+  const [orders, site, user] = await Promise.all([
     getOrders(session.id),
     getSite(),
+    getUserById(session.id),
   ]);
 
   return (
@@ -21,6 +23,15 @@ export default async function AccountHomePage() {
         {session.company || "Retailer account"} · Province{" "}
         {session.province || "—"}
       </p>
+      <ProfileProgress complete={Boolean(user?.licenceNumber?.trim())} />
+      {!user?.licenceNumber?.trim() && (
+        <p className="mt-3 text-sm text-white/75">
+          <Link href="/account/profile" className="font-semibold text-cyan">
+            Open your profile
+          </Link>{" "}
+          to add the licence, or enter it when you place an order.
+        </p>
+      )}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <div className="surface rounded-xl p-4">

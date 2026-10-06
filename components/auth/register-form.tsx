@@ -109,8 +109,12 @@ export function RegisterForm() {
           <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70">
             Tobacco licence #
           </label>
-          <Input name="licenceNumber" placeholder="Required" />
+          <Input name="licenceNumber" placeholder="Optional" />
           <FieldError message={errors.licenceNumber} />
+          <p className="mt-1 text-xs text-white/55">
+            Not needed to register. You can view pricing now. Add the licence
+            once, when you place an order.
+          </p>
         </div>
       </div>
       <div>

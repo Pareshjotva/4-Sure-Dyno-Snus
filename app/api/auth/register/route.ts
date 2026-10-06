@@ -19,7 +19,7 @@ export async function POST(req: Request) {
       phone: data.phone,
       province: data.province,
       address: data.address,
-      licenceNumber: data.licenceNumber,
+      ...(data.licenceNumber ? { licenceNumber: data.licenceNumber } : {}),
     });
     const session = await createSession(user);
     return NextResponse.json({ ok: true, user: session });

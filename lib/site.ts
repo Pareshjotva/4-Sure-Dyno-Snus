@@ -22,3 +22,20 @@ export const NAV_LINKS = [
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://4sureinternational.ca";
+
+export const COMPANY_EMAILS = [
+  "info@4sureinternational.ca",
+  "4sureinternational@gmail.com",
+] as const;
+
+export function contactEmails(primary?: string) {
+  const emails: string[] = [...COMPANY_EMAILS];
+  const extra = primary?.trim();
+  if (
+    extra &&
+    !emails.some((email) => email.toLowerCase() === extra.toLowerCase())
+  ) {
+    emails.push(extra);
+  }
+  return emails;
+}

@@ -1,5 +1,5 @@
 import { getSite } from "@/lib/db";
-import { NAV_LINKS } from "@/lib/site";
+import { contactEmails, NAV_LINKS } from "@/lib/site";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -58,11 +58,13 @@ export async function SiteFooter() {
                 {site.phone}
               </a>
             </li>
-            <li>
-              <a href={`mailto:${site.email}`} className="hover:text-white">
-                {site.email}
-              </a>
-            </li>
+            {contactEmails(site.email).map((email) => (
+              <li key={email}>
+                <a href={`mailto:${email}`} className="hover:text-white">
+                  {email}
+                </a>
+              </li>
+            ))}
             <li>{site.address}</li>
           </ul>
         </div>

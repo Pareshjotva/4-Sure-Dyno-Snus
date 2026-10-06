@@ -5,9 +5,11 @@ import {
   getIncentives,
   getProductById,
   getSite,
+  getUserById,
+  updateUser,
 } from "@/lib/db";
 import { zodFieldErrors } from "@/lib/form-errors";
-import { orderSchema } from "@/lib/form-schemas";
+import { licenceNumberSchema, orderSchema } from "@/lib/form-schemas";
 import { resolveIncentive } from "@/lib/site";
 import { z } from "zod";
 
@@ -19,6 +21,27 @@ export async function POST(req: Request) {
 
   try {
     const body = orderSchema.parse(await req.json());
+    const user = await getUserById(session.id);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    let licenceToSave = "";
+    if (!user.licenceNumber?.trim()) {
+      const licence = licenceNumberSchema.safeParse(body.licenceNumber || "");
+      if (!licence.success) {
+        return NextResponse.json(
+          {
+            fieldErrors: {
+              licenceNumber:
+                licence.error.issues[0]?.message ||
+                "Enter the tobacco licence number.",
+            },
+          },
+          { status: 400 }
+        );
+      }
+      licenceToSave = licence.data;
+    }
     const site = await getSite();
     const incentives = await getIncentives();
 
@@ -64,6 +87,10 @@ export async function POST(req: Request) {
     const discountPercent = tier?.discountPercent ?? 0;
     const discountAmount = Math.round(subtotal * (discountPercent / 100) * 100) / 100;
     const total = Math.round((subtotal - discountAmount) * 100) / 100;
+
+    if (licenceToSave) {
+      await updateUser(session.id, { licenceNumber: licenceToSave });
+    }
 
     const order = await createOrder({
       userId: session.id,

@@ -1,3 +1,4 @@
+import { EmailLinks } from "@/components/layout/email-links";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Badge } from "@/components/ui/badge";
 import { getSite } from "@/lib/db";
@@ -63,7 +64,7 @@ export default async function AboutPage() {
               <p className="mt-1 text-sm">
                 {site.phone}
                 <br />
-                {site.email}
+                <EmailLinks primary={site.email} className="text-cyan" />
                 <br />
                 {site.website}
               </p>

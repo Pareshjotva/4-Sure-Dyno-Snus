@@ -1,4 +1,5 @@
 import { ContactForm } from "@/components/forms/contact-form";
+import { EmailLinks } from "@/components/layout/email-links";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Badge } from "@/components/ui/badge";
 import { getSite } from "@/lib/db";
@@ -36,10 +37,10 @@ export default async function ContactPage() {
               </a>
             </p>
             <p>
-              <span className="font-semibold">Email:</span>{" "}
-              <a href={`mailto:${site.email}`} className="text-cyan">
-                {site.email}
-              </a>
+              <span className="font-semibold">Email:</span>
+              <span className="mt-1 block">
+                <EmailLinks primary={site.email} className="text-cyan" />
+              </span>
             </p>
             <p>
               <span className="font-semibold">Office:</span> {site.address}

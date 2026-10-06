@@ -1,3 +1,5 @@
+import { LicenceForm } from "@/components/account/licence-form";
+import { ProfileProgress } from "@/components/account/profile-progress";
 import { requireSession } from "@/lib/auth";
 import { getUserById } from "@/lib/db";
 import { redirect } from "next/navigation";
@@ -8,6 +10,7 @@ export default async function ProfilePage() {
   const user = await getUserById(session.id);
   if (!user) redirect("/login");
 
+  const hasLicence = Boolean(user.licenceNumber?.trim());
   const fields = [
     ["Name", user.name],
     ["Email", user.email],
@@ -15,22 +18,24 @@ export default async function ProfilePage() {
     ["Phone", user.phone || "—"],
     ["Province", user.province || "—"],
     ["Address", user.address || "—"],
-    ["Licence #", user.licenceNumber || "—"],
+    ["Licence #", user.licenceNumber || "Not added yet"],
   ];
 
   return (
     <div>
       <h1 className="font-display text-3xl text-navy">Profile</h1>
-      <div className="surface mt-6 grid gap-4 rounded-2xl p-5 sm:grid-cols-2">
+      <ProfileProgress complete={hasLicence} />
+      <div className="surface mt-4 grid gap-4 rounded-2xl p-5 sm:grid-cols-2">
         {fields.map(([label, value]) => (
           <div key={label}>
             <p className="text-xs font-semibold uppercase tracking-wider text-cyan">
               {label}
             </p>
-            <p className="mt-1 text-navy">{value}</p>
+            <p className="mt-1 text-white">{value}</p>
           </div>
         ))}
       </div>
+      {!hasLicence && <LicenceForm />}
     </div>
   );
 }

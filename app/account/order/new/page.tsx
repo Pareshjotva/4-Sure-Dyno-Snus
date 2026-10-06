@@ -1,12 +1,17 @@
 import { OrderForm } from "@/components/account/order-form";
 import { requireSession } from "@/lib/auth";
-import { getProducts, getSite } from "@/lib/db";
+import { getProducts, getSite, getUserById } from "@/lib/db";
 import { redirect } from "next/navigation";
 
 export default async function NewOrderPage() {
   const session = await requireSession("retailer");
   if (!session) redirect("/login");
-  const [products, site] = await Promise.all([getProducts(), getSite()]);
+  const [products, site, user] = await Promise.all([
+    getProducts(),
+    getSite(),
+    getUserById(session.id),
+  ]);
+  if (!user) redirect("/login");
 
   return (
     <div>
@@ -20,6 +25,7 @@ export default async function NewOrderPage() {
           products={products.map((p) => ({ id: p.id, name: p.name }))}
           defaultProvince={session.province || "BC"}
           minOrderPacks={site.minOrderPacks}
+          needsLicence={!user.licenceNumber?.trim()}
         />
       </div>
     </div>

@@ -29,6 +29,11 @@ export const loginSchema = z.object({
     .min(6, "Password must be at least 6 characters."),
 });
 
+export const licenceNumberSchema = z
+  .string()
+  .trim()
+  .min(3, "Enter the tobacco licence number.");
+
 export const registerSchema = z.object({
   name: z.string().trim().min(2, "Enter the contact name."),
   email: z
@@ -44,15 +49,16 @@ export const registerSchema = z.object({
   phone: z.string().trim().optional(),
   province: z.string().trim().min(2, "Choose a province."),
   address: z.string().trim().optional(),
-  licenceNumber: z
-    .string()
-    .trim()
-    .min(3, "Enter the tobacco licence number."),
+  licenceNumber: optionalText(
+    3,
+    "Licence number must be at least 3 characters."
+  ),
 });
 
 export const orderSchema = z.object({
   province: z.string().trim().min(2, "Choose a province."),
   notes: z.string().optional(),
+  licenceNumber: z.string().trim().optional(),
   items: z
     .array(
       z.object({

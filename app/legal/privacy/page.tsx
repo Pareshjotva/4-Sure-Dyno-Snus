@@ -1,3 +1,4 @@
+import { EmailLinks } from "@/components/layout/email-links";
 import { SiteShell } from "@/components/layout/site-shell";
 import type { Metadata } from "next";
 
@@ -21,8 +22,13 @@ export default function PrivacyPage() {
             is limited to authorized staff and system administrators.
           </p>
           <p>
-            For privacy requests, contact octavio4sure@gmail.com or call
-            403-828-6370.
+            For privacy requests, email{" "}
+            <EmailLinks
+              primary="octavio4sure@gmail.com"
+              separator="dot"
+              className="text-cyan"
+            />{" "}
+            or call 403-828-6370.
           </p>
         </div>
       </article>
