@@ -20,7 +20,7 @@ export default async function AccountLayout({
     <>
       <AgeGate minimumAge={legalAge} />
       <SiteHeader user={session} />
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[240px_1fr]">
+      <div className="panel-shell mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[240px_1fr]">
         <PanelNav mode="account" userName={session.name} />
         <div>{children}</div>
       </div>

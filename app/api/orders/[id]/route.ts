@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth";
-import { updateOrder } from "@/lib/db";
+import { getOrderById, updateOrder } from "@/lib/db";
+import { priceInvoice } from "@/lib/invoice";
 import type { OrderStatus } from "@/lib/types";
 import { z } from "zod";
 
-const schema = z.object({
+const statusSchema = z.object({
   status: z.enum([
     "pending",
     "confirmed",
@@ -12,6 +13,29 @@ const schema = z.object({
     "delivered",
     "cancelled",
   ]),
+});
+
+const invoiceSchema = z.object({
+  invoice: z.object({
+    billToName: z.string().trim().min(1).max(160),
+    billToAddress: z.string().trim().min(1).max(400),
+    billToPhone: z.string().trim().max(40),
+    shipToName: z.string().trim().min(1).max(160),
+    shipToAddress: z.string().trim().min(1).max(400),
+    shipToPhone: z.string().trim().max(40),
+    discountPercent: z.number().min(0).max(100),
+    lines: z
+      .array(
+        z.object({
+          productId: z.string().min(1),
+          description: z.string().trim().min(1).max(160),
+          quantity: z.number().int().min(1).max(5000),
+          unitPrice: z.number().min(0).max(10000),
+          pttUnit: z.number().min(0).max(10000),
+        })
+      )
+      .min(1),
+  }),
 });
 
 export async function PATCH(
@@ -24,7 +48,52 @@ export async function PATCH(
   }
   const { id } = await params;
   try {
-    const body = schema.parse(await req.json());
+    const json = await req.json();
+    if (json && typeof json === "object" && "invoice" in json) {
+      const body = invoiceSchema.parse(json);
+      const current = await getOrderById(id);
+      if (!current) {
+        return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      }
+      const items = current.items.map((item) => {
+        const line = body.invoice.lines.find(
+          (entry) => entry.productId === item.productId
+        );
+        if (!line) return item;
+        return {
+          ...item,
+          quantity: line.quantity,
+          unitPrice: line.unitPrice,
+        };
+      });
+      const priced = priceInvoice(body.invoice.lines, body.invoice.discountPercent);
+      const percentChanged =
+        priced.discountPercent !== (current.discountPercent || 0);
+      const order = await updateOrder(id, {
+        items,
+        subtotal: priced.subtotal,
+        discountPercent: priced.discountPercent,
+        discountAmount: priced.discountAmount,
+        discountTier: percentChanged ? "" : current.discountTier,
+        total: Math.round((priced.subtotal - priced.discountAmount) * 100) / 100,
+        invoiceOverrides: {
+          billToName: body.invoice.billToName,
+          billToAddress: body.invoice.billToAddress,
+          billToPhone: body.invoice.billToPhone,
+          shipToName: body.invoice.shipToName,
+          shipToAddress: body.invoice.shipToAddress,
+          shipToPhone: body.invoice.shipToPhone,
+          lines: body.invoice.lines.map((line) => ({
+            productId: line.productId,
+            description: line.description,
+            pttUnit: line.pttUnit,
+          })),
+        },
+      });
+      return NextResponse.json({ ok: true, order });
+    }
+
+    const body = statusSchema.parse(json);
     const order = await updateOrder(id, { status: body.status as OrderStatus });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });

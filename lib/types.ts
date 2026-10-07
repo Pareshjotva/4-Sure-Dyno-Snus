@@ -75,6 +75,22 @@ export interface OrderItem {
   unitPrice: number;
 }
 
+export interface InvoiceLineOverride {
+  productId: string;
+  description: string;
+  pttUnit: number;
+}
+
+export interface InvoiceOverrides {
+  billToName: string;
+  billToAddress: string;
+  billToPhone: string;
+  shipToName: string;
+  shipToAddress: string;
+  shipToPhone: string;
+  lines: InvoiceLineOverride[];
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -92,6 +108,7 @@ export interface Order {
   total: number;
   status: OrderStatus;
   notes?: string;
+  invoiceOverrides?: InvoiceOverrides;
   createdAt: string;
   updatedAt: string;
 }

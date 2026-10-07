@@ -1,15 +1,22 @@
+import { OrderItemList } from "@/components/orders/order-item-list";
 import { OrderTotals } from "@/components/orders/order-totals";
 import { Badge } from "@/components/ui/badge";
 import { requireSession } from "@/lib/auth";
-import { getOrders } from "@/lib/db";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { getOrders, getProducts } from "@/lib/db";
+import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function AccountOrdersPage() {
   const session = await requireSession("retailer");
   if (!session) redirect("/login");
-  const orders = await getOrders(session.id);
+  const [orders, products] = await Promise.all([
+    getOrders(session.id),
+    getProducts(false),
+  ]);
+  const images = Object.fromEntries(
+    products.map((product) => [product.id, product.image])
+  );
 
   return (
     <div>
@@ -34,14 +41,11 @@ export default async function AccountOrdersPage() {
                 <Badge>{order.status}</Badge>
               </div>
             </div>
-            <ul className="mt-4 space-y-1 text-sm text-slate-ink">
-              {order.items.map((item) => (
-                <li key={`${order.id}-${item.productId}`}>
-                  {item.productName} × {item.quantity} —{" "}
-                  {formatCurrency(item.unitPrice * item.quantity)}
-                </li>
-              ))}
-            </ul>
+            <OrderItemList
+              orderId={order.id}
+              items={order.items}
+              images={images}
+            />
             <OrderTotals order={order} />
             {order.notes && (
               <p className="mt-2 text-xs text-navy/55">{order.notes}</p>

@@ -1,5 +1,6 @@
 "use client";
 
+import { OrderItemList } from "@/components/orders/order-item-list";
 import { OrderTotals } from "@/components/orders/order-totals";
 import { Select } from "@/components/ui/select";
 import type { Order, OrderStatus } from "@/lib/types";
@@ -16,7 +17,13 @@ const statuses: OrderStatus[] = [
   "cancelled",
 ];
 
-export function AdminOrdersClient({ orders }: { orders: Order[] }) {
+export function AdminOrdersClient({
+  orders,
+  images,
+}: {
+  orders: Order[];
+  images: Record<string, string>;
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -44,13 +51,12 @@ export function AdminOrdersClient({ orders }: { orders: Order[] }) {
               </p>
             </div>
           </div>
-          <ul className="mt-3 space-y-1 text-sm text-slate-ink">
-            {order.items.map((item) => (
-              <li key={`${order.id}-${item.productId}`}>
-                {item.productName} × {item.quantity}
-              </li>
-            ))}
-          </ul>
+          <OrderItemList
+            orderId={order.id}
+            items={order.items}
+            images={images}
+            showPrice={false}
+          />
           <OrderTotals order={order} />
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Link

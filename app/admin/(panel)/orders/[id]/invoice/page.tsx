@@ -40,6 +40,8 @@ export default async function AdminInvoicePage({
   return (
     <InvoiceDocument
       invoice={buildInvoice(order, user, pricing, orders)}
+      orderId={order.id}
+      canEdit
       backHref="/admin/orders"
       backLabel="Back to orders"
     />

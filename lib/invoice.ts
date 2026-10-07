@@ -54,6 +54,7 @@ function descriptionFor(name: string) {
 }
 
 export interface InvoiceLine {
+  productId: string;
   no: number;
   description: string;
   quantity: number;
@@ -62,6 +63,46 @@ export interface InvoiceLine {
   pttUnit: number;
   totalPtt: number;
   amount: number;
+}
+
+export function priceInvoice(
+  lines: Pick<InvoiceLine, "productId" | "description" | "quantity" | "unitPrice" | "pttUnit">[],
+  discountPercent: number
+) {
+  const priced = lines.map((line, index) => {
+    const quantity = Math.max(0, Number(line.quantity) || 0);
+    const unitPrice = money(line.unitPrice);
+    const pttUnit = money(line.pttUnit);
+    const totalPrice = money(quantity * unitPrice);
+    const totalPtt = money(quantity * pttUnit);
+    return {
+      productId: line.productId,
+      no: index + 1,
+      description: line.description,
+      quantity,
+      unitPrice,
+      totalPrice,
+      pttUnit,
+      totalPtt,
+      amount: money(totalPrice + totalPtt),
+    };
+  });
+  const subtotal = money(priced.reduce((sum, line) => sum + line.totalPrice, 0));
+  const percent = Math.min(100, Math.max(0, Number(discountPercent) || 0));
+  const discountAmount = money(subtotal * (percent / 100));
+  const ptt = money(priced.reduce((sum, line) => sum + line.totalPtt, 0));
+  const totalAmount = money(subtotal - discountAmount + ptt);
+  const gst = money(totalAmount * GST_RATE);
+  return {
+    lines: priced,
+    subtotal,
+    discountPercent: percent,
+    discountAmount,
+    ptt,
+    totalAmount,
+    gst,
+    amountDue: money(totalAmount + gst),
+  };
 }
 
 export interface InvoiceDocumentModel {
@@ -93,32 +134,23 @@ export function buildInvoice(
   orders: Order[]
 ): InvoiceDocumentModel {
   const province = (order.province || "").toUpperCase();
-  const lines = (order.items || []).map((item, index) => {
+  const overrides = order.invoiceOverrides;
+  const draftLines = (order.items || []).map((item) => {
     const row = pricing.find(
       (price) =>
         price.productId === item.productId &&
         price.provinceCode.toUpperCase() === province
     );
-    const pttUnit = money(row?.ptt ?? 0);
-    const totalPrice = money(item.quantity * item.unitPrice);
-    const totalPtt = money(item.quantity * pttUnit);
+    const saved = overrides?.lines?.find((line) => line.productId === item.productId);
     return {
-      no: index + 1,
-      description: descriptionFor(item.productName),
+      productId: item.productId,
+      description: saved?.description?.trim() || descriptionFor(item.productName),
       quantity: item.quantity,
-      unitPrice: money(item.unitPrice),
-      totalPrice,
-      pttUnit,
-      totalPtt,
-      amount: money(totalPrice + totalPtt),
+      unitPrice: item.unitPrice,
+      pttUnit: saved ? money(saved.pttUnit) : money(row?.ptt ?? 0),
     };
   });
-
-  const subtotal = money(order.subtotal);
-  const discountAmount = money(order.discountAmount);
-  const ptt = money(lines.reduce((sum, line) => sum + line.totalPtt, 0));
-  const totalAmount = money(subtotal - discountAmount + ptt);
-  const gst = money(totalAmount * GST_RATE);
+  const priced = priceInvoice(draftLines, order.discountPercent || 0);
   const name = user?.company?.trim() || order.company?.trim() || order.userName || "Retailer";
   const address = user?.address?.trim() || province || "—";
   const phone = user?.phone?.trim() || "";
@@ -127,21 +159,21 @@ export function buildInvoice(
     number: invoiceNumber(order, orders),
     dateLabel: invoiceDateParts(order.createdAt).label,
     orderNumber: order.orderNumber,
-    billToName: name,
-    billToAddress: address,
-    billToPhone: phone,
-    shipToName: name,
-    shipToAddress: address,
-    shipToPhone: phone,
+    billToName: overrides?.billToName?.trim() || name,
+    billToAddress: overrides?.billToAddress?.trim() || address,
+    billToPhone: overrides?.billToPhone?.trim() || phone,
+    shipToName: overrides?.shipToName?.trim() || name,
+    shipToAddress: overrides?.shipToAddress?.trim() || address,
+    shipToPhone: overrides?.shipToPhone?.trim() || phone,
     province,
-    lines,
-    subtotal,
-    discountAmount,
-    discountPercent: order.discountPercent || 0,
+    lines: priced.lines,
+    subtotal: priced.subtotal,
+    discountAmount: priced.discountAmount,
+    discountPercent: priced.discountPercent,
     discountTier: order.discountTier?.trim() || "",
-    ptt,
-    totalAmount,
-    gst,
-    amountDue: money(totalAmount + gst),
+    ptt: priced.ptt,
+    totalAmount: priced.totalAmount,
+    gst: priced.gst,
+    amountDue: priced.amountDue,
   };
 }
