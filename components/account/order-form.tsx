@@ -7,12 +7,14 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { FieldErrors } from "@/lib/form-errors";
 import { licenceNumberSchema } from "@/lib/form-schemas";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 
 type ProductOption = {
   id: string;
   name: string;
+  image: string;
 };
 
 export function OrderForm({
@@ -114,9 +116,22 @@ export function OrderForm({
             key={product.id}
             className="flex flex-wrap items-center justify-between gap-3 border-b border-navy/8 pb-4 last:border-0 last:pb-0"
           >
-            <div>
-              <p className="font-semibold text-navy">{product.name}</p>
-              <p className="text-xs text-navy/55">$40.00 / 50 g pack</p>
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              {product.image ? (
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-mist sm:h-16 sm:w-20">
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                    sizes="80px"
+                  />
+                </div>
+              ) : null}
+              <div className="min-w-0">
+                <p className="font-semibold text-navy">{product.name}</p>
+                <p className="text-xs text-navy/55">$40.00 / 50 g pack</p>
+              </div>
             </div>
             <div>
               <Input

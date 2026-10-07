@@ -1,17 +1,19 @@
 import { EmailLinks } from "@/components/layout/email-links";
 import { SiteShell } from "@/components/layout/site-shell";
+import { getSite } from "@/lib/db";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Privacy Policy" };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const site = await getSite();
   return (
     <SiteShell>
       <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
         <h1 className="font-display text-4xl text-navy">Privacy Policy</h1>
         <div className="mt-6 space-y-4 text-sm leading-relaxed text-slate-ink">
           <p>
-            4 Sure International Inc. (“we”) collects business contact details
+            4Sure International Inc. (“we”) collects business contact details
             you submit through this website — including name, email, phone,
             company, province, and licence information — to respond to wholesale
             inquiries and operate retailer accounts.
@@ -24,11 +26,11 @@ export default function PrivacyPage() {
           <p>
             For privacy requests, email{" "}
             <EmailLinks
-              primary="octavio4sure@gmail.com"
+              primary={site.email}
               separator="dot"
               className="text-cyan"
             />{" "}
-            or call 403-828-6370.
+            or call {site.phone}.
           </p>
         </div>
       </article>

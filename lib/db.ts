@@ -2,6 +2,8 @@ import type { Collection, Document } from "mongodb";
 import { getDb } from "./mongo";
 import type {
   ContactLead,
+  Blog,
+  Faq,
   IncentiveTier,
   Order,
   Product,
@@ -220,6 +222,116 @@ export async function updateLead(id: string, patch: Partial<ContactLead>) {
     { returnDocument: "after" }
   );
   return strip(updated);
+}
+
+export async function getBlogs(publishedOnly = true) {
+  const blogs = await collection<Blog>("blogs");
+  const filter = publishedOnly ? { published: true } : {};
+  const rows = await blogs.find(filter).sort({ createdAt: -1 }).toArray();
+  return rows.map((row) => strip(row)!);
+}
+
+export async function getBlogBySlug(slug: string) {
+  const blogs = await collection<Blog>("blogs");
+  return strip(await blogs.findOne({ slug }));
+}
+
+export async function getBlogById(id: string) {
+  const blogs = await collection<Blog>("blogs");
+  return strip(await blogs.findOne({ id }));
+}
+
+export async function createBlog(
+  input: Omit<Blog, "id" | "createdAt" | "updatedAt">
+) {
+  const blogs = await collection<Blog>("blogs");
+  const taken = await blogs.findOne({ slug: input.slug });
+  if (taken) throw new Error("Slug already exists");
+  const now = new Date().toISOString();
+  const record: Blog = {
+    ...input,
+    id: `blog_${Date.now()}`,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await blogs.insertOne(record);
+  return record;
+}
+
+export async function updateBlog(id: string, patch: Partial<Blog>) {
+  const blogs = await collection<Blog>("blogs");
+  if (patch.slug) {
+    const taken = await blogs.findOne({ slug: patch.slug, id: { $ne: id } });
+    if (taken) throw new Error("Slug already exists");
+  }
+  const updated = await blogs.findOneAndUpdate(
+    { id },
+    { $set: { ...patch, id, updatedAt: new Date().toISOString() } },
+    { returnDocument: "after" }
+  );
+  return strip(updated);
+}
+
+export async function deleteBlog(id: string) {
+  const blogs = await collection<Blog>("blogs");
+  const result = await blogs.deleteOne({ id });
+  return result.deletedCount === 1;
+}
+
+export async function getFaqs(publishedOnly = true) {
+  const faqs = await collection<Faq>("faqs");
+  const filter = publishedOnly ? { published: true } : {};
+  const rows = await faqs
+    .find(filter)
+    .sort({ sortOrder: 1, createdAt: 1 })
+    .toArray();
+  return rows.map((row) => strip(row)!);
+}
+
+export async function getFaqById(id: string) {
+  const faqs = await collection<Faq>("faqs");
+  return strip(await faqs.findOne({ id }));
+}
+
+export async function createFaq(
+  input: Omit<Faq, "id" | "createdAt" | "updatedAt" | "sortOrder"> & {
+    sortOrder?: number;
+  }
+) {
+  const faqs = await collection<Faq>("faqs");
+  const now = new Date().toISOString();
+  let sortOrder = input.sortOrder;
+  if (sortOrder === undefined) {
+    const last = await faqs.find().sort({ sortOrder: -1 }).limit(1).toArray();
+    sortOrder = (last[0]?.sortOrder ?? 0) + 1;
+  }
+  const record: Faq = {
+    question: input.question,
+    answer: input.answer,
+    published: input.published,
+    sortOrder,
+    id: `faq_${Date.now()}`,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await faqs.insertOne(record);
+  return record;
+}
+
+export async function updateFaq(id: string, patch: Partial<Faq>) {
+  const faqs = await collection<Faq>("faqs");
+  const updated = await faqs.findOneAndUpdate(
+    { id },
+    { $set: { ...patch, id, updatedAt: new Date().toISOString() } },
+    { returnDocument: "after" }
+  );
+  return strip(updated);
+}
+
+export async function deleteFaq(id: string) {
+  const faqs = await collection<Faq>("faqs");
+  const result = await faqs.deleteOne({ id });
+  return result.deletedCount === 1;
 }
 
 export async function getDashboardStats() {

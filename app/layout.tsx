@@ -27,23 +27,23 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || "https://4sureinternational.ca"
   ),
   title: {
-    default: "Dyno Snus | 4 Sure International",
-    template: "%s | Dyno Snus · 4 Sure International",
+    default: "Dyno Snus | 4Sure International",
+    template: "%s | Dyno Snus · 4Sure International",
   },
   description:
-    "Dyno Snus premium slim pouches for licensed adult tobacco retailers in Canada. Dyno Extreme and Dyno Blast from 4 Sure International.",
+    "Dyno Snus premium slim pouches for licensed adult tobacco retailers in Canada. Dyno Extreme and Dyno Blast from 4Sure International.",
   keywords: [
     "Dyno Snus",
-    "4 Sure International",
+    "4Sure International",
     "wholesale snus",
     "Dyno Extreme",
     "Dyno Blast",
     "B2B tobacco Canada",
   ],
   openGraph: {
-    title: "Dyno Snus | 4 Sure International",
+    title: "Dyno Snus | 4Sure International",
     description:
-      "Premium Scandinavian snus for licensed Canadian retailers. Extreme Slim and Blast White Slim.",
+      "Premium Scandinavian snus for licensed Canadian retailers. Extreme Slim and Blast Slim.",
     type: "website",
     locale: "en_CA",
     images: [{ url: "/images/dyno-products-hero.jpg" }],

@@ -27,7 +27,7 @@ export function SiteHeader({ user }: Props) {
         <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
           <Image
             src="/images/logo-4sure-white.png"
-            alt="4 Sure International — From Global to Local"
+            alt="4Sure International — From Global to Local"
             width={200}
             height={72}
             className="h-10 w-auto sm:h-12"

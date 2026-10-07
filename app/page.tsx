@@ -18,6 +18,10 @@ export default async function HomePage() {
 
   const extreme = products.find((p) => p.slug.includes("extreme"));
   const blast = products.find((p) => p.slug.includes("blast"));
+  const maxOff = incentives.reduce(
+    (max, tier) => Math.max(max, tier.discountPercent),
+    0
+  );
 
   return (
     <SiteShell>
@@ -34,7 +38,7 @@ export default async function HomePage() {
             </p>
             <p className="mt-5 max-w-lg text-base leading-relaxed text-white/75 sm:text-lg">
               Slim pouches in <strong className="text-white">Extreme</strong>{" "}
-              and <strong className="text-white">Blast White</strong> for
+              and <strong className="text-white">Blast</strong> for
               licensed adult tobacco retailers — produced in Norway, distributed
               by {site.companyName}.
             </p>
@@ -145,8 +149,8 @@ export default async function HomePage() {
           {[
             {
               icon: ShieldCheck,
-              title: "Licensed B2B only",
-              text: "Built for registered adult tobacco retailers and wholesale partners.",
+              title: "Plain packaging",
+              text: "Every pack follows Canadian plain-packaging rules and carries the required health warning.",
             },
             {
               icon: Package,
@@ -155,8 +159,8 @@ export default async function HomePage() {
             },
             {
               icon: Leaf,
-              title: "Norwegian origin",
-              text: "Scandinavian heritage with consistent pouch technology.",
+              title: "Spit-free pouches",
+              text: "A discreet slim format for adult retail, with no spit and no smoke.",
             },
             {
               icon: Truck,
@@ -198,27 +202,19 @@ export default async function HomePage() {
               </Link>
             </div>
           </RevealOnScroll>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {incentives.map((tier, i) => (
-              <RevealOnScroll key={tier.id} delay={i * 80}>
-                <div className="rounded-xl border border-cyan/30 bg-black/50 p-4 h-full">
-                  <p className="text-xs uppercase tracking-wider text-cyan">
-                    {tier.name}
-                  </p>
-                  <p className="mt-2 font-display text-4xl text-white">
-                    {tier.discountPercent}%
-                  </p>
-                  <p className="mt-1 text-sm text-white/65">
-                    {tier.minPacks}
-                    {tier.maxPacks ? `–${tier.maxPacks}` : "+"} packs / month
-                  </p>
-                  <p className="mt-2 text-xs text-white/45">
-                    Save ${tier.savePerPack.toFixed(2)} per 50 g pack
-                  </p>
-                </div>
-              </RevealOnScroll>
-            ))}
-          </div>
+          <RevealOnScroll>
+            <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-cyan/30 bg-black/50 px-6 py-10 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan">
+                Volume discount
+              </p>
+              <p className="mt-3 font-display text-6xl leading-none text-white sm:text-7xl">
+                Up to {maxOff}% off
+              </p>
+              <p className="mt-4 max-w-sm text-sm text-white/65">
+                On qualifying monthly orders.
+              </p>
+            </div>
+          </RevealOnScroll>
         </div>
       </section>
 
@@ -241,7 +237,7 @@ export default async function HomePage() {
                 </h2>
                 <p className="mt-3 text-slate-ink">
                   Confirm your province, share retailer licence details, and
-                  start ordering Dyno Extreme Slim and Dyno Blast White Slim.
+                  start ordering Dyno Extreme Slim and Dyno Blast Slim.
                 </p>
                 <div className="mt-6 flex items-stretch gap-2 sm:gap-3">
                   <Link href="/contact" className="flex min-w-0 flex-1">
@@ -259,7 +255,8 @@ export default async function HomePage() {
                   </Link>
                 </div>
                 <p className="mt-6 text-sm text-white/45">
-                  {site.salesContact} · {site.phone} ·{" "}
+                  {site.salesContact ? `${site.salesContact} · ` : null}
+                  {site.phone} ·{" "}
                   <EmailLinks
                     primary={site.email}
                     separator="dot"

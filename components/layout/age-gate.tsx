@@ -1,12 +1,21 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FALLBACK_LEGAL_AGE } from "@/lib/canadian-legal-age";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
 const KEY = "dyno_age_verified_v1";
 
-export function AgeGate() {
+export function AgeGate({
+  minimumAge = FALLBACK_LEGAL_AGE,
+}: {
+  minimumAge?: number;
+}) {
+  const age =
+    minimumAge === 18 || minimumAge === 19 || minimumAge === 21
+      ? minimumAge
+      : FALLBACK_LEGAL_AGE;
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -40,7 +49,7 @@ export function AgeGate() {
         <div className="mb-4 flex justify-center">
           <Image
             src="/images/logo-4sure-white.png"
-            alt="4 Sure International"
+            alt="4Sure International"
             width={180}
             height={65}
             className="h-12 w-auto"
@@ -50,7 +59,7 @@ export function AgeGate() {
           Age verification
         </p>
         <h2 className="mt-3 text-center font-display text-3xl text-white sm:text-4xl">
-          Are you 19 or older?
+          Are you {age} or older?
         </h2>
         <p className="mt-3 text-center text-sm leading-relaxed text-slate-ink">
           Dyno Snus is intended only for licensed adult tobacco retailers and
@@ -59,7 +68,7 @@ export function AgeGate() {
         </p>
         <div className="mt-6 grid grid-cols-2 gap-2">
           <Button className="h-auto min-h-11 w-full whitespace-normal px-2 text-sm" onClick={confirm}>
-            Yes, I am 19+
+            Yes, I am {age}+
           </Button>
           <Button
             className="h-auto min-h-11 w-full whitespace-normal border-2 border-white/80 px-2 text-sm text-white"

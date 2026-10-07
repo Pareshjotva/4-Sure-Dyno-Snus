@@ -9,7 +9,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Products",
   description:
-    "Dyno Extreme Slim and Dyno Blast White Slim snus pouches for licensed Canadian retailers.",
+    "Dyno Extreme Slim and Dyno Blast Slim snus pouches for licensed Canadian retailers.",
 };
 
 export default async function ProductsPage() {
@@ -24,7 +24,7 @@ export default async function ProductsPage() {
         </h1>
         <p className="mt-3 max-w-2xl text-slate-ink">
           Two slim soft-pack SKUs for adult retail — ultra-strong Extreme and
-          cooling Blast White. Both sold in Canada under plain packaging rules.
+          cooling Blast. Both sold in Canada under plain packaging rules.
         </p>
 
         <div className="mt-10 grid gap-8">

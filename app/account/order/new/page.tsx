@@ -22,7 +22,11 @@ export default async function NewOrderPage() {
       </p>
       <div className="mt-6">
         <OrderForm
-          products={products.map((p) => ({ id: p.id, name: p.name }))}
+          products={products.map((p) => ({
+            id: p.id,
+            name: p.name,
+            image: p.image,
+          }))}
           defaultProvince={session.province || "BC"}
           minOrderPacks={site.minOrderPacks}
           needsLicence={!user.licenceNumber?.trim()}

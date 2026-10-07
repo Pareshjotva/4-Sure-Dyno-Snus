@@ -97,3 +97,27 @@ export const productSchema = z.object({
   image: z.string().optional(),
   overviewImage: z.string().optional(),
 });
+
+export const faqSchema = z.object({
+  question: z.string().trim().min(5, "Enter a question."),
+  answer: z.string().trim().min(10, "Answer must be at least 10 characters."),
+  published: z.boolean().optional(),
+  sortOrder: z
+    .number("Enter a sort order.")
+    .int("Sort order must be a whole number.")
+    .nonnegative("Sort order cannot be negative.")
+    .optional(),
+});
+
+export const blogSchema = z.object({
+  title: z.string().trim().min(2, "Enter a blog title."),
+  slug: optionalText(2, "Slug must be at least 2 characters."),
+  excerpt: z
+    .string()
+    .trim()
+    .min(10, "Excerpt must be at least 10 characters."),
+  body: z.string().trim().min(20, "Write a post of at least 20 characters."),
+  published: z.boolean().optional(),
+  image: z.string().optional(),
+  imageTwo: z.string().optional(),
+});

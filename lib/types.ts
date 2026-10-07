@@ -105,6 +105,29 @@ export interface ContactLead {
   status: "new" | "contacted" | "closed";
 }
 
+export interface Blog {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  body: string;
+  published: boolean;
+  image?: string;
+  imageTwo?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Faq {
+  id: string;
+  question: string;
+  answer: string;
+  published: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SiteContent {
   companyName: string;
   productLine: string;

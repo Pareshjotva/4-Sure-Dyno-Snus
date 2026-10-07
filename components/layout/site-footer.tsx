@@ -12,7 +12,7 @@ export async function SiteFooter() {
         <div>
           <Image
             src="/images/logo-4sure-white.png"
-            alt="4 Sure International"
+            alt="4Sure International"
             width={220}
             height={80}
             className="h-14 w-auto"
@@ -40,6 +40,11 @@ export async function SiteFooter() {
               </li>
             ))}
             <li>
+              <Link href="/blogs" className="hover:text-white">
+                Blogs
+              </Link>
+            </li>
+            <li>
               <Link href="/login" className="hover:text-white">
                 Retailer login
               </Link>
@@ -52,7 +57,7 @@ export async function SiteFooter() {
             Contact
           </h3>
           <ul className="mt-4 space-y-2 text-sm text-white/70">
-            <li>{site.salesContact}</li>
+            {site.salesContact ? <li>{site.salesContact}</li> : null}
             <li>
               <a href={`tel:${site.phone}`} className="hover:text-white">
                 {site.phone}

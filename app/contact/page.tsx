@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Contact 4 Sure International about Dyno Snus wholesale accounts for licensed retailers.",
+    "Contact 4Sure International about Dyno Snus wholesale accounts for licensed retailers.",
 };
 
 export default async function ContactPage() {
@@ -20,16 +20,18 @@ export default async function ContactPage() {
         <div>
           <Badge>Contact sales</Badge>
           <h1 className="mt-3 font-display text-4xl text-navy sm:text-5xl">
-            Let&apos;s set up your Dyno account
+            Let&apos;s set up your 4SURE Account
           </h1>
           <p className="mt-4 text-slate-ink">
             Share your retailer details and we&apos;ll follow up with current
             pricing, taxes/PTT, shipping, and ordering steps for your province.
           </p>
           <div className="mt-8 space-y-3 text-sm text-navy">
-            <p>
-              <span className="font-semibold">Contact:</span> {site.salesContact}
-            </p>
+            {site.salesContact ? (
+              <p>
+                <span className="font-semibold">Contact:</span> {site.salesContact}
+              </p>
+            ) : null}
             <p>
               <span className="font-semibold">Phone:</span>{" "}
               <a href={`tel:${site.phone}`} className="text-cyan">

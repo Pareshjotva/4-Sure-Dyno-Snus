@@ -8,11 +8,14 @@ import Image from "next/image";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "4 Sure International brings Dyno Snus premium slim pouches from Norway to licensed Canadian retailers.",
+    "4Sure International brings Dyno Snus premium slim pouches from Norway to licensed Canadian retailers.",
 };
 
 export default async function AboutPage() {
   const site = await getSite();
+  const basedIn = site.address
+    .replace(/\s+[A-Z]\d[A-Z]\s*\d[A-Z]\d\s*$/i, "")
+    .trim();
 
   return (
     <SiteShell>
@@ -32,7 +35,7 @@ export default async function AboutPage() {
           <div className="overflow-hidden rounded-2xl border border-white/10">
             <Image
               src="/images/about-banner.png"
-              alt="4 Sure International — From Global to Local, with Dyno pouches for Canadian wholesale"
+              alt="4Sure International — From Global to Local, with Dyno pouches for Canadian wholesale"
               width={1672}
               height={941}
               quality={90}
@@ -43,9 +46,10 @@ export default async function AboutPage() {
           <div className="grid gap-8 text-slate-ink lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.8fr)] lg:items-start">
             <div className="space-y-4">
               <p>
-                Based in {site.address}, {site.companyName} supplies Dyno Extreme
-                Slim and Dyno Blast White Slim to registered retailers in British
-                Columbia, Alberta, and Ontario.
+                Based in {basedIn}, {site.companyName} supplies Dyno Extreme Slim
+                and Dyno Blast Slim
+                to registered retailers in British Columbia, Alberta, and
+                Ontario.
               </p>
               <p>
                 Every pack follows Canadian plain-packaging requirements and
@@ -58,10 +62,12 @@ export default async function AboutPage() {
               <p className="text-xs font-semibold uppercase tracking-wider text-cyan">
                 Sales contact
               </p>
-              <p className="mt-2 font-display text-2xl text-navy">
-                {site.salesContact}
-              </p>
-              <p className="mt-1 text-sm">
+              {site.salesContact ? (
+                <p className="mt-2 font-display text-2xl text-navy">
+                  {site.salesContact}
+                </p>
+              ) : null}
+              <p className="mt-2 text-sm">
                 {site.phone}
                 <br />
                 <EmailLinks primary={site.email} className="text-cyan" />

@@ -10,7 +10,7 @@ export default function TermsPage() {
         <h1 className="font-display text-4xl text-navy">Terms of Use</h1>
         <div className="mt-6 space-y-4 text-sm leading-relaxed text-slate-ink">
           <p>
-            This website is operated by 4 Sure International Inc. for licensed
+            This website is operated by 4Sure International Inc. for licensed
             adult tobacco retailers and wholesale partners in Canada. By using
             the site you confirm you are of legal age (19+) in your province and
             will use the information lawfully.
@@ -22,7 +22,7 @@ export default function TermsPage() {
           </p>
           <p>
             Orders placed through retailer accounts are subject to acceptance,
-            licence verification, and payment terms communicated by 4 Sure
+            licence verification, and payment terms communicated by 4Sure
             International.
           </p>
         </div>

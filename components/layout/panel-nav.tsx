@@ -15,10 +15,13 @@ const accountLinks = [
 const adminLinks = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/reports", label: "Reports" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/pricing", label: "Pricing" },
   { href: "/admin/retailers", label: "Retailers" },
   { href: "/admin/leads", label: "Leads" },
+  { href: "/admin/blogs", label: "Blogs" },
+  { href: "/admin/faqs", label: "FAQ" },
 ];
 
 export function PanelNav({

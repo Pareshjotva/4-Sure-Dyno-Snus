@@ -1,13 +1,13 @@
 {
   "site": {
-    "companyName": "4 Sure International",
+    "companyName": "4Sure International",
     "productLine": "Dyno Snus",
     "tagline": "From Global to Local",
-    "phone": "403-828-6370",
-    "email": "octavio4sure@gmail.com",
+    "phone": "587-456-2417",
+    "email": "info@4sureinternational.ca",
     "website": "4sureinternational.ca",
     "address": "Edmonton, AB T6V 0M7",
-    "salesContact": "Octavio Silva",
+    "salesContact": "",
     "minOrderPacks": 20,
     "ageRequirement": 19
   },
@@ -41,16 +41,16 @@
     {
       "id": "prod_blast",
       "slug": "dyno-blast-snus",
-      "name": "Dyno Blast White Slim",
+      "name": "Dyno Blast Slim",
       "shortName": "Dyno Blast",
       "tagline": "Light cooling. Fast-release nicotine. Soft white pouches.",
-      "description": "Dyno Blast White Slims deliver a light cooling experience with a high, fast-releasing dose of nicotine. Soft white pouches, spit-free and easy to use — a strong value option for adult consumers who want cooling refreshment with reliable strength.",
+      "description": "Dyno Blast Slims deliver a light cooling experience with a high, fast-releasing dose of nicotine. Soft white pouches, spit-free and easy to use — a strong value option for adult consumers who want cooling refreshment with reliable strength.",
       "flavour": "Light cooling white-pouch flavour with smooth, intense nicotine satisfaction",
       "nicotinePerPortionMg": 13,
       "nicotinePerGramMg": 20,
       "pouchesPerPack": "Approx. 73–75 slim pouches",
       "packSize": "50 g resealable soft pack",
-      "format": "Slim blast white pouch for discreet comfort",
+      "format": "Slim blast pouch for discreet comfort",
       "origin": "Produced in Norway",
       "tobaccoFreePercent": 97,
       "features": [
@@ -185,8 +185,8 @@
       "passwordHash": "$2b$10$KuA54MP.6xzsz.2eg./Y8ely6FH.nOl.MvoCcNVXtp8GdeFe0mA1W",
       "name": "Site Admin",
       "role": "admin",
-      "company": "4 Sure International Inc.",
-      "phone": "403-828-6370",
+      "company": "4Sure International Inc.",
+      "phone": "587-456-2417",
       "province": "AB",
       "address": "Edmonton, AB T6V 0M7",
       "createdAt": "2026-01-01T00:00:00.000Z",
@@ -224,7 +224,7 @@
         },
         {
           "productId": "prod_blast",
-          "productName": "Dyno Blast White Slim",
+          "productName": "Dyno Blast Slim",
           "quantity": 8,
           "unitPrice": 40
         }

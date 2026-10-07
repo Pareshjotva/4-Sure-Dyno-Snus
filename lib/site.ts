@@ -17,6 +17,7 @@ export const NAV_LINKS = [
   { href: "/pricing", label: "Wholesale Pricing" },
   { href: "/incentives", label: "Retailer Program" },
   { href: "/about", label: "About" },
+  { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
 ] as const;
 
@@ -28,12 +29,15 @@ export const COMPANY_EMAILS = [
   "4sureinternational@gmail.com",
 ] as const;
 
+const HIDDEN_EMAILS = ["octavio4sure@gmail.com"];
+
 export function contactEmails(primary?: string) {
   const emails: string[] = [...COMPANY_EMAILS];
   const extra = primary?.trim();
   if (
     extra &&
-    !emails.some((email) => email.toLowerCase() === extra.toLowerCase())
+    !emails.some((email) => email.toLowerCase() === extra.toLowerCase()) &&
+    !HIDDEN_EMAILS.some((email) => email.toLowerCase() === extra.toLowerCase())
   ) {
     emails.push(extra);
   }

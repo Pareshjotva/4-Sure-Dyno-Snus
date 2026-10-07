@@ -1,6 +1,6 @@
-# Dyno Snus · 4 Sure International
+# Dyno Snus · 4Sure International
 
-Wholesale marketing and ordering site for **Dyno Snus** by **4 Sure International** — premium Norwegian slim pouches for licensed adult tobacco retailers in Canada.
+Wholesale marketing and ordering site for **Dyno Snus** by **4Sure International** — premium Norwegian slim pouches for licensed adult tobacco retailers in Canada.
 
 ## Features
 
@@ -14,7 +14,7 @@ Wholesale marketing and ordering site for **Dyno Snus** by **4 Sure Internationa
 ## Products
 
 - **Dyno Extreme Slim** — 18 mg/portion · 27 mg/g · natural tobacco
-- **Dyno Blast White Slim** — 13 mg/portion · 20 mg/g · light cooling · 97% tobacco-free
+- **Dyno Blast Slim** — 13 mg/portion · 20 mg/g · light cooling · 97% tobacco-free
 
 ## Run locally
 
@@ -45,6 +45,6 @@ Next.js 15 · React 19 · TypeScript · Tailwind CSS 4 · JWT session cookies ·
 
 ## Notes
 
-- Theme colours follow the 4 Sure logo: navy `#1B365D` and cyan `#29ABE2`
+- Theme colours follow the 4Sure logo: navy `#1B365D` and cyan `#29ABE2`
 - Pricing worksheets cover BC, Alberta, and Ontario (from the 2026 B2B sheet)
 - Intended for licensed adult retailers only; nicotine products are addictive
