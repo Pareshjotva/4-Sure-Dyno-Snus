@@ -44,6 +44,9 @@ export interface ReportOrderLine {
   status: string;
   summary: string;
   packs: number;
+  discountPercent: number;
+  discountAmount: number;
+  discountTier: string;
   total: number;
 }
 
@@ -292,6 +295,9 @@ export function buildSalesReport(
         (sum, item) => sum + (Number(item.quantity) || 0),
         0
       ),
+      discountPercent: Number(order.discountPercent) || 0,
+      discountAmount: money(order.discountAmount),
+      discountTier: order.discountTier?.trim() || "",
       total: money(order.total),
     }));
 

@@ -363,6 +363,7 @@ function ReportBody({ report }: { report: SalesReport }) {
                   <th className="px-4 py-3 font-semibold">Company</th>
                   <th className="px-4 py-3 font-semibold">Items</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold">Discount</th>
                   <th className="px-4 py-3 font-semibold">Total</th>
                 </tr>
               </thead>
@@ -380,6 +381,11 @@ function ReportBody({ report }: { report: SalesReport }) {
                     <td className="px-4 py-3 text-white/75">{order.summary}</td>
                     <td className="px-4 py-3 capitalize text-white/75">
                       {order.status}
+                    </td>
+                    <td className="px-4 py-3 text-white/75">
+                      {order.discountPercent > 0
+                        ? `${order.discountTier ? `${order.discountTier} ` : ""}${order.discountPercent}% (−${formatCurrency(order.discountAmount)})`
+                        : formatCurrency(0)}
                     </td>
                     <td className="px-4 py-3 text-white">
                       {formatCurrency(order.total)}

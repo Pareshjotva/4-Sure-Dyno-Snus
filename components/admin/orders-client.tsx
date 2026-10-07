@@ -1,8 +1,9 @@
 "use client";
 
+import { OrderTotals } from "@/components/orders/order-totals";
 import { Select } from "@/components/ui/select";
 import type { Order, OrderStatus } from "@/lib/types";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -41,9 +42,6 @@ export function AdminOrdersClient({ orders }: { orders: Order[] }) {
                 {formatDate(order.createdAt)}
               </p>
             </div>
-            <p className="font-display text-2xl text-navy">
-              {formatCurrency(order.total)}
-            </p>
           </div>
           <ul className="mt-3 space-y-1 text-sm text-slate-ink">
             {order.items.map((item) => (
@@ -52,6 +50,7 @@ export function AdminOrdersClient({ orders }: { orders: Order[] }) {
               </li>
             ))}
           </ul>
+          <OrderTotals order={order} />
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Select
               className="w-44"

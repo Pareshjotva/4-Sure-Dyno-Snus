@@ -1,9 +1,10 @@
 import { ProfileProgress } from "@/components/account/profile-progress";
+import { OrderTotals } from "@/components/orders/order-totals";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { requireSession } from "@/lib/auth";
 import { getOrders, getSite, getUserById } from "@/lib/db";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -81,9 +82,7 @@ export default async function AccountHomePage() {
               <p className="text-xs text-navy/60">{formatDate(order.createdAt)}</p>
             </div>
             <Badge>{order.status}</Badge>
-            <p className="font-semibold text-navy">
-              {formatCurrency(order.total)}
-            </p>
+            <OrderTotals order={order} />
           </div>
         ))}
         {orders.length === 0 && (

@@ -7,6 +7,8 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { FieldErrors } from "@/lib/form-errors";
 import { licenceNumberSchema } from "@/lib/form-schemas";
+import { quoteVolumeDiscount } from "@/lib/site";
+import type { IncentiveTier } from "@/lib/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
@@ -22,11 +24,15 @@ export function OrderForm({
   defaultProvince,
   minOrderPacks,
   needsLicence,
+  tiers,
+  monthPacks,
 }: {
   products: ProductOption[];
   defaultProvince: string;
   minOrderPacks: number;
   needsLicence: boolean;
+  tiers: IncentiveTier[];
+  monthPacks: number;
 }) {
   const router = useRouter();
   const [qty, setQty] = useState<Record<string, number>>(
@@ -41,6 +47,8 @@ export function OrderForm({
     [qty]
   );
   const subtotal = packCount * 40;
+  const quote = quoteVolumeDiscount(packCount, monthPacks, tiers, subtotal);
+  const sortedTiers = [...tiers].sort((a, b) => a.minPacks - b.minPacks);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -168,11 +176,42 @@ export function OrderForm({
         </div>
         <div className="surface rounded-xl p-4 text-sm">
           <p>
-            Packs: <strong>{packCount}</strong> (min {minOrderPacks} for free
-            shipping)
+            This order: <strong>{packCount} packs</strong> (min {minOrderPacks}{" "}
+            for free shipping)
           </p>
           <p className="mt-1">
-            Subtotal before incentives: <strong>${subtotal.toFixed(2)}</strong>
+            Already this month: <strong>{monthPacks} packs</strong>
+          </p>
+          <p className="mt-1">
+            Qualifying volume: <strong>{quote.qualifyingPacks} packs</strong>
+          </p>
+          <p className="mt-1">
+            Subtotal: <strong>${subtotal.toFixed(2)}</strong>
+          </p>
+          <p className={`mt-1 ${quote.discountPercent > 0 ? "font-semibold text-cyan" : ""}`}>
+            Discount:{" "}
+            <strong>
+              {quote.tier
+                ? `${quote.tier.name} ${quote.discountPercent}% (−$${quote.discountAmount.toFixed(2)})`
+                : "$0.00"}
+            </strong>
+          </p>
+          <p className="mt-1 font-semibold">
+            Total: ${quote.total.toFixed(2)}
+          </p>
+          <ul className="mt-3 space-y-1 text-xs text-navy/70">
+            {sortedTiers.map((tier) => (
+              <li key={tier.id}>
+                {tier.maxPacks == null
+                  ? `${tier.minPacks}+ packs`
+                  : `${tier.minPacks}–${tier.maxPacks} packs`}{" "}
+                · {tier.name} · {tier.discountPercent}% off
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-navy/60">
+            One order can qualify on its own, or this month’s orders add
+            together. Last month’s packs do not carry forward.
           </p>
           <FieldError message={errors.packs} />
         </div>

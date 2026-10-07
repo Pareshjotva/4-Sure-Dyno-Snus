@@ -1,3 +1,4 @@
+import { OrderTotals } from "@/components/orders/order-totals";
 import { requireSession } from "@/lib/auth";
 import { getDashboardStats, getLeads, getOrders } from "@/lib/db";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -63,9 +64,7 @@ export default async function AdminHomePage() {
                 <p className="mt-1 text-navy/60">
                   {order.company || order.userName} · {formatDate(order.createdAt)}
                 </p>
-                <p className="mt-1 font-medium text-navy">
-                  {formatCurrency(order.total)}
-                </p>
+                <OrderTotals order={order} />
               </div>
             ))}
           </div>

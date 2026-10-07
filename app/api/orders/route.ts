@@ -3,6 +3,7 @@ import { requireSession } from "@/lib/auth";
 import {
   createOrder,
   getIncentives,
+  getOrders,
   getProductById,
   getSite,
   getUserById,
@@ -10,7 +11,7 @@ import {
 } from "@/lib/db";
 import { zodFieldErrors } from "@/lib/form-errors";
 import { licenceNumberSchema, orderSchema } from "@/lib/form-schemas";
-import { resolveIncentive } from "@/lib/site";
+import { packsThisMonth, quoteVolumeDiscount } from "@/lib/site";
 import { z } from "zod";
 
 export async function POST(req: Request) {
@@ -83,10 +84,14 @@ export async function POST(req: Request) {
       (sum, i) => sum + i.quantity * i.unitPrice,
       0
     );
-    const tier = resolveIncentive(packCount, incentives);
-    const discountPercent = tier?.discountPercent ?? 0;
-    const discountAmount = Math.round(subtotal * (discountPercent / 100) * 100) / 100;
-    const total = Math.round((subtotal - discountAmount) * 100) / 100;
+    const priorOrders = await getOrders(session.id);
+    const monthPacksBefore = packsThisMonth(priorOrders);
+    const quote = quoteVolumeDiscount(
+      packCount,
+      monthPacksBefore,
+      incentives,
+      subtotal
+    );
 
     if (licenceToSave) {
       await updateUser(session.id, { licenceNumber: licenceToSave });
@@ -99,9 +104,10 @@ export async function POST(req: Request) {
       province: body.province,
       items: lineItems,
       subtotal,
-      discountPercent,
-      discountAmount,
-      total,
+      discountPercent: quote.discountPercent,
+      discountAmount: quote.discountAmount,
+      discountTier: quote.tier?.name || "",
+      total: quote.total,
       status: "pending",
       notes:
         body.notes ||

@@ -1,3 +1,4 @@
+import { OrderTotals } from "@/components/orders/order-totals";
 import { Badge } from "@/components/ui/badge";
 import { requireSession } from "@/lib/auth";
 import { getOrders } from "@/lib/db";
@@ -32,18 +33,7 @@ export default async function AccountOrdersPage() {
                 </li>
               ))}
             </ul>
-            <div className="mt-4 flex flex-wrap gap-4 text-sm">
-              <span>Subtotal {formatCurrency(order.subtotal)}</span>
-              {order.discountPercent > 0 && (
-                <span className="text-cyan">
-                  Discount {order.discountPercent}% (−
-                  {formatCurrency(order.discountAmount)})
-                </span>
-              )}
-              <span className="font-semibold text-navy">
-                Total {formatCurrency(order.total)}
-              </span>
-            </div>
+            <OrderTotals order={order} />
             {order.notes && (
               <p className="mt-2 text-xs text-navy/55">{order.notes}</p>
             )}

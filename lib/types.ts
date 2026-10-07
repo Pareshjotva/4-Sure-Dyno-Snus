@@ -86,6 +86,7 @@ export interface Order {
   subtotal: number;
   discountPercent: number;
   discountAmount: number;
+  discountTier?: string;
   total: number;
   status: OrderStatus;
   notes?: string;

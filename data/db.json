@@ -155,23 +155,23 @@
   "incentives": [
     {
       "id": "tier_1",
-      "name": "Growth Partner",
-      "minPacks": 20,
-      "maxPacks": 40,
+      "name": "Tier A · Growth",
+      "minPacks": 40,
+      "maxPacks": 59,
       "discountPercent": 5,
       "savePerPack": 2
     },
     {
       "id": "tier_2",
-      "name": "Premium",
-      "minPacks": 41,
-      "maxPacks": 60,
+      "name": "Tier B · Partner",
+      "minPacks": 60,
+      "maxPacks": 79,
       "discountPercent": 10,
       "savePerPack": 4
     },
     {
       "id": "tier_3",
-      "name": "Volume",
+      "name": "Tier C · Premium Volume",
       "minPacks": 80,
       "maxPacks": null,
       "discountPercent": 15,
