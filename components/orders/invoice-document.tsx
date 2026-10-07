@@ -36,12 +36,14 @@ export function InvoiceDocument({
   canEdit = false,
   backHref,
   backLabel,
+  contact,
 }: {
   invoice: InvoiceDocumentModel;
   orderId?: string;
   canEdit?: boolean;
   backHref: string;
   backLabel: string;
+  contact: { email: string; phone: string };
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -166,8 +168,8 @@ export function InvoiceDocument({
             />
             <div className="mt-4 space-y-0.5 text-sm text-[#3d4a5c]">
               <p>{INVOICE_LETTERHEAD.address}</p>
-              <p>{INVOICE_LETTERHEAD.email}</p>
-              <p>{INVOICE_LETTERHEAD.phone}</p>
+              <p>{contact.email}</p>
+              <p>{contact.phone}</p>
             </div>
           </div>
           <div className="min-w-[180px] text-left sm:text-right">
@@ -338,7 +340,7 @@ export function InvoiceDocument({
 
         <div className="mt-8 border-t border-[#e6ebf1] pt-4 text-sm">
           <p className="font-semibold text-[#163a62]">Payment via E-transfer</p>
-          <p className="mt-1">{INVOICE_LETTERHEAD.email}</p>
+          <p className="mt-1">{contact.email}</p>
           <p className="mt-3 text-xs leading-5 text-[#5c6b7d]">
             Notice: {INVOICE_LETTERHEAD.notice}
           </p>

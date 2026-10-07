@@ -63,7 +63,7 @@ export async function SiteFooter() {
                 {site.phone}
               </a>
             </li>
-            {contactEmails(site.email).map((email) => (
+            {contactEmails(site.email, site.secondaryEmail).map((email) => (
               <li key={email}>
                 <a href={`mailto:${email}`} className="hover:text-white">
                   {email}
