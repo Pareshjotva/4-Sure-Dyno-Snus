@@ -1,6 +1,6 @@
 import type { Order } from "@/lib/types";
 
-export type ReportMode = "monthly" | "yearly" | "custom";
+export type ReportMode = "overall" | "monthly" | "yearly" | "custom";
 
 export interface ReportRange {
   start: Date;
@@ -24,6 +24,29 @@ export interface ProvinceBreakdown {
   total: number;
 }
 
+export interface CustomerBreakdown {
+  key: string;
+  customer: string;
+  company: string;
+  orders: number;
+  packs: number;
+  subtotal: number;
+  discountAmount: number;
+  total: number;
+}
+
+export interface ReportOrderLine {
+  id: string;
+  orderNumber: string;
+  createdAt: string;
+  customer: string;
+  company: string;
+  status: string;
+  summary: string;
+  packs: number;
+  total: number;
+}
+
 export interface SalesReport {
   label: string;
   orderCount: number;
@@ -34,6 +57,8 @@ export interface SalesReport {
   total: number;
   byProduct: ProductBreakdown[];
   byProvince: ProvinceBreakdown[];
+  byCustomer: CustomerBreakdown[];
+  orders: ReportOrderLine[];
 }
 
 export interface CustomRangeResult {
@@ -156,10 +181,14 @@ export function resolveCustomRange(
   };
 }
 
-export function buildSalesReport(orders: Order[], range: ReportRange): SalesReport {
-  const startMs = range.start.getTime();
-  const endMs = range.end.getTime();
+export function buildSalesReport(
+  orders: Order[],
+  range: ReportRange | null
+): SalesReport {
+  const startMs = range?.start.getTime();
+  const endMs = range?.end.getTime();
   const inRange = orders.filter((order) => {
+    if (startMs === undefined || endMs === undefined) return true;
     const created = new Date(order.createdAt).getTime();
     return Number.isFinite(created) && created >= startMs && created <= endMs;
   });
@@ -171,6 +200,7 @@ export function buildSalesReport(orders: Order[], range: ReportRange): SalesRepo
   let total = 0;
   const products = new Map<string, ProductBreakdown>();
   const provinces = new Map<string, ProvinceBreakdown>();
+  const customers = new Map<string, CustomerBreakdown>();
 
   for (const order of active) {
     subtotal = money(subtotal + order.subtotal);
@@ -214,8 +244,59 @@ export function buildSalesReport(orders: Order[], range: ReportRange): SalesRepo
     provinces.set(province, provinceRow);
   }
 
+  for (const order of inRange) {
+    const packs = (order.items || []).reduce(
+      (sum, item) => sum + (Number(item.quantity) || 0),
+      0
+    );
+    const customerKey = order.userId || order.company || order.userName || "unknown";
+    const customerRow = customers.get(customerKey) ?? {
+      key: customerKey,
+      customer: order.userName?.trim() || "Unknown customer",
+      company: order.company?.trim() || "—",
+      orders: 0,
+      packs: 0,
+      subtotal: 0,
+      discountAmount: 0,
+      total: 0,
+    };
+    customerRow.orders += 1;
+    if (order.status !== "cancelled") {
+      customerRow.packs += packs;
+      customerRow.subtotal = money(customerRow.subtotal + order.subtotal);
+      customerRow.discountAmount = money(
+        customerRow.discountAmount + order.discountAmount
+      );
+      customerRow.total = money(customerRow.total + order.total);
+    }
+    customers.set(customerKey, customerRow);
+  }
+
+  const orderLines: ReportOrderLine[] = [...inRange]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+    .map((order) => ({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      createdAt: order.createdAt,
+      customer: order.userName?.trim() || "Unknown customer",
+      company: order.company?.trim() || "—",
+      status: order.status,
+      summary:
+        (order.items || [])
+          .map((item) => `${item.productName} × ${item.quantity}`)
+          .join(", ") || "—",
+      packs: (order.items || []).reduce(
+        (sum, item) => sum + (Number(item.quantity) || 0),
+        0
+      ),
+      total: money(order.total),
+    }));
+
   return {
-    label: range.label,
+    label: range?.label || "All orders",
     orderCount: active.length,
     cancelledCount: inRange.length - active.length,
     packCount,
@@ -228,5 +309,9 @@ export function buildSalesReport(orders: Order[], range: ReportRange): SalesRepo
     byProvince: [...provinces.values()].sort(
       (a, b) => b.total - a.total || a.province.localeCompare(b.province)
     ),
+    byCustomer: [...customers.values()].sort(
+      (a, b) => b.total - a.total || a.customer.localeCompare(b.customer)
+    ),
+    orders: orderLines,
   };
 }
