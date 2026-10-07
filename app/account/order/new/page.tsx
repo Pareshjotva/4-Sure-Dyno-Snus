@@ -20,9 +20,9 @@ export default async function NewOrderPage() {
     <div>
       <h1 className="font-display text-3xl text-navy">Place an order</h1>
       <p className="mt-2 text-sm text-slate-ink">
-        Minimum {site.minOrderPacks} packs for free shipping. Discount follows
-        this month’s volume: 40–59 packs 5% off, 60–79 packs 10% off, 80+ packs
-        15% off.
+        Minimum {site.minOrderPacks} packs for free shipping. Each order’s
+        discount uses packs already bought this month plus the packs on this
+        order. 40–59 combined is 5% off, 60–79 is 10% off, and 80+ is 15% off.
       </p>
       <div className="mt-6">
         <OrderForm

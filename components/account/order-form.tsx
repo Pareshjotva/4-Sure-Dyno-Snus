@@ -176,22 +176,26 @@ export function OrderForm({
         </div>
         <div className="surface rounded-xl p-4 text-sm">
           <p>
+            Earlier this month: <strong>{monthPacks} packs</strong>
+          </p>
+          <p className="mt-1">
             This order: <strong>{packCount} packs</strong> (min {minOrderPacks}{" "}
             for free shipping)
           </p>
           <p className="mt-1">
-            Already this month: <strong>{monthPacks} packs</strong>
+            Counted together: <strong>{quote.qualifyingPacks} packs</strong>
           </p>
-          <p className="mt-1">
-            Qualifying volume: <strong>{quote.qualifyingPacks} packs</strong>
+          <p className="mt-1 text-xs text-navy/70">
+            This order’s discount uses that combined total. Earlier orders keep
+            the discount they already received.
           </p>
           <p className="mt-1">
             Subtotal: <strong>${subtotal.toFixed(2)}</strong>
           </p>
-          <p className={`mt-1 ${quote.discountPercent > 0 ? "font-semibold text-cyan" : ""}`}>
-            Discount:{" "}
+          <p className={`mt-1 ${quote.discountAmount > 0 ? "font-semibold text-cyan" : ""}`}>
+            Discount on this order:{" "}
             <strong>
-              {quote.tier
+              {quote.discountAmount > 0 && quote.tier
                 ? `${quote.tier.name} ${quote.discountPercent}% (−$${quote.discountAmount.toFixed(2)})`
                 : "$0.00"}
             </strong>
@@ -210,8 +214,10 @@ export function OrderForm({
             ))}
           </ul>
           <p className="mt-2 text-xs text-navy/60">
-            One order can qualify on its own, or this month’s orders add
-            together. Last month’s packs do not carry forward.
+            Example: 45 packs earlier this month got 5% on that invoice. A
+            later order of 20 packs is counted as 65, so that new order gets
+            10%. Last month does not carry forward. 10% starts at 60 packs
+            combined, 15% at 80.
           </p>
           <FieldError message={errors.packs} />
         </div>

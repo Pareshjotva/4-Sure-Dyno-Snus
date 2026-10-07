@@ -7,14 +7,34 @@ export function OrderTotals({
 }: {
   order: Pick<
     Order,
-    "subtotal" | "discountPercent" | "discountAmount" | "discountTier" | "total"
+    | "subtotal"
+    | "discountPercent"
+    | "discountAmount"
+    | "discountTier"
+    | "monthPacksBefore"
+    | "qualifyingPacks"
+    | "total"
+    | "items"
   >;
 }) {
   const tier = discountTierLabel(order.discountPercent, order.discountTier);
   const hasDiscount = order.discountPercent > 0 && order.discountAmount > 0;
+  const thisOrderPacks = (order.items || []).reduce(
+    (sum, item) => sum + (Number(item.quantity) || 0),
+    0
+  );
+  const showRunningTotal = typeof order.monthPacksBefore === "number";
 
   return (
-    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+    <div className="mt-3 space-y-1 text-sm">
+      {showRunningTotal && (
+        <p className="text-navy/70">
+          Earlier this month {order.monthPacksBefore} packs + this order{" "}
+          {thisOrderPacks} packs = {order.qualifyingPacks ?? thisOrderPacks}{" "}
+          packs. Discount is on this order.
+        </p>
+      )}
+      <div className="flex flex-wrap gap-x-4 gap-y-1">
       <span>Subtotal {formatCurrency(order.subtotal)}</span>
       <span className={hasDiscount ? "font-semibold text-cyan" : "text-navy/70"}>
         {hasDiscount
@@ -24,6 +44,7 @@ export function OrderTotals({
       <span className="font-semibold text-navy">
         Total {formatCurrency(order.total)}
       </span>
+      </div>
     </div>
   );
 }

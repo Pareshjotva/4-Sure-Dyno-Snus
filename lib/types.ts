@@ -87,6 +87,8 @@ export interface Order {
   discountPercent: number;
   discountAmount: number;
   discountTier?: string;
+  monthPacksBefore?: number;
+  qualifyingPacks?: number;
   total: number;
   status: OrderStatus;
   notes?: string;

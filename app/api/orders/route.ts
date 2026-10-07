@@ -107,6 +107,8 @@ export async function POST(req: Request) {
       discountPercent: quote.discountPercent,
       discountAmount: quote.discountAmount,
       discountTier: quote.tier?.name || "",
+      monthPacksBefore,
+      qualifyingPacks: quote.qualifyingPacks,
       total: quote.total,
       status: "pending",
       notes:
