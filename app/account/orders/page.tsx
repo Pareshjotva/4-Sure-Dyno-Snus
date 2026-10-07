@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { requireSession } from "@/lib/auth";
 import { getOrders } from "@/lib/db";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function AccountOrdersPage() {
@@ -23,7 +24,15 @@ export default async function AccountOrdersPage() {
                   {formatDate(order.createdAt)} · {order.province}
                 </p>
               </div>
-              <Badge>{order.status}</Badge>
+              <div className="flex items-center gap-3">
+                <Link
+                  href={`/account/orders/${order.id}/invoice`}
+                  className="text-sm font-semibold text-cyan"
+                >
+                  Invoice
+                </Link>
+                <Badge>{order.status}</Badge>
+              </div>
             </div>
             <ul className="mt-4 space-y-1 text-sm text-slate-ink">
               {order.items.map((item) => (

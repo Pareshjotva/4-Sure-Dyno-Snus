@@ -42,7 +42,7 @@ export function PanelNav({
   }
 
   return (
-    <aside className="surface rounded-2xl p-4">
+    <aside className="surface rounded-2xl p-4 print:hidden">
       <p className="text-xs font-semibold uppercase tracking-wider text-cyan">
         {mode === "admin" ? "Admin panel" : "Retailer panel"}
       </p>

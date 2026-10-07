@@ -80,6 +80,12 @@ export default async function AccountHomePage() {
             <div>
               <p className="font-semibold text-navy">{order.orderNumber}</p>
               <p className="text-xs text-navy/60">{formatDate(order.createdAt)}</p>
+              <Link
+                href={`/account/orders/${order.id}/invoice`}
+                className="text-xs font-semibold text-cyan"
+              >
+                Invoice
+              </Link>
             </div>
             <Badge>{order.status}</Badge>
             <OrderTotals order={order} />

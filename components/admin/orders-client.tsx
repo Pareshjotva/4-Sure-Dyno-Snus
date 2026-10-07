@@ -4,6 +4,7 @@ import { OrderTotals } from "@/components/orders/order-totals";
 import { Select } from "@/components/ui/select";
 import type { Order, OrderStatus } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -52,6 +53,12 @@ export function AdminOrdersClient({ orders }: { orders: Order[] }) {
           </ul>
           <OrderTotals order={order} />
           <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Link
+              href={`/admin/orders/${order.id}/invoice`}
+              className="text-sm font-semibold text-cyan"
+            >
+              Invoice
+            </Link>
             <Select
               className="w-44"
               value={order.status}

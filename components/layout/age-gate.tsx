@@ -44,7 +44,7 @@ export function AgeGate({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-fade print:hidden">
       <div className="surface w-full max-w-md rounded-2xl p-6 shadow-2xl sm:p-8">
         <div className="mb-4 flex justify-center">
           <Image

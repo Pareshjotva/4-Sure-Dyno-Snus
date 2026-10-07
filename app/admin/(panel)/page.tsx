@@ -64,6 +64,12 @@ export default async function AdminHomePage() {
                 <p className="mt-1 text-navy/60">
                   {order.company || order.userName} · {formatDate(order.createdAt)}
                 </p>
+                <Link
+                  href={`/admin/orders/${order.id}/invoice`}
+                  className="text-xs font-semibold text-cyan"
+                >
+                  Invoice
+                </Link>
                 <OrderTotals order={order} />
               </div>
             ))}
