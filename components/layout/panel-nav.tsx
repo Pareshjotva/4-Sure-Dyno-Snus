@@ -37,7 +37,7 @@ export function PanelNav({
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    router.push(mode === "admin" ? "/admin/login" : "/login");
     router.refresh();
   }
 

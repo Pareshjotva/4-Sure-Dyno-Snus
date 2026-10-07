@@ -7,6 +7,7 @@ import { z } from "zod";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const audience = body?.audience === "admin" ? "admin" : "retailer";
     const data = loginSchema.parse(body);
     const user = await authenticate(data.email, data.password);
     if (!user) {
@@ -17,6 +18,17 @@ export async function POST(req: Request) {
           },
         },
         { status: 401 }
+      );
+    }
+    if (user.role !== audience) {
+      return NextResponse.json(
+        {
+          error:
+            audience === "admin"
+              ? "This sign-in is for admin accounts only."
+              : "This is the retailer sign-in. Staff should use the admin sign-in.",
+        },
+        { status: 403 }
       );
     }
     const session = await createSession(user);

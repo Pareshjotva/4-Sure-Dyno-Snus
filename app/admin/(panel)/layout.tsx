@@ -14,7 +14,7 @@ export default async function AdminLayout({
     requireSession("admin"),
     getRequestLegalAge(),
   ]);
-  if (!session) redirect("/login");
+  if (!session) redirect("/admin/login");
 
   return (
     <>

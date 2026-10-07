@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 export default async function AdminOrdersPage() {
   const session = await requireSession("admin");
-  if (!session) redirect("/login");
+  if (!session) redirect("/admin/login");
   const orders = await getOrders();
 
   return (

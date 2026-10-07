@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
-export function LoginForm() {
+export function LoginForm({ audience = "retailer" }: { audience?: "retailer" | "admin" }) {
   const router = useRouter();
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState("");
@@ -35,7 +35,7 @@ export function LoginForm() {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(parsed.data),
+      body: JSON.stringify({ ...parsed.data, audience }),
     });
     const json = await res.json();
     setLoading(false);
@@ -44,7 +44,7 @@ export function LoginForm() {
       setFormError(json.fieldErrors ? "" : json.error || "Sign-in failed. Try again.");
       return;
     }
-    router.push(json.user.role === "admin" ? "/admin" : "/account");
+    router.push(audience === "admin" ? "/admin" : "/account");
     router.refresh();
   }
 
@@ -58,7 +58,11 @@ export function LoginForm() {
         <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/70">
           Email
         </label>
-        <Input name="email" type="email" placeholder="you@store.com" />
+        <Input
+          name="email"
+          type="email"
+          placeholder={audience === "admin" ? "admin@4sureinternational.ca" : "you@store.com"}
+        />
         <FieldError message={errors.email} />
       </div>
       <div>
@@ -76,12 +80,28 @@ export function LoginForm() {
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Signing in…" : "Sign in"}
       </Button>
-      <p className="text-center text-sm text-slate-ink">
-        New retailer?{" "}
-        <Link href="/register" className="font-semibold text-cyan">
-          Open an account
-        </Link>
-      </p>
+      {audience === "retailer" ? (
+        <div className="space-y-2 text-center text-sm text-slate-ink">
+          <p>
+            New retailer?{" "}
+            <Link href="/register" className="font-semibold text-cyan">
+              Open an account
+            </Link>
+          </p>
+          <p>
+            <Link href="/admin/login" className="font-semibold text-cyan">
+              Admin sign in
+            </Link>
+          </p>
+        </div>
+      ) : (
+        <p className="text-center text-sm text-slate-ink">
+          Retailer?{" "}
+          <Link href="/login" className="font-semibold text-cyan">
+            Sign in to your shop account
+          </Link>
+        </p>
+      )}
     </form>
   );
 }

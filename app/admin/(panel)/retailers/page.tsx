@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export default async function AdminRetailersPage() {
   const session = await requireSession("admin");
-  if (!session) redirect("/login");
+  if (!session) redirect("/admin/login");
   const retailers = (await getUsers()).filter((u) => u.role === "retailer");
 
   return (

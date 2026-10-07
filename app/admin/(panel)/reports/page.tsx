@@ -43,7 +43,7 @@ export default async function AdminReportsPage({
   }>;
 }) {
   const session = await requireSession("admin");
-  if (!session) redirect("/login");
+  if (!session) redirect("/admin/login");
 
   const params = await searchParams;
   const mode = modeFromParam(params.mode);

@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminLeadsPage() {
   const session = await requireSession("admin");
-  if (!session) redirect("/login");
+  if (!session) redirect("/admin/login");
   const leads = await getLeads();
 
   return (

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 export default async function AdminPricingPage() {
   const session = await requireSession("admin");
-  if (!session) redirect("/login");
+  if (!session) redirect("/admin/login");
   const [pricing, products] = await Promise.all([
     getPricing(),
     getProducts(false),
