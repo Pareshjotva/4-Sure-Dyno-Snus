@@ -156,37 +156,36 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
         </div>
         {message && <p className="text-sm text-cyan">{message}</p>}
         {error && <p className="text-sm text-warn-red">{error}</p>}
-        <div className="space-y-3">
-          {rows.map((blog) => (
-            <article
-              key={blog.id}
-              className="surface flex flex-wrap items-center justify-between gap-3 rounded-xl p-4"
-            >
-              <div>
+        {rows.length === 0 ? (
+          <p className="text-sm text-slate-ink">No blog posts yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {rows.map((blog) => (
+              <article
+                key={blog.id}
+                className="surface flex h-full flex-col rounded-xl p-4"
+              >
                 <p className="font-semibold text-white">{blog.title}</p>
                 <p className="mt-1 text-xs text-white/60">
                   {formatDate(blog.createdAt)} · {blog.published ? "Published" : "Draft"}
                 </p>
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => openEdit(blog)}>
-                  <Pencil size={14} /> Edit
-                </Button>
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={() => onDelete(blog.id)}
-                  disabled={busy}
-                >
-                  <Trash2 size={14} /> Delete
-                </Button>
-              </div>
-            </article>
-          ))}
-          {rows.length === 0 && (
-            <p className="text-sm text-slate-ink">No blog posts yet.</p>
-          )}
-        </div>
+                <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                  <Button size="sm" variant="outline" onClick={() => openEdit(blog)}>
+                    <Pencil size={14} /> Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => onDelete(blog.id)}
+                    disabled={busy}
+                  >
+                    <Trash2 size={14} /> Delete
+                  </Button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
