@@ -30,13 +30,16 @@ export default async function IncentivesPage() {
           Buy more. Save more.
         </p>
         <p className="mt-3 max-w-2xl text-slate-ink">
-          Calendar-month pack volume unlocks{" "}
-          {maxOff ? `up to ${maxOff}%` : "volume"} off on the qualifying order.
-          This page is only about incentives — wholesale account setup lives on{" "}
-          <Link href="/wholesale" className="text-cyan underline-offset-2 hover:underline">
+          For licensed retailers with a retailer account. Calendar-month pack
+          volume unlocks {maxOff ? `up to ${maxOff}%` : "volume"} off on the
+          qualifying order. Separate wholesale inquiries use the{" "}
+          <Link
+            href="/wholesale"
+            className="text-cyan underline-offset-2 hover:underline"
+          >
             Wholesale
-          </Link>
-          .
+          </Link>{" "}
+          form.
         </p>
 
         <div className="mt-10">
@@ -47,9 +50,9 @@ export default async function IncentivesPage() {
           <Link href="/account">
             <Button size="lg">Sign in to order</Button>
           </Link>
-          <Link href="/wholesale">
+          <Link href="/register">
             <Button size="lg" variant="outline">
-              Wholesale account setup
+              Open retailer account
             </Button>
           </Link>
         </div>

@@ -1,6 +1,11 @@
 import { OrderTotals } from "@/components/orders/order-totals";
 import { requireSession } from "@/lib/auth";
-import { getDashboardStats, getLeads, getOrders } from "@/lib/db";
+import {
+  getDashboardStats,
+  getLeads,
+  getOrders,
+  getWholesaleInquiries,
+} from "@/lib/db";
 import { isInvoiceAvailable, orderStatusLabel } from "@/lib/orders";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
@@ -11,10 +16,11 @@ export const dynamic = "force-dynamic";
 export default async function AdminHomePage() {
   const session = await requireSession("admin");
   if (!session) redirect("/admin/login");
-  const [stats, orders, leads] = await Promise.all([
+  const [stats, orders, leads, wholesaleInquiries] = await Promise.all([
     getDashboardStats(),
     getOrders(),
     getLeads(),
+    getWholesaleInquiries(),
   ]);
 
   const cards = [
@@ -23,6 +29,10 @@ export default async function AdminHomePage() {
     { label: "Orders", value: stats.orders },
     { label: "Pending orders", value: stats.pendingOrders },
     { label: "New leads", value: stats.leads },
+    {
+      label: "Wholesale inquiries",
+      value: stats.wholesaleInquiries,
+    },
     { label: "Revenue", value: formatCurrency(stats.revenue) },
   ];
 
@@ -30,8 +40,8 @@ export default async function AdminHomePage() {
     <div>
       <h1 className="font-display text-3xl text-navy">Admin overview</h1>
       <p className="mt-2 text-sm text-slate-ink">
-        Manage Dyno Snus catalogue, wholesale pricing, retailer orders, and
-        inbound leads.
+        Manage Dyno Snus catalogue, retailer orders, contact leads, and
+        wholesale inquiries.
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -115,6 +125,30 @@ export default async function AdminHomePage() {
           </div>
         </section>
       </div>
+
+      <section className="mt-10">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-display text-2xl text-navy">Wholesale Inquiry</h2>
+          <Link href="/admin/wholesale-inquiries" className="text-sm text-cyan">
+            View all
+          </Link>
+        </div>
+        <div className="grid gap-3 lg:grid-cols-2">
+          {wholesaleInquiries.slice(0, 4).map((row) => (
+            <div key={row.id} className="surface rounded-xl p-4 text-sm">
+              <p className="font-semibold text-white">{row.name}</p>
+              <p className="text-white/75">
+                {row.company} · {row.email}
+                {row.phone ? ` · ${row.phone}` : ""} · {row.status}
+              </p>
+              <p className="mt-2 text-white/80">{row.message}</p>
+            </div>
+          ))}
+          {wholesaleInquiries.length === 0 && (
+            <p className="text-sm text-white/70">No wholesale inquiries yet.</p>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

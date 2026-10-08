@@ -240,17 +240,17 @@ export default async function HomePage() {
                   start ordering Dyno Extreme Slim and Dyno Blast Slim.
                 </p>
                 <div className="mt-6 flex items-stretch gap-2 sm:gap-3">
-                  <Link href="/contact" className="flex min-w-0 flex-1">
+                  <Link href="/wholesale" className="flex min-w-0 flex-1">
                     <Button className="h-auto min-h-11 w-full whitespace-normal px-2 py-2.5 text-center text-xs leading-tight sm:h-11 sm:px-5 sm:text-sm">
-                      Talk to sales
+                      Wholesale inquiry
                     </Button>
                   </Link>
-                  <Link href="/wholesale" className="flex min-w-0 flex-1">
+                  <Link href="/register" className="flex min-w-0 flex-1">
                     <Button
                       variant="outline"
                       className="h-auto min-h-11 w-full whitespace-normal px-2 py-2.5 text-center text-xs leading-tight sm:h-11 sm:px-5 sm:text-sm"
                     >
-                      Wholesale
+                      Retailer account
                     </Button>
                   </Link>
                 </div>

@@ -127,6 +127,20 @@ export interface ContactLead {
   status: "new" | "contacted" | "closed";
 }
 
+export interface WholesaleInquiry {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  company: string;
+  province: string;
+  address?: string;
+  licenceNumber?: string;
+  message: string;
+  createdAt: string;
+  status: "new" | "contacted" | "closed";
+}
+
 export interface Blog {
   id: string;
   slug: string;
@@ -170,5 +184,6 @@ export interface Database {
   users: User[];
   orders: Order[];
   leads: ContactLead[];
+  wholesaleInquiries: WholesaleInquiry[];
   site: SiteContent;
 }

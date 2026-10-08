@@ -20,8 +20,8 @@ export default async function AccountProgramPage() {
       <h1 className="font-display text-3xl text-navy">Retailer Program</h1>
       <p className="mt-2 max-w-2xl text-sm text-slate-ink">
         Volume discounts for your shop: hit a monthly pack threshold and the
-        discount applies on the new order. Wholesale account setup is separate
-        on the Wholesale page; this module is only the incentive tiers.
+        discount applies on the new order. This module is only the Retailer
+        Program incentive tiers.
       </p>
       <div className="mt-6">
         <ProgramRules tiers={incentives} />

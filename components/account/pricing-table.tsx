@@ -58,7 +58,7 @@ export function PricingTable({
               <th className="px-4 py-3 font-semibold">Product</th>
               <th className="px-4 py-3 font-semibold">Pack qty</th>
               <th className="px-4 py-3 font-semibold">Case</th>
-              <th className="px-4 py-3 font-semibold">Wholesale</th>
+              <th className="px-4 py-3 font-semibold">Pack price</th>
               <th className="px-4 py-3 font-semibold">{code} PTT</th>
               <th className="px-4 py-3 font-semibold">MSRP range</th>
               <th className="px-4 py-3 font-semibold">Margin</th>
@@ -118,8 +118,8 @@ export function PricingTable({
         <div className="surface rounded-xl p-5">
           <h2 className="font-display text-xl text-navy">Confidential</h2>
           <p className="mt-2 text-sm text-slate-ink">
-            Intended strictly for registered wholesale partners. Availability
-            and pricing may change.
+            Intended strictly for signed-in retailer accounts. Availability and
+            pricing may change.
           </p>
         </div>
       </div>

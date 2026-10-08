@@ -17,6 +17,27 @@ export const contactSchema = z.object({
     .min(5, "Write a message of at least 5 characters."),
 });
 
+export const wholesaleInquirySchema = z.object({
+  name: z.string().trim().min(2, "Enter the contact name."),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Enter a business email.")
+    .email("Enter a valid email address."),
+  phone: z.string().trim().optional(),
+  company: z.string().trim().min(2, "Enter the store or company name."),
+  province: z.string().trim().min(2, "Choose a province."),
+  address: z.string().trim().optional(),
+  licenceNumber: optionalText(
+    3,
+    "Licence number must be at least 3 characters."
+  ),
+  message: z
+    .string()
+    .trim()
+    .min(5, "Tell us briefly what you need (at least 5 characters)."),
+});
+
 export const loginSchema = z.object({
   email: z
     .string()

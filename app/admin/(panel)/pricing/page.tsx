@@ -19,7 +19,7 @@ export default async function AdminPricingPage() {
       <h1 className="font-display text-3xl text-navy">Provincial pricing</h1>
       <p className="mt-2 text-sm text-slate-ink">
         Update BC, Alberta, and Ontario worksheets shown only in the signed-in
-        retailer panel. The public Wholesale page does not list dollar prices.
+        retailer panel. Public Wholesale is inquiry-only and shows no prices.
       </p>
       <div className="mt-6">
         <AdminPricingClient pricing={pricing} productNames={productNames} />

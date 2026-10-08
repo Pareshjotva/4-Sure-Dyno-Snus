@@ -35,7 +35,7 @@ export default async function AccountHomePage() {
         </p>
       )}
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <div className="surface rounded-xl p-4">
           <p className="text-xs uppercase tracking-wider text-cyan">Orders</p>
           <p className="mt-1 font-display text-3xl text-navy">{orders.length}</p>
@@ -47,11 +47,6 @@ export default async function AccountHomePage() {
           <p className="mt-1 font-display text-3xl text-navy">
             {site.minOrderPacks}
           </p>
-        </div>
-        <div className="surface rounded-xl p-4">
-          <p className="text-xs uppercase tracking-wider text-cyan">Wholesale</p>
-          <p className="mt-1 font-display text-3xl text-navy">$40</p>
-          <p className="text-xs text-navy/55">per 50 g pack before tax</p>
         </div>
       </div>
 

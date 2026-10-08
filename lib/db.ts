@@ -10,6 +10,7 @@ import type {
   ProvincePricing,
   SiteContent,
   User,
+  WholesaleInquiry,
 } from "./types";
 
 type WithMongoId<T> = T & { _id?: unknown };
@@ -224,6 +225,43 @@ export async function updateLead(id: string, patch: Partial<ContactLead>) {
   return strip(updated);
 }
 
+export async function getWholesaleInquiries() {
+  const rows = await (
+    await collection<WholesaleInquiry>("wholesaleInquiries")
+  )
+    .find()
+    .sort({ createdAt: -1 })
+    .toArray();
+  return rows.map((row) => strip(row)!);
+}
+
+export async function createWholesaleInquiry(
+  inquiry: Omit<WholesaleInquiry, "id" | "createdAt" | "status">
+) {
+  const col = await collection<WholesaleInquiry>("wholesaleInquiries");
+  const record: WholesaleInquiry = {
+    ...inquiry,
+    id: `wi_${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    status: "new",
+  };
+  await col.insertOne(record);
+  return record;
+}
+
+export async function updateWholesaleInquiry(
+  id: string,
+  patch: Partial<WholesaleInquiry>
+) {
+  const col = await collection<WholesaleInquiry>("wholesaleInquiries");
+  const updated = await col.findOneAndUpdate(
+    { id },
+    { $set: { ...patch, id } },
+    { returnDocument: "after" }
+  );
+  return strip(updated);
+}
+
 export async function getBlogs(publishedOnly = true) {
   const blogs = await collection<Blog>("blogs");
   const filter = publishedOnly ? { published: true } : {};
@@ -335,12 +373,14 @@ export async function deleteFaq(id: string) {
 }
 
 export async function getDashboardStats() {
-  const [products, users, orders, leads] = await Promise.all([
-    getProducts(false),
-    getUsers(),
-    getOrders(),
-    getLeads(),
-  ]);
+  const [products, users, orders, leads, wholesaleInquiries] =
+    await Promise.all([
+      getProducts(false),
+      getUsers(),
+      getOrders(),
+      getLeads(),
+      getWholesaleInquiries(),
+    ]);
   const retailers = users.filter((user) => user.role === "retailer");
   const revenue = orders
     .filter((order) => order.status !== "cancelled")
@@ -351,6 +391,9 @@ export async function getDashboardStats() {
     orders: orders.length,
     pendingOrders: orders.filter((order) => order.status === "pending").length,
     leads: leads.filter((lead) => lead.status === "new").length,
+    wholesaleInquiries: wholesaleInquiries.filter(
+      (row) => row.status === "new"
+    ).length,
     revenue,
   };
 }
