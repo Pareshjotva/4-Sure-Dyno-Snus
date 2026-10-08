@@ -22,7 +22,7 @@ export default async function AboutPage() {
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <Badge>About us</Badge>
         <h1 className="mt-3 max-w-3xl font-display text-4xl text-navy sm:text-5xl">
-          {site.companyName} — {site.tagline}
+          {site.productLine} by {site.companyName}
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-slate-ink">
           We connect global snus craftsmanship with local Canadian retail. Dyno
@@ -35,7 +35,7 @@ export default async function AboutPage() {
           <div className="overflow-hidden rounded-2xl border border-white/10">
             <Image
               src="/images/about-banner.png"
-              alt="4Sure International — From Global to Local, with Dyno pouches for Canadian wholesale"
+              alt="4Sure International, with Dyno pouches for Canadian wholesale"
               width={1672}
               height={941}
               quality={90}

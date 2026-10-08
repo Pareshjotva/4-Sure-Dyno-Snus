@@ -18,9 +18,8 @@ export async function SiteFooter() {
             className="h-14 w-auto"
           />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/65">
-            {site.productLine} by {site.companyName}. Premium Scandinavian snus
-            for licensed adult tobacco retailers across Canada.{" "}
-            {site.tagline}.
+            {site.productLine} by {site.companyName}. Premium snus for licensed
+            adult tobacco retailers across Canada.
           </p>
           <p className="mt-4 text-xs uppercase tracking-[0.18em] text-cyan">
             Adults 19+ only · Nicotine is addictive
