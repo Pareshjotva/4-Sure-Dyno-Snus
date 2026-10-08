@@ -17,13 +17,13 @@ export default async function AdminLayout({
   if (!session) redirect("/admin/login");
 
   return (
-    <>
+    <div className="admin-shell">
       <AgeGate minimumAge={legalAge} />
-      <SiteHeader user={session} />
-      <div className="panel-shell mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[240px_1fr]">
+      <SiteHeader user={session} theme="light" />
+      <div className="panel-shell mx-auto grid w-full max-w-[1400px] gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[240px_minmax(0,1fr)] xl:px-8">
         <PanelNav mode="admin" userName={session.name} />
         <div>{children}</div>
       </div>
-    </>
+    </div>
   );
 }

@@ -143,6 +143,68 @@ a {
   backdrop-filter: blur(10px);
 }
 
+/* Admin panel: light / white shell (public site stays dark) */
+.admin-shell {
+  --background: #ffffff;
+  --foreground: #111827;
+  min-height: 100vh;
+  background: #ffffff;
+  color: #111827;
+  color-scheme: light;
+}
+
+.admin-shell .surface {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  backdrop-filter: none;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+  color: #111827 !important;
+}
+
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Theme tokens compile to fixed colors; remap them inside admin */
+.admin-shell :is(.text-navy, .text-white) {
+  color: #111827 !important;
+}
+.admin-shell :is(.text-slate-ink, .text-white\/70, .text-white\/75) {
+  color: #6b7280 !important;
+}
+.admin-shell :is(.text-navy\/50, .text-navy\/55, .text-white\/45, .text-white\/50) {
+  color: rgb(17 24 39 / 0.55) !important;
+}
+.admin-shell :is(.text-navy\/60, .text-navy\/65, .text-white\/60, .text-white\/65) {
+  color: rgb(17 24 39 / 0.65) !important;
+}
+.admin-shell :is(.text-navy\/70, .text-navy\/80, .text-white\/80, .text-white\/90) {
+  color: rgb(17 24 39 / 0.75) !important;
+}
+.admin-shell :is(.bg-mist, .bg-ice, .bg-black, .bg-black\/40, .bg-black\/50, .bg-white\/8, .bg-white\/10) {
+  background-color: #f3f4f6 !important;
+}
+.admin-shell .bg-cyan {
+  background-color: #e31e24 !important;
+}
+.admin-shell .bg-cyan.text-white,
+.admin-shell .bg-cyan .text-white,
+.admin-shell a.bg-cyan,
+.admin-shell button.bg-cyan {
+  color: #ffffff !important;
+}
+.admin-shell :is(.border-white\/8, .border-white\/10, .border-white\/15, .border-white\/20, .border-white\/25) {
+  border-color: #e5e7eb !important;
+}
+
 .divider-line {
   height: 1px;
   background: linear-gradient(

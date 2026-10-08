@@ -12,7 +12,7 @@ export default async function AdminFaqsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl text-white">FAQ</h1>
+      <h1 className="font-display text-3xl text-navy">FAQ</h1>
       <p className="mt-2 text-sm text-slate-ink">
         Add and edit questions. Published items appear on the FAQ page.
       </p>

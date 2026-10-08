@@ -77,7 +77,7 @@ export default async function AdminReportsPage({
 
   return (
     <div>
-      <h1 className="font-display text-3xl text-white">Sales reports</h1>
+      <h1 className="font-display text-3xl text-navy">Sales reports</h1>
       <p className="mt-2 text-sm text-slate-ink">
         Wholesale orders, packs, discounts, and totals. Cancelled orders are
         left out of revenue.
@@ -92,7 +92,7 @@ export default async function AdminReportsPage({
               "rounded-md px-4 py-2 text-sm font-semibold transition",
               mode === item.id
                 ? "bg-cyan text-white"
-                : "surface text-white/70 hover:text-white"
+                : "surface text-slate-ink hover:text-navy"
             )}
           >
             {item.label}
@@ -108,7 +108,7 @@ export default async function AdminReportsPage({
       >
         <input type="hidden" name="mode" value={mode} />
         {mode === "overall" && (
-          <p className="text-sm text-white/75">
+          <p className="text-sm text-slate-ink">
             Overall report covers every order, with a customer-wise total and
             the orders placed.
           </p>
@@ -118,7 +118,7 @@ export default async function AdminReportsPage({
             <div className="min-w-48 flex-1">
               <label
                 htmlFor="month"
-                className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/70"
+                className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-ink"
               >
                 Month
               </label>
@@ -132,7 +132,7 @@ export default async function AdminReportsPage({
             <div className="min-w-40 flex-1">
               <label
                 htmlFor="year"
-                className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/70"
+                className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-ink"
               >
                 Year
               </label>
@@ -152,7 +152,7 @@ export default async function AdminReportsPage({
             <div className="min-w-44 flex-1">
               <label
                 htmlFor="start"
-                className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/70"
+                className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-ink"
               >
                 Start date
               </label>
@@ -168,7 +168,7 @@ export default async function AdminReportsPage({
             <div className="min-w-44 flex-1">
               <label
                 htmlFor="end"
-                className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/70"
+                className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-ink"
               >
                 End date
               </label>
@@ -181,7 +181,7 @@ export default async function AdminReportsPage({
       </form>
 
       {mode === "custom" && !report && !custom?.startError && !custom?.endError && (
-        <p className="surface mt-6 rounded-2xl p-6 text-sm text-white/75">
+        <p className="surface mt-6 rounded-2xl p-6 text-sm text-slate-ink">
           Choose a start date and an end date to run a custom report.
         </p>
       )}
@@ -204,7 +204,7 @@ function ReportBody({ report }: { report: SalesReport }) {
 
   return (
     <div className="mt-6">
-      <h2 className="font-display text-2xl text-white">{report.label}</h2>
+      <h2 className="font-display text-2xl text-navy">{report.label}</h2>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {cards.map((card) => (
           <div key={card.label} className="surface rounded-xl p-4">
@@ -215,13 +215,13 @@ function ReportBody({ report }: { report: SalesReport }) {
       </div>
 
       {empty && (
-        <p className="surface mt-6 rounded-2xl p-6 text-sm text-white/75">
+        <p className="surface mt-6 rounded-2xl p-6 text-sm text-slate-ink">
           No orders in this period.
         </p>
       )}
 
       {!empty && report.orderCount === 0 && (
-        <p className="surface mt-6 rounded-2xl p-6 text-sm text-white/75">
+        <p className="surface mt-6 rounded-2xl p-6 text-sm text-slate-ink">
           No sales in this period. {report.cancelledCount} cancelled{" "}
           {report.cancelledCount === 1 ? "order is" : "orders are"} excluded
           from totals.
@@ -231,13 +231,13 @@ function ReportBody({ report }: { report: SalesReport }) {
       {report.orderCount > 0 && (
         <div className="mt-8 grid gap-6">
           <section>
-            <h3 className="font-display text-2xl text-white">By product</h3>
-            <p className="mt-1 text-xs text-white/50">
+            <h3 className="font-display text-2xl text-navy">By product</h3>
+            <p className="mt-1 text-xs text-navy/50">
               Pack counts and line subtotals before the order discount.
             </p>
             <div className="mt-3 overflow-x-auto surface rounded-2xl">
               <table className="min-w-full text-left text-sm">
-                <thead className="bg-black/50 text-white/70">
+                <thead className="bg-mist text-slate-ink">
                   <tr>
                     <th className="px-4 py-3 font-semibold">Product</th>
                     <th className="px-4 py-3 font-semibold">Packs</th>
@@ -246,12 +246,12 @@ function ReportBody({ report }: { report: SalesReport }) {
                 </thead>
                 <tbody>
                   {report.byProduct.map((row) => (
-                    <tr key={row.productId} className="border-t border-white/8">
-                      <td className="px-4 py-3 font-medium text-white">
+                    <tr key={row.productId} className="border-t border-black/10">
+                      <td className="px-4 py-3 font-medium text-navy">
                         {row.productName}
                       </td>
-                      <td className="px-4 py-3 text-white/75">{row.packs}</td>
-                      <td className="px-4 py-3 text-white">
+                      <td className="px-4 py-3 text-slate-ink">{row.packs}</td>
+                      <td className="px-4 py-3 text-navy">
                         {formatCurrency(row.subtotal)}
                       </td>
                     </tr>
@@ -262,10 +262,10 @@ function ReportBody({ report }: { report: SalesReport }) {
           </section>
 
           <section>
-            <h3 className="font-display text-2xl text-white">By province</h3>
+            <h3 className="font-display text-2xl text-navy">By province</h3>
             <div className="mt-3 overflow-x-auto surface rounded-2xl">
               <table className="min-w-full text-left text-sm">
-                <thead className="bg-black/50 text-white/70">
+                <thead className="bg-mist text-slate-ink">
                   <tr>
                     <th className="px-4 py-3 font-semibold">Province</th>
                     <th className="px-4 py-3 font-semibold">Orders</th>
@@ -277,19 +277,19 @@ function ReportBody({ report }: { report: SalesReport }) {
                 </thead>
                 <tbody>
                   {report.byProvince.map((row) => (
-                    <tr key={row.province} className="border-t border-white/8">
-                      <td className="px-4 py-3 font-medium text-white">
+                    <tr key={row.province} className="border-t border-black/10">
+                      <td className="px-4 py-3 font-medium text-navy">
                         {row.province}
                       </td>
-                      <td className="px-4 py-3 text-white/75">{row.orders}</td>
-                      <td className="px-4 py-3 text-white/75">{row.packs}</td>
-                      <td className="px-4 py-3 text-white">
+                      <td className="px-4 py-3 text-slate-ink">{row.orders}</td>
+                      <td className="px-4 py-3 text-slate-ink">{row.packs}</td>
+                      <td className="px-4 py-3 text-navy">
                         {formatCurrency(row.subtotal)}
                       </td>
-                      <td className="px-4 py-3 text-white/75">
+                      <td className="px-4 py-3 text-slate-ink">
                         {formatCurrency(row.discountAmount)}
                       </td>
-                      <td className="px-4 py-3 text-white">
+                      <td className="px-4 py-3 text-navy">
                         {formatCurrency(row.total)}
                       </td>
                     </tr>
@@ -303,14 +303,14 @@ function ReportBody({ report }: { report: SalesReport }) {
 
       {report.byCustomer.length > 0 && (
         <section className="mt-8">
-          <h3 className="font-display text-2xl text-white">By customer</h3>
-          <p className="mt-1 text-xs text-white/50">
+          <h3 className="font-display text-2xl text-navy">By customer</h3>
+          <p className="mt-1 text-xs text-navy/50">
             Overall customer report for this period. Money totals leave out
             cancelled orders.
           </p>
           <div className="mt-3 overflow-x-auto surface rounded-2xl">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-black/50 text-white/70">
+              <thead className="bg-mist text-slate-ink">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Customer</th>
                   <th className="px-4 py-3 font-semibold">Company</th>
@@ -323,20 +323,20 @@ function ReportBody({ report }: { report: SalesReport }) {
               </thead>
               <tbody>
                 {report.byCustomer.map((row) => (
-                  <tr key={row.key} className="border-t border-white/8">
-                    <td className="px-4 py-3 font-medium text-white">
+                  <tr key={row.key} className="border-t border-black/10">
+                    <td className="px-4 py-3 font-medium text-navy">
                       {row.customer}
                     </td>
-                    <td className="px-4 py-3 text-white/75">{row.company}</td>
-                    <td className="px-4 py-3 text-white/75">{row.orders}</td>
-                    <td className="px-4 py-3 text-white/75">{row.packs}</td>
-                    <td className="px-4 py-3 text-white">
+                    <td className="px-4 py-3 text-slate-ink">{row.company}</td>
+                    <td className="px-4 py-3 text-slate-ink">{row.orders}</td>
+                    <td className="px-4 py-3 text-slate-ink">{row.packs}</td>
+                    <td className="px-4 py-3 text-navy">
                       {formatCurrency(row.subtotal)}
                     </td>
-                    <td className="px-4 py-3 text-white/75">
+                    <td className="px-4 py-3 text-slate-ink">
                       {formatCurrency(row.discountAmount)}
                     </td>
-                    <td className="px-4 py-3 text-white">
+                    <td className="px-4 py-3 text-navy">
                       {formatCurrency(row.total)}
                     </td>
                   </tr>
@@ -349,13 +349,13 @@ function ReportBody({ report }: { report: SalesReport }) {
 
       {report.orders.length > 0 && (
         <section className="mt-8">
-          <h3 className="font-display text-2xl text-white">Orders</h3>
-          <p className="mt-1 text-xs text-white/50">
+          <h3 className="font-display text-2xl text-navy">Orders</h3>
+          <p className="mt-1 text-xs text-navy/50">
             Every order in this report, including cancelled orders.
           </p>
           <div className="mt-3 overflow-x-auto surface rounded-2xl">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-black/50 text-white/70">
+              <thead className="bg-mist text-slate-ink">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Date</th>
                   <th className="px-4 py-3 font-semibold">Order</th>
@@ -369,25 +369,25 @@ function ReportBody({ report }: { report: SalesReport }) {
               </thead>
               <tbody>
                 {report.orders.map((order) => (
-                  <tr key={order.id} className="border-t border-white/8">
-                    <td className="px-4 py-3 text-white/75">
+                  <tr key={order.id} className="border-t border-black/10">
+                    <td className="px-4 py-3 text-slate-ink">
                       {formatDate(order.createdAt)}
                     </td>
-                    <td className="px-4 py-3 font-medium text-white">
+                    <td className="px-4 py-3 font-medium text-navy">
                       {order.orderNumber}
                     </td>
-                    <td className="px-4 py-3 text-white">{order.customer}</td>
-                    <td className="px-4 py-3 text-white/75">{order.company}</td>
-                    <td className="px-4 py-3 text-white/75">{order.summary}</td>
-                    <td className="px-4 py-3 capitalize text-white/75">
+                    <td className="px-4 py-3 text-navy">{order.customer}</td>
+                    <td className="px-4 py-3 text-slate-ink">{order.company}</td>
+                    <td className="px-4 py-3 text-slate-ink">{order.summary}</td>
+                    <td className="px-4 py-3 capitalize text-slate-ink">
                       {order.status}
                     </td>
-                    <td className="px-4 py-3 text-white/75">
+                    <td className="px-4 py-3 text-slate-ink">
                       {order.discountPercent > 0
                         ? `${order.discountTier ? `${order.discountTier} ` : ""}${order.discountPercent}% (−${formatCurrency(order.discountAmount)})`
                         : formatCurrency(0)}
                     </td>
-                    <td className="px-4 py-3 text-white">
+                    <td className="px-4 py-3 text-navy">
                       {formatCurrency(order.total)}
                     </td>
                   </tr>

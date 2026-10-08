@@ -12,7 +12,7 @@ export default async function AdminBlogsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl text-white">Blogs</h1>
+      <h1 className="font-display text-3xl text-navy">Blogs</h1>
       <p className="mt-2 text-sm text-slate-ink">
         Add, edit, and publish posts. Published posts appear on the site and in
         the footer.

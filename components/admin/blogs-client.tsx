@@ -163,8 +163,8 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
               className="surface flex flex-wrap items-center justify-between gap-3 rounded-xl p-4"
             >
               <div>
-                <p className="font-semibold text-white">{blog.title}</p>
-                <p className="mt-1 text-xs text-white/60">
+                <p className="font-semibold text-navy">{blog.title}</p>
+                <p className="mt-1 text-xs text-navy/60">
                   {formatDate(blog.createdAt)} · {blog.published ? "Published" : "Draft"}
                 </p>
               </div>
@@ -194,7 +194,7 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-2xl text-white">
+        <h2 className="font-display text-2xl text-navy">
           {mode === "create" ? "Add blog" : "Edit blog"}
         </h2>
         <Button type="button" variant="outline" size="sm" onClick={() => backToList()}>
@@ -203,7 +203,7 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
       </div>
       {error && <p className="text-sm text-warn-red">{error}</p>}
       <div className="surface space-y-4 rounded-2xl p-5">
-        <label className="flex items-center gap-2 text-sm text-white">
+        <label className="flex items-center gap-2 text-sm text-navy">
           <input
             type="checkbox"
             checked={draft.published}
@@ -214,7 +214,7 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
           Published — show on the blogs page
         </label>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+          <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
             Title
           </label>
           <Input
@@ -224,7 +224,7 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
           <FieldError message={fieldErrors.title} />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+          <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
             Slug
           </label>
           <Input
@@ -235,7 +235,7 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
           <FieldError message={fieldErrors.slug} />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+          <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
             Excerpt
           </label>
           <Textarea
@@ -246,7 +246,7 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+            <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
               Image 1
             </label>
             <Input
@@ -255,7 +255,7 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+            <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
               Image 2
             </label>
             <Input
@@ -265,7 +265,7 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
           </div>
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+          <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
             Post
           </label>
           <Textarea
