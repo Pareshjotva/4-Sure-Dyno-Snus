@@ -277,7 +277,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
 
         <div className="overflow-x-auto surface rounded-2xl">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-black/50 text-white/70">
+            <thead className="bg-mist text-slate-ink">
               <tr>
                 <th className="px-4 py-3 font-semibold">Photo</th>
                 <th className="px-4 py-3 font-semibold">Product</th>
@@ -288,9 +288,9 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
             </thead>
             <tbody>
               {rows.map((product) => (
-                <tr key={product.id} className="border-t border-white/8">
+                <tr key={product.id} className="border-t border-black/10">
                   <td className="px-4 py-3">
-                    <div className="relative h-14 w-20 overflow-hidden rounded-md bg-black">
+                    <div className="relative h-14 w-20 overflow-hidden rounded-md bg-mist">
                       <Image
                         src={product.image}
                         alt={product.name}
@@ -301,10 +301,10 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-white">{product.name}</p>
-                    <p className="text-xs text-white/45">{product.slug}</p>
+                    <p className="font-semibold text-navy">{product.name}</p>
+                    <p className="text-xs text-navy/50">{product.slug}</p>
                   </td>
-                  <td className="px-4 py-3 text-white/75">
+                  <td className="px-4 py-3 text-slate-ink">
                     {product.nicotinePerPortionMg} mg / portion
                     <br />
                     {product.nicotinePerGramMg} mg / g
@@ -314,7 +314,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
                       className={`rounded-md px-2 py-1 text-xs font-semibold uppercase ${
                         product.active
                           ? "bg-cyan/20 text-cyan"
-                          : "bg-white/10 text-white/50"
+                          : "bg-mist text-navy/50"
                       }`}
                     >
                       {product.active ? "Active" : "Hidden"}
@@ -361,7 +361,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-2xl text-white">
+        <h2 className="font-display text-2xl text-navy">
           {mode === "create" ? "Add product" : "Edit product"}
         </h2>
         <Button
@@ -385,7 +385,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-cyan">
               {label}
             </p>
-            <div className="relative mb-3 aspect-video overflow-hidden rounded-lg bg-black">
+            <div className="relative mb-3 aspect-video overflow-hidden rounded-lg bg-mist">
               <Image
                 src={draft[field]}
                 alt={label}
@@ -395,7 +395,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-white/20 px-3 py-2 text-sm text-white hover:border-cyan">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-zinc-300 px-3 py-2 text-sm text-navy hover:border-cyan">
                 <Upload size={14} />
                 Upload
                 <input
@@ -425,7 +425,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
       </div>
 
       <div className="surface space-y-4 rounded-2xl p-5">
-        <label className="flex items-center gap-2 text-sm text-white">
+        <label className="flex items-center gap-2 text-sm text-navy">
           <input
             type="checkbox"
             checked={draft.active}
@@ -437,7 +437,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
         </label>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+            <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
               Name
             </label>
             <Input
@@ -447,7 +447,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
             <FieldError message={fieldErrors.name} />
           </div>
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+            <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
               Short name
             </label>
             <Input
@@ -460,7 +460,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
           </div>
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+          <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
             Slug
           </label>
           <Input
@@ -471,7 +471,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
           <FieldError message={fieldErrors.slug} />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+          <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
             Tagline
           </label>
             <Input
@@ -483,7 +483,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
           <FieldError message={fieldErrors.tagline} />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+          <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
             Description
           </label>
           <Textarea
@@ -495,7 +495,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
           <FieldError message={fieldErrors.description} />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+          <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
             Flavour
           </label>
           <Input
@@ -508,7 +508,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+            <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
               Nicotine / portion (mg)
             </label>
             <Input
@@ -524,7 +524,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
             <FieldError message={fieldErrors.nicotinePerPortionMg} />
           </div>
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+            <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
               Nicotine / gram (mg)
             </label>
             <Input
@@ -542,7 +542,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+            <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
               Pouches / pack
             </label>
             <Input
@@ -553,7 +553,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
+            <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
               Pack size
             </label>
             <Input
