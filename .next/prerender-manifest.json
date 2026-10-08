@@ -1,1 +1,11 @@
-{"version":4,"routes":{"/products/dyno-extreme-snus":{},"/products/dyno-blast-snus":{}},"dynamicRoutes":{"/products/[slug]":{"dataRoute":null,"dataRouteRegex":null,"fallback":null,"fallbackRevalidate":false,"fallbackSourceRoute":"/products/[slug]","routeRegex":"^\\/products\\/([^/]+?)(?:\\/)?$","allowHeader":[]}},"notFoundRoutes":[],"preview":{"previewModeId":"e3d45ff1a82ceb1091734567c8802bb8","previewModeSigningKey":"108689b66318b0b6638ba9ca8df7fbcbeb81b7ece08caec104ddeeac82b2866b","previewModeEncryptionKey":"e392b1a41a77e3476b4c8dea650887f6f874c20ed08592117ba6cb575a9c322e"}}
+{
+  "version": 4,
+  "routes": {},
+  "dynamicRoutes": {},
+  "notFoundRoutes": [],
+  "preview": {
+    "previewModeId": "44138b62742dc1d66a0d1dc0d2722bdd",
+    "previewModeSigningKey": "f52250e74299c29d44f939e2baf4404e0a26388c45fa03a56990352e851a7929",
+    "previewModeEncryptionKey": "e6699af9d5206b5ae14596b549fd8f4f3a8bf17c7fa48057b07de1f3d8133b7b"
+  }
+}
