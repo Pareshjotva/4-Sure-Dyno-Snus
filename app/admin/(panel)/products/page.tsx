@@ -10,7 +10,7 @@ export default async function AdminProductsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl text-navy">Products</h1>
+      <h1 className="font-display text-3xl text-white">Products</h1>
       <p className="mt-2 text-sm text-slate-ink">
         List, add, edit, and delete Dyno catalogue items — including product
         photos.

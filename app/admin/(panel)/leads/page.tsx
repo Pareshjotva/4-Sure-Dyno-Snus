@@ -12,8 +12,8 @@ export default async function AdminLeadsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-3xl text-navy">Leads</h1>
-      <p className="mt-2 text-sm text-slate-ink">
+      <h1 className="font-display text-3xl text-white">Leads</h1>
+      <p className="mt-2 text-sm text-white/70">
         {leads.length} inquiries from the contact form.
       </p>
       <div className="mt-6">

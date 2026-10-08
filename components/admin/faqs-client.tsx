@@ -161,8 +161,8 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
               className="surface flex flex-wrap items-center justify-between gap-3 rounded-xl p-4"
             >
               <div>
-                <p className="font-semibold text-navy">{faq.question}</p>
-                <p className="mt-1 text-xs text-navy/60">
+                <p className="font-semibold text-white">{faq.question}</p>
+                <p className="mt-1 text-xs text-white/60">
                   Order {faq.sortOrder} · {faq.published ? "Published" : "Draft"}
                 </p>
               </div>
@@ -192,7 +192,7 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-2xl text-navy">
+        <h2 className="font-display text-2xl text-white">
           {mode === "create" ? "Add FAQ" : "Edit FAQ"}
         </h2>
         <Button type="button" variant="outline" size="sm" onClick={() => backToList()}>
@@ -201,7 +201,7 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
       </div>
       {error && <p className="text-sm text-warn-red">{error}</p>}
       <div className="surface space-y-4 rounded-2xl p-5">
-        <label className="flex items-center gap-2 text-sm text-navy">
+        <label className="flex items-center gap-2 text-sm text-white">
           <input
             type="checkbox"
             checked={draft.published}
@@ -212,7 +212,7 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
           Published — show on the FAQ page
         </label>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
+          <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
             Question
           </label>
           <Input
@@ -222,7 +222,7 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
           <FieldError message={fieldErrors.question} />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
+          <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
             Answer
           </label>
           <Textarea
@@ -233,7 +233,7 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
           <FieldError message={fieldErrors.answer} />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-navy/50">
+          <label className="mb-1 block text-xs uppercase tracking-wide text-white/50">
             Sort order
           </label>
           <Input

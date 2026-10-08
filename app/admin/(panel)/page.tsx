@@ -86,16 +86,16 @@ export default async function AdminHomePage() {
           <div className="space-y-3">
             {leads.slice(0, 4).map((lead) => (
               <div key={lead.id} className="surface rounded-xl p-4 text-sm">
-                <p className="font-semibold text-navy">{lead.name}</p>
-                <p className="text-slate-ink">
+                <p className="font-semibold text-white">{lead.name}</p>
+                <p className="text-white/75">
                   {lead.email}
                   {lead.phone ? ` · ${lead.phone}` : ""} · {lead.status}
                 </p>
-                <p className="mt-2 text-navy/70">{lead.message}</p>
+                <p className="mt-2 text-white/80">{lead.message}</p>
               </div>
             ))}
             {leads.length === 0 && (
-              <p className="text-sm text-slate-ink">No contact inquiries yet.</p>
+              <p className="text-sm text-white/70">No contact inquiries yet.</p>
             )}
           </div>
         </section>
