@@ -58,9 +58,9 @@ export function packsThisMonth(orders: Order[], now = new Date()) {
 
 export function discountTierLabel(percent: number, stored?: string) {
   if (stored?.trim()) return stored.trim();
-  if (percent >= 15) return "Tier C · Premium Volume";
-  if (percent >= 10) return "Tier B · Partner";
-  if (percent >= 5) return "Tier A · Growth";
+  if (percent >= 15) return "Tier 3 · Premium Volume";
+  if (percent >= 10) return "Tier 2 · Partner";
+  if (percent >= 5) return "Tier 1 · Growth";
   return "";
 }
 

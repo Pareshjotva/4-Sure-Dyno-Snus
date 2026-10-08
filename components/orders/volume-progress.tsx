@@ -1,6 +1,6 @@
 "use client";
 
-import { VOLUME_MILESTONES } from "@/lib/orders";
+import { activeVolumeMilestone, VOLUME_MILESTONES } from "@/lib/orders";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
@@ -42,9 +42,7 @@ export function VolumeProgress({
   const currentOrder = Math.max(0, thisOrderPacks);
   const combined = earlier + currentOrder;
   const fillPct = lineFillPercent(combined);
-  const current = [...VOLUME_MILESTONES]
-    .reverse()
-    .find((m) => combined >= m.packs);
+  const current = activeVolumeMilestone(combined);
   const next = VOLUME_MILESTONES.find((m) => combined < m.packs);
   const packsToNext = next ? next.packs - combined : 0;
 
@@ -113,7 +111,10 @@ export function VolumeProgress({
                     reached ? "text-white/75" : "text-[#5f5f5f]"
                   )}
                 >
-                  {milestone.packs}+ packs
+                  {milestone.maxPacks == null
+                    ? `${milestone.packs}+`
+                    : `${milestone.packs}–${milestone.maxPacks}`}{" "}
+                  packs
                 </p>
               </li>
             );
