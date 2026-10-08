@@ -258,7 +258,7 @@ export default async function HomePage() {
                   {site.salesContact ? `${site.salesContact} · ` : null}
                   {site.phone} ·{" "}
                   <EmailLinks
-                    primary={site.email}
+                    emails={[site.email, site.secondaryEmail]}
                     separator="dot"
                     className="hover:text-white"
                   />

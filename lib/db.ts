@@ -30,7 +30,28 @@ export async function getSite() {
     id: "site",
   });
   if (!site) throw new Error("Site settings are missing");
-  return strip(site)!;
+  const record = strip(site)!;
+  return {
+    ...record,
+    secondaryEmail:
+      typeof record.secondaryEmail === "string"
+        ? record.secondaryEmail
+        : "4sureinternational@gmail.com",
+  };
+}
+
+export async function updateSiteContact(patch: Pick<
+  SiteContent,
+  "phone" | "email" | "secondaryEmail" | "address" | "website" | "salesContact"
+>) {
+  const sites = await collection<SiteContent & { id: string }>("site");
+  const updated = await sites.findOneAndUpdate(
+    { id: "site" },
+    { $set: { ...patch, id: "site" } },
+    { returnDocument: "after" }
+  );
+  if (!updated) return null;
+  return getSite();
 }
 
 export async function getProducts(activeOnly = true) {
