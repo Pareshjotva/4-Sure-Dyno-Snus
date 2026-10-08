@@ -49,6 +49,10 @@ h3,
   font-weight: 700;
 }
 
+h3 {
+  letter-spacing: 2px;
+}
+
 .font-brand {
   font-family: var(--font-brand), Impact, sans-serif;
   letter-spacing: 0.04em;
