@@ -7,8 +7,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Wholesale Pricing",
-  description: "Dyno Snus wholesale pricing for signed-in retailers.",
+  title: "Pricing",
+  description: "Dyno Snus provincial worksheets for signed-in retailers.",
 };
 
 export default async function AccountPricingPage({

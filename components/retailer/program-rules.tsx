@@ -38,6 +38,11 @@ export function ProgramRules({ tiers }: { tiers: IncentiveTier[] }) {
                 : `${tier.minPacks}–${tier.maxPacks} packs`}{" "}
               in a calendar month
             </p>
+            {tier.savePerPack > 0 ? (
+              <p className="mt-3 text-sm font-semibold text-warn-red">
+                Save ${tier.savePerPack.toFixed(2)} / 50 g pack
+              </p>
+            ) : null}
           </article>
         ))}
       </div>

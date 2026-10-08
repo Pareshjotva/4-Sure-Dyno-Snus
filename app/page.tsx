@@ -245,12 +245,12 @@ export default async function HomePage() {
                       Talk to sales
                     </Button>
                   </Link>
-                  <Link href="/account" className="flex min-w-0 flex-1">
+                  <Link href="/wholesale" className="flex min-w-0 flex-1">
                     <Button
                       variant="outline"
                       className="h-auto min-h-11 w-full whitespace-normal px-2 py-2.5 text-center text-xs leading-tight sm:h-11 sm:px-5 sm:text-sm"
                     >
-                      Retailer pricing
+                      Wholesale
                     </Button>
                   </Link>
                 </div>

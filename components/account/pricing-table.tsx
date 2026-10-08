@@ -28,9 +28,9 @@ export function PricingTable({
 
   return (
     <div>
-      <Badge>B2B pricing worksheet</Badge>
+      <Badge>Retailer panel</Badge>
       <h1 className="mt-3 font-display text-4xl text-navy sm:text-5xl">
-        Wholesale pricing
+        Pricing
       </h1>
       <p className="mt-3 max-w-2xl text-slate-ink">
         SKU pricing for licensed adult tobacco retailers. Provincial tobacco

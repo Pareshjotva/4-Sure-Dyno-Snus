@@ -9,7 +9,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Retailer Program",
   description:
-    "Dyno Snus volume discounts: 5%, 10%, and 15% tiers for licensed Canadian retailers.",
+    "Dyno Snus Retailer Incentive Program — buy more, save more with 5%, 10%, and 15% monthly volume tiers.",
 };
 
 export default async function IncentivesPage() {
@@ -22,14 +22,21 @@ export default async function IncentivesPage() {
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <Badge>B2B retail program</Badge>
+        <Badge>Volume incentive</Badge>
         <h1 className="mt-3 font-display text-4xl text-navy sm:text-5xl">
           Retailer Program
         </h1>
+        <p className="mt-2 font-display text-xl tracking-wide text-cyan sm:text-2xl">
+          Buy more. Save more.
+        </p>
         <p className="mt-3 max-w-2xl text-slate-ink">
-          Buy more, save more — calendar-month volume tiers unlock{" "}
+          Calendar-month pack volume unlocks{" "}
           {maxOff ? `up to ${maxOff}%` : "volume"} off on the qualifying order.
-          Ordering and live pricing stay inside the retailer panel.
+          This page is only about incentives — wholesale account setup lives on{" "}
+          <Link href="/wholesale" className="text-cyan underline-offset-2 hover:underline">
+            Wholesale
+          </Link>
+          .
         </p>
 
         <div className="mt-10">
@@ -40,9 +47,9 @@ export default async function IncentivesPage() {
           <Link href="/account">
             <Button size="lg">Sign in to order</Button>
           </Link>
-          <Link href="/register">
+          <Link href="/wholesale">
             <Button size="lg" variant="outline">
-              Join as a retailer
+              Wholesale account setup
             </Button>
           </Link>
         </div>
