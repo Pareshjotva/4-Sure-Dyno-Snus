@@ -9,6 +9,8 @@ const accountLinks = [
   { href: "/account", label: "Overview" },
   { href: "/account/orders", label: "Orders" },
   { href: "/account/order/new", label: "Place order" },
+  { href: "/account/pricing", label: "Pricing" },
+  { href: "/account/program", label: "Retailer Program" },
   { href: "/account/profile", label: "Profile" },
 ];
 
@@ -55,7 +57,10 @@ export function PanelNav({
             href={link.href}
             className={cn(
               "rounded-md px-3 py-2 text-sm font-medium transition",
-              pathname === link.href
+              pathname === link.href ||
+                (link.href !== "/account" &&
+                  link.href !== "/admin" &&
+                  pathname.startsWith(link.href + "/"))
                 ? "bg-cyan text-white"
                 : "text-white/70 hover:bg-white/8 hover:text-white"
             )}

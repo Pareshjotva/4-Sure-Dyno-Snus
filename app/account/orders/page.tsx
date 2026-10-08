@@ -3,6 +3,7 @@ import { OrderTotals } from "@/components/orders/order-totals";
 import { Badge } from "@/components/ui/badge";
 import { requireSession } from "@/lib/auth";
 import { getOrders, getProducts } from "@/lib/db";
+import { isInvoiceAvailable, orderStatusLabel } from "@/lib/orders";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -32,13 +33,19 @@ export default async function AccountOrdersPage() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Link
-                  href={`/account/orders/${order.id}/invoice`}
-                  className="text-sm font-semibold text-cyan"
-                >
-                  Invoice
-                </Link>
-                <Badge>{order.status}</Badge>
+                {isInvoiceAvailable(order.status) ? (
+                  <Link
+                    href={`/account/orders/${order.id}/invoice`}
+                    className="text-sm font-semibold text-cyan"
+                  >
+                    Invoice
+                  </Link>
+                ) : (
+                  <span className="text-xs text-white/45">
+                    Invoice after acceptance
+                  </span>
+                )}
+                <Badge>{orderStatusLabel(order.status)}</Badge>
               </div>
             </div>
             <OrderItemList

@@ -2,6 +2,7 @@ import { InvoiceDocument } from "@/components/orders/invoice-document";
 import { requireSession } from "@/lib/auth";
 import { getOrderById, getOrders, getPricing, getSite, getUserById } from "@/lib/db";
 import { buildInvoice } from "@/lib/invoice";
+import { isInvoiceAvailable } from "@/lib/orders";
 import { invoicePaymentEmail } from "@/lib/site";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -15,7 +16,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const order = await getOrderById(id);
-  if (!order) return { title: "Invoice" };
+  if (!order || !isInvoiceAvailable(order.status)) return { title: "Invoice" };
   const orders = await getOrders();
   const invoice = buildInvoice(order, null, [], orders);
   return { title: `Invoice ${invoice.number}` };
@@ -31,6 +32,9 @@ export default async function RetailerInvoicePage({
   const { id } = await params;
   const order = await getOrderById(id);
   if (!order || order.userId !== session.id) notFound();
+  if (!isInvoiceAvailable(order.status)) {
+    redirect("/account/orders");
+  }
 
   const [user, pricing, orders, site] = await Promise.all([
     getUserById(order.userId),

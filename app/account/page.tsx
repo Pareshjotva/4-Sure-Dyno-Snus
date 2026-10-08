@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { requireSession } from "@/lib/auth";
 import { getOrders, getSite, getUserById } from "@/lib/db";
+import { isInvoiceAvailable, orderStatusLabel } from "@/lib/orders";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -60,12 +61,20 @@ export default async function AccountHomePage() {
             Place new order
           </Button>
         </Link>
-        <Link href="/pricing" className="flex min-w-0 flex-1 sm:flex-none">
+        <Link href="/account/pricing" className="flex min-w-0 flex-1 sm:flex-none">
           <Button
             variant="outline"
             className="h-auto min-h-11 w-full whitespace-normal px-3 py-2.5 text-center text-sm sm:w-auto"
           >
             View pricing
+          </Button>
+        </Link>
+        <Link href="/account/program" className="flex min-w-0 flex-1 sm:flex-none">
+          <Button
+            variant="outline"
+            className="h-auto min-h-11 w-full whitespace-normal px-3 py-2.5 text-center text-sm sm:w-auto"
+          >
+            Retailer Program
           </Button>
         </Link>
       </div>
@@ -80,14 +89,18 @@ export default async function AccountHomePage() {
             <div>
               <p className="font-semibold text-navy">{order.orderNumber}</p>
               <p className="text-xs text-navy/60">{formatDate(order.createdAt)}</p>
-              <Link
-                href={`/account/orders/${order.id}/invoice`}
-                className="text-xs font-semibold text-cyan"
-              >
-                Invoice
-              </Link>
+              {isInvoiceAvailable(order.status) ? (
+                <Link
+                  href={`/account/orders/${order.id}/invoice`}
+                  className="text-xs font-semibold text-cyan"
+                >
+                  Invoice
+                </Link>
+              ) : (
+                <p className="text-xs text-white/45">Invoice after acceptance</p>
+              )}
             </div>
-            <Badge>{order.status}</Badge>
+            <Badge>{orderStatusLabel(order.status)}</Badge>
             <OrderTotals order={order} />
           </div>
         ))}

@@ -1,142 +1,55 @@
 import { SiteShell } from "@/components/layout/site-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getPricing, getProducts, getSite } from "@/lib/db";
-import { formatCurrency } from "@/lib/utils";
+import { getSite } from "@/lib/db";
 import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Wholesale Pricing",
   description:
-    "Dyno Snus B2B pricing for British Columbia, Alberta, and Ontario licensed retailers.",
+    "Dyno Snus B2B pricing for licensed Canadian retailers — available in the retailer panel.",
 };
 
-export default async function PricingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ province?: string }>;
-}) {
-  const { province } = await searchParams;
-  const code = (province || "BC").toUpperCase();
-  const [pricing, products, site] = await Promise.all([
-    getPricing(code),
-    getProducts(),
-    getSite(),
-  ]);
-
-  const provinces = [
-    { code: "BC", label: "British Columbia" },
-    { code: "AB", label: "Alberta" },
-    { code: "ON", label: "Ontario" },
-  ];
-
-  const productName = (id: string) =>
-    products.find((p) => p.id === id)?.name ?? id;
+export default async function PricingPage() {
+  const site = await getSite();
 
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <Badge>B2B pricing worksheet</Badge>
+        <Badge>B2B partners only</Badge>
         <h1 className="mt-3 font-display text-4xl text-navy sm:text-5xl">
           Wholesale pricing
         </h1>
         <p className="mt-3 max-w-2xl text-slate-ink">
-          SKU pricing for licensed adult tobacco retailers. Provincial tobacco
-          tax (PTT), case packs, and MSRP ranges are shown as a planning guide —
-          confirm final figures with {site.companyName} before ordering.
+          Live SKU sheets, provincial PTT, and case planning figures are shown
+          only inside the signed-in retailer panel — not on the public site.
         </p>
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          {provinces.map((p) => (
-            <Link key={p.code} href={`/pricing?province=${p.code}`}>
-              <Button
-                variant={code === p.code ? "secondary" : "outline"}
-                size="sm"
-              >
-                {p.label}
+        <div className="surface mt-8 max-w-2xl rounded-2xl p-6">
+          <h2 className="font-display text-2xl text-white">
+            How to view pricing
+          </h2>
+          <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-white/80">
+            <li>Sign in to your wholesale retailer account.</li>
+            <li>Open Pricing in the retailer panel.</li>
+            <li>Place orders from Place order — not from public CTAs.</li>
+          </ol>
+          <p className="mt-4 text-sm text-white/65">
+            Minimum order for free shipping: {site.minOrderPacks}× 50 g packs.
+            New shops can open an account first, then access pricing after sign
+            in.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/account">
+              <Button size="lg">Open retailer panel</Button>
+            </Link>
+            <Link href="/register">
+              <Button size="lg" variant="outline">
+                Open wholesale account
               </Button>
             </Link>
-          ))}
-        </div>
-
-        <div className="mt-8 overflow-x-auto surface rounded-2xl">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-cyan text-white">
-              <tr>
-                <th className="px-4 py-3 font-semibold">Product</th>
-                <th className="px-4 py-3 font-semibold">Pack qty</th>
-                <th className="px-4 py-3 font-semibold">Case</th>
-                <th className="px-4 py-3 font-semibold">Wholesale</th>
-                <th className="px-4 py-3 font-semibold">{code} PTT</th>
-                <th className="px-4 py-3 font-semibold">MSRP range</th>
-                <th className="px-4 py-3 font-semibold">Margin</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pricing.map((row) => (
-                <tr key={row.id} className="border-t border-navy/8">
-                  <td className="px-4 py-3 font-medium text-navy">
-                    {productName(row.productId)}
-                  </td>
-                  <td className="px-4 py-3 text-slate-ink">{row.packQty}</td>
-                  <td className="px-4 py-3 text-slate-ink">{row.casePack}</td>
-                  <td className="px-4 py-3 text-navy">
-                    {formatCurrency(row.wholesale)}
-                  </td>
-                  <td className="px-4 py-3 text-navy">
-                    {formatCurrency(row.ptt)}
-                  </td>
-                  <td className="px-4 py-3 text-slate-ink">
-                    {formatCurrency(row.msrpMin)} – {formatCurrency(row.msrpMax)}
-                  </td>
-                  <td className="px-4 py-3 text-slate-ink">
-                    {row.marginMin}% – {row.marginMax}%
-                  </td>
-                </tr>
-              ))}
-              {pricing.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="px-4 py-8 text-center text-slate-ink"
-                  >
-                    No pricing rows for this province yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <div className="surface rounded-xl p-5">
-            <h2 className="font-display text-xl text-navy">Minimum order</h2>
-            <p className="mt-2 text-sm text-slate-ink">
-              {site.minOrderPacks}× 50 g soft-pack pouches qualifies for free
-              shipping.
-            </p>
           </div>
-          <div className="surface rounded-xl p-5">
-            <h2 className="font-display text-xl text-navy">Taxes & freight</h2>
-            <p className="mt-2 text-sm text-slate-ink">
-              Prices exclude applicable provincial sales tax. Orders under the
-              minimum incur standard shipping.
-            </p>
-          </div>
-          <div className="surface rounded-xl p-5">
-            <h2 className="font-display text-xl text-navy">Confidential</h2>
-            <p className="mt-2 text-sm text-slate-ink">
-              Intended strictly for registered wholesale partners. Availability
-              and pricing may change.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-8">
-          <Link href="/register">
-            <Button size="lg">Request wholesale access</Button>
-          </Link>
         </div>
       </div>
     </SiteShell>

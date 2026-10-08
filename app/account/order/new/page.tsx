@@ -1,4 +1,5 @@
 import { OrderForm } from "@/components/account/order-form";
+import { VolumeProgress } from "@/components/orders/volume-progress";
 import { requireSession } from "@/lib/auth";
 import { getIncentives, getOrders, getProducts, getSite, getUserById } from "@/lib/db";
 import { packsThisMonth } from "@/lib/site";
@@ -16,6 +17,8 @@ export default async function NewOrderPage() {
   ]);
   if (!user) redirect("/login");
 
+  const monthPacks = packsThisMonth(orders);
+
   return (
     <div>
       <h1 className="font-display text-3xl text-navy">Place an order</h1>
@@ -24,6 +27,9 @@ export default async function NewOrderPage() {
         discount uses packs already bought this month plus the packs on this
         order. 40–59 combined is 5% off, 60–79 is 10% off, and 80+ is 15% off.
       </p>
+
+      <VolumeProgress monthPacks={monthPacks} className="mt-6" />
+
       <div className="mt-6">
         <OrderForm
           products={products.map((p) => ({
@@ -35,7 +41,7 @@ export default async function NewOrderPage() {
           minOrderPacks={site.minOrderPacks}
           needsLicence={!user.licenceNumber?.trim()}
           tiers={incentives}
-          monthPacks={packsThisMonth(orders)}
+          monthPacks={monthPacks}
         />
       </div>
     </div>

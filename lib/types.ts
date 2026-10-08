@@ -2,6 +2,8 @@ export type UserRole = "admin" | "retailer";
 
 export type OrderStatus =
   | "pending"
+  | "accepted"
+  /** @deprecated Prefer "accepted"; kept for existing orders. */
   | "confirmed"
   | "shipped"
   | "delivered"

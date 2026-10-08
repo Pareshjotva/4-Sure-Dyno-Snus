@@ -1,6 +1,7 @@
 import { OrderTotals } from "@/components/orders/order-totals";
 import { requireSession } from "@/lib/auth";
 import { getDashboardStats, getLeads, getOrders } from "@/lib/db";
+import { isInvoiceAvailable, orderStatusLabel } from "@/lib/orders";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -53,22 +54,39 @@ export default async function AdminHomePage() {
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {orders.slice(0, 4).map((order) => (
-            <div key={order.id} className="surface flex h-full flex-col rounded-xl p-4 text-sm">
+            <div
+              key={order.id}
+              className="surface flex h-full flex-col rounded-xl p-4 text-sm"
+            >
               <div className="flex justify-between gap-2">
                 <p className="font-semibold text-navy">{order.orderNumber}</p>
                 <span className="rounded-md bg-mist px-2 py-0.5 text-xs uppercase">
-                  {order.status}
+                  {orderStatusLabel(order.status)}
                 </span>
               </div>
               <p className="mt-1 text-navy/60">
                 {order.company || order.userName} · {formatDate(order.createdAt)}
               </p>
-              <Link
-                href={`/admin/orders/${order.id}/invoice`}
-                className="mt-2 text-xs font-semibold text-cyan"
-              >
-                Invoice
-              </Link>
+              <div className="mt-2 flex flex-wrap gap-3">
+                <Link
+                  href={`/admin/orders/${order.id}`}
+                  className="text-xs font-semibold text-cyan"
+                >
+                  Edit order
+                </Link>
+                {isInvoiceAvailable(order.status) ? (
+                  <Link
+                    href={`/admin/orders/${order.id}/invoice`}
+                    className="text-xs font-semibold text-cyan"
+                  >
+                    Invoice
+                  </Link>
+                ) : (
+                  <span className="text-xs text-white/45">
+                    Invoice after accept
+                  </span>
+                )}
+              </div>
               <div className="mt-auto">
                 <OrderTotals order={order} />
               </div>
