@@ -1,6 +1,10 @@
 import { VOLUME_MILESTONES } from "@/lib/orders";
 import type { IncentiveTier } from "@/lib/types";
 
+function packRangeLabel(minPacks: number, maxPacks: number | null) {
+  return maxPacks == null ? `${minPacks}+ packs` : `${minPacks}–${maxPacks} packs`;
+}
+
 export function ProgramRules({ tiers }: { tiers: IncentiveTier[] }) {
   const sorted = [...tiers].sort((a, b) => a.minPacks - b.minPacks);
   const display =
@@ -10,12 +14,9 @@ export function ProgramRules({ tiers }: { tiers: IncentiveTier[] }) {
           id: `fallback_${i}`,
           name: `${m.label} · ${m.name}`,
           minPacks: m.packs,
-          maxPacks:
-            i < VOLUME_MILESTONES.length - 1
-              ? VOLUME_MILESTONES[i + 1].packs - 1
-              : null,
+          maxPacks: m.maxPacks,
           discountPercent: m.percent,
-          savePerPack: 0,
+          savePerPack: m.percent === 5 ? 2 : m.percent === 10 ? 4 : 6,
         }));
 
   return (
@@ -33,10 +34,7 @@ export function ProgramRules({ tiers }: { tiers: IncentiveTier[] }) {
               {tier.name}
             </h3>
             <p className="mt-2 text-sm text-white/70">
-              {tier.maxPacks == null
-                ? `${tier.minPacks}+ packs`
-                : `${tier.minPacks}–${tier.maxPacks} packs`}{" "}
-              in a calendar month
+              {packRangeLabel(tier.minPacks, tier.maxPacks)} in a calendar month
             </p>
             {tier.savePerPack > 0 ? (
               <p className="mt-3 text-sm font-semibold text-warn-red">
@@ -50,15 +48,14 @@ export function ProgramRules({ tiers }: { tiers: IncentiveTier[] }) {
       <div className="surface rounded-2xl p-6">
         <h2 className="font-display text-2xl text-white">Program rules</h2>
         <ul className="mt-4 space-y-3 text-sm leading-relaxed text-white/80">
-          <li>
-            <strong className="text-white">Tier A · 5%:</strong> 40–59 packs
-          </li>
-          <li>
-            <strong className="text-white">Tier B · 10%:</strong> 60–79 packs
-          </li>
-          <li>
-            <strong className="text-white">Tier C · 15%:</strong> 80+ packs
-          </li>
+          {display.map((tier) => (
+            <li key={`rule_${tier.id}`}>
+              <strong className="text-white">
+                {tier.name} · {tier.discountPercent}%:
+              </strong>{" "}
+              {packRangeLabel(tier.minPacks, tier.maxPacks)}
+            </li>
+          ))}
           <li>
             Qualify by accumulating packs across the calendar month{" "}
             <strong className="text-white">or</strong> by ordering the full
