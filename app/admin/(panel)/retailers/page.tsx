@@ -15,9 +15,9 @@ export default async function AdminRetailersPage() {
       <p className="mt-2 text-sm text-slate-ink">
         Registered wholesale accounts for Dyno Snus ordering.
       </p>
-      <div className="mt-6 space-y-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {retailers.map((user) => (
-          <div key={user.id} className="surface rounded-xl p-4">
+          <div key={user.id} className="surface flex h-full flex-col rounded-xl p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="font-semibold text-navy">{user.name}</p>

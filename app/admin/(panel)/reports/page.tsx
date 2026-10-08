@@ -235,67 +235,36 @@ function ReportBody({ report }: { report: SalesReport }) {
             <p className="mt-1 text-xs text-white/50">
               Pack counts and line subtotals before the order discount.
             </p>
-            <div className="mt-3 overflow-x-auto surface rounded-2xl">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-black/50 text-white/70">
-                  <tr>
-                    <th className="px-4 py-3 font-semibold">Product</th>
-                    <th className="px-4 py-3 font-semibold">Packs</th>
-                    <th className="px-4 py-3 font-semibold">Subtotal</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {report.byProduct.map((row) => (
-                    <tr key={row.productId} className="border-t border-white/8">
-                      <td className="px-4 py-3 font-medium text-white">
-                        {row.productName}
-                      </td>
-                      <td className="px-4 py-3 text-white/75">{row.packs}</td>
-                      <td className="px-4 py-3 text-white">
-                        {formatCurrency(row.subtotal)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {report.byProduct.map((row) => (
+                <article key={row.productId} className="surface rounded-2xl p-4">
+                  <p className="text-xs uppercase tracking-wider text-cyan">Product</p>
+                  <p className="mt-1 font-semibold text-white">{row.productName}</p>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <ReportField label="Packs" value={String(row.packs)} />
+                    <ReportField label="Subtotal" value={formatCurrency(row.subtotal)} />
+                  </div>
+                </article>
+              ))}
             </div>
           </section>
 
           <section>
             <h3 className="font-display text-2xl text-white">By province</h3>
-            <div className="mt-3 overflow-x-auto surface rounded-2xl">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-black/50 text-white/70">
-                  <tr>
-                    <th className="px-4 py-3 font-semibold">Province</th>
-                    <th className="px-4 py-3 font-semibold">Orders</th>
-                    <th className="px-4 py-3 font-semibold">Packs</th>
-                    <th className="px-4 py-3 font-semibold">Subtotal</th>
-                    <th className="px-4 py-3 font-semibold">Discount</th>
-                    <th className="px-4 py-3 font-semibold">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {report.byProvince.map((row) => (
-                    <tr key={row.province} className="border-t border-white/8">
-                      <td className="px-4 py-3 font-medium text-white">
-                        {row.province}
-                      </td>
-                      <td className="px-4 py-3 text-white/75">{row.orders}</td>
-                      <td className="px-4 py-3 text-white/75">{row.packs}</td>
-                      <td className="px-4 py-3 text-white">
-                        {formatCurrency(row.subtotal)}
-                      </td>
-                      <td className="px-4 py-3 text-white/75">
-                        {formatCurrency(row.discountAmount)}
-                      </td>
-                      <td className="px-4 py-3 text-white">
-                        {formatCurrency(row.total)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {report.byProvince.map((row) => (
+                <article key={row.province} className="surface rounded-2xl p-4">
+                  <p className="text-xs uppercase tracking-wider text-cyan">Province</p>
+                  <p className="mt-1 font-semibold text-white">{row.province}</p>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <ReportField label="Orders" value={String(row.orders)} />
+                    <ReportField label="Packs" value={String(row.packs)} />
+                    <ReportField label="Subtotal" value={formatCurrency(row.subtotal)} />
+                    <ReportField label="Discount" value={formatCurrency(row.discountAmount)} />
+                    <ReportField label="Total" value={formatCurrency(row.total)} />
+                  </div>
+                </article>
+              ))}
             </div>
           </section>
         </div>
@@ -308,41 +277,21 @@ function ReportBody({ report }: { report: SalesReport }) {
             Overall customer report for this period. Money totals leave out
             cancelled orders.
           </p>
-          <div className="mt-3 overflow-x-auto surface rounded-2xl">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-black/50 text-white/70">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Customer</th>
-                  <th className="px-4 py-3 font-semibold">Company</th>
-                  <th className="px-4 py-3 font-semibold">Orders</th>
-                  <th className="px-4 py-3 font-semibold">Packs</th>
-                  <th className="px-4 py-3 font-semibold">Subtotal</th>
-                  <th className="px-4 py-3 font-semibold">Discount</th>
-                  <th className="px-4 py-3 font-semibold">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.byCustomer.map((row) => (
-                  <tr key={row.key} className="border-t border-white/8">
-                    <td className="px-4 py-3 font-medium text-white">
-                      {row.customer}
-                    </td>
-                    <td className="px-4 py-3 text-white/75">{row.company}</td>
-                    <td className="px-4 py-3 text-white/75">{row.orders}</td>
-                    <td className="px-4 py-3 text-white/75">{row.packs}</td>
-                    <td className="px-4 py-3 text-white">
-                      {formatCurrency(row.subtotal)}
-                    </td>
-                    <td className="px-4 py-3 text-white/75">
-                      {formatCurrency(row.discountAmount)}
-                    </td>
-                    <td className="px-4 py-3 text-white">
-                      {formatCurrency(row.total)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {report.byCustomer.map((row) => (
+              <article key={row.key} className="surface rounded-2xl p-4">
+                <p className="text-xs uppercase tracking-wider text-cyan">Customer</p>
+                <p className="mt-1 font-semibold text-white">{row.customer}</p>
+                <p className="text-sm text-white/70">{row.company}</p>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <ReportField label="Orders" value={String(row.orders)} />
+                  <ReportField label="Packs" value={String(row.packs)} />
+                  <ReportField label="Subtotal" value={formatCurrency(row.subtotal)} />
+                  <ReportField label="Discount" value={formatCurrency(row.discountAmount)} />
+                  <ReportField label="Total" value={formatCurrency(row.total)} />
+                </div>
+              </article>
+            ))}
           </div>
         </section>
       )}
@@ -353,50 +302,49 @@ function ReportBody({ report }: { report: SalesReport }) {
           <p className="mt-1 text-xs text-white/50">
             Every order in this report, including cancelled orders.
           </p>
-          <div className="mt-3 overflow-x-auto surface rounded-2xl">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-black/50 text-white/70">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Date</th>
-                  <th className="px-4 py-3 font-semibold">Order</th>
-                  <th className="px-4 py-3 font-semibold">Customer</th>
-                  <th className="px-4 py-3 font-semibold">Company</th>
-                  <th className="px-4 py-3 font-semibold">Items</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">Discount</th>
-                  <th className="px-4 py-3 font-semibold">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.orders.map((order) => (
-                  <tr key={order.id} className="border-t border-white/8">
-                    <td className="px-4 py-3 text-white/75">
-                      {formatDate(order.createdAt)}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-white">
-                      {order.orderNumber}
-                    </td>
-                    <td className="px-4 py-3 text-white">{order.customer}</td>
-                    <td className="px-4 py-3 text-white/75">{order.company}</td>
-                    <td className="px-4 py-3 text-white/75">{order.summary}</td>
-                    <td className="px-4 py-3 capitalize text-white/75">
-                      {order.status}
-                    </td>
-                    <td className="px-4 py-3 text-white/75">
-                      {order.discountPercent > 0
+          <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {report.orders.map((order) => (
+              <article key={order.id} className="surface rounded-2xl p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-cyan">Order</p>
+                    <p className="mt-1 font-semibold text-white">{order.orderNumber}</p>
+                  </div>
+                  <span className="rounded-md bg-mist px-2 py-0.5 text-xs uppercase text-white/80">
+                    {order.status}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-white">{order.customer}</p>
+                <p className="text-sm text-white/70">{order.company}</p>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <ReportField label="Date" value={formatDate(order.createdAt)} />
+                  <ReportField label="Items" value={order.summary} />
+                  <ReportField
+                    label="Discount"
+                    value={
+                      order.discountPercent > 0
                         ? `${order.discountTier ? `${order.discountTier} ` : ""}${order.discountPercent}% (−${formatCurrency(order.discountAmount)})`
-                        : formatCurrency(0)}
-                    </td>
-                    <td className="px-4 py-3 text-white">
-                      {formatCurrency(order.total)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        : formatCurrency(0)
+                    }
+                  />
+                  <ReportField label="Total" value={formatCurrency(order.total)} />
+                </div>
+              </article>
+            ))}
           </div>
         </section>
       )}
+    </div>
+  );
+}
+
+function ReportField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-white/50">
+        {label}
+      </p>
+      <p className="mt-0.5 text-sm text-white">{value}</p>
     </div>
   );
 }

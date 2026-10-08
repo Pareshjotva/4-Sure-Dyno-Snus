@@ -39,9 +39,9 @@ export function AdminOrdersClient({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {orders.map((order) => (
-        <article key={order.id} className="surface rounded-2xl p-5">
+        <article key={order.id} className="surface flex h-full flex-col rounded-2xl p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="font-semibold text-navy">{order.orderNumber}</p>
@@ -58,7 +58,7 @@ export function AdminOrdersClient({
             showPrice={false}
           />
           <OrderTotals order={order} />
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="mt-auto flex flex-wrap items-center gap-3 pt-4">
             <Link
               href={`/admin/orders/${order.id}/invoice`}
               className="text-sm font-semibold text-cyan"
