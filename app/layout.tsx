@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Dyno Snus | 4Sure International",
     description:
-      "Premium snus for licensed Canadian retailers. Extreme Slim and Blast Slim.",
+      "Premium Scandinavian snus for licensed Canadian retailers. Extreme Slim and Blast Slim.",
     type: "website",
     locale: "en_CA",
     images: [{ url: "/images/dyno-products-hero.jpg" }],

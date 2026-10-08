@@ -158,7 +158,7 @@ export function InvoiceDocument({
           <div className="min-w-[240px] flex-1">
             <Image
               src="/images/logo-4sure-original.png"
-              alt="4Sure International"
+              alt="4Sure International — From Global to Local"
               width={1024}
               height={371}
               className="h-24 w-auto max-w-full"
