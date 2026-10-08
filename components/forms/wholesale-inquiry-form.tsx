@@ -18,7 +18,13 @@ function issuesToFields(issues: { path: PropertyKey[]; message: string }[]) {
   return next;
 }
 
-export function WholesaleInquiryForm() {
+export function WholesaleInquiryForm({
+  embedded = false,
+  onSuccess,
+}: {
+  embedded?: boolean;
+  onSuccess?: () => void;
+}) {
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">(
     "idle"
   );
@@ -58,6 +64,7 @@ export function WholesaleInquiryForm() {
       setStatus("ok");
       setMessage("Thanks — your wholesale inquiry was sent. Our team will follow up.");
       form.reset();
+      onSuccess?.();
     } catch (err) {
       setStatus("error");
       setMessage(
@@ -70,7 +77,9 @@ export function WholesaleInquiryForm() {
     <form
       onSubmit={onSubmit}
       noValidate
-      className="surface space-y-4 rounded-2xl p-6"
+      className={
+        embedded ? "space-y-4" : "surface space-y-4 rounded-2xl p-6"
+      }
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div>

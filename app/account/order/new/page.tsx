@@ -24,7 +24,7 @@ export default async function NewOrderPage() {
       <p className="mt-2 text-sm text-slate-ink">
         Minimum {site.minOrderPacks} packs for free shipping. Each order’s
         discount uses packs already bought this month plus the packs on this
-        order. 40–59 combined is 5% off, 60–79 is 10% off, and 80+ is 15% off.
+        order. 20–40 combined is 5% off, 41–60 is 10% off, and 80+ is 15% off.
       </p>
 
       <div className="mt-6">

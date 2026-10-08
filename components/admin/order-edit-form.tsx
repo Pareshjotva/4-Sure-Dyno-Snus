@@ -256,7 +256,7 @@ export function AdminOrderEditForm({
           <Input
             value={discountTier}
             onChange={(e) => setDiscountTier(e.target.value)}
-            placeholder="Tier A · Growth"
+            placeholder="Tier 1 · Growth"
           />
         </div>
       </div>

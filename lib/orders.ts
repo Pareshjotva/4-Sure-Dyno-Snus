@@ -1,11 +1,25 @@
 import type { OrderStatus } from "./types";
 
-/** Volume discount milestones (packs combined this calendar month). */
+/** Volume discount milestones — matches client Retailer Incentive Program PPT. */
 export const VOLUME_MILESTONES = [
-  { packs: 40, percent: 5, label: "Tier A", name: "Growth" },
-  { packs: 60, percent: 10, label: "Tier B", name: "Partner" },
-  { packs: 80, percent: 15, label: "Tier C", name: "Premium Volume" },
+  { packs: 20, maxPacks: 40, percent: 5, label: "Tier 1", name: "Growth" },
+  { packs: 41, maxPacks: 60, percent: 10, label: "Tier 2", name: "Partner" },
+  {
+    packs: 80,
+    maxPacks: null as number | null,
+    percent: 15,
+    label: "Tier 3",
+    name: "Premium Volume",
+  },
 ] as const;
+
+export function activeVolumeMilestone(totalPacks: number) {
+  return [...VOLUME_MILESTONES].reverse().find((m) => {
+    if (totalPacks < m.packs) return false;
+    if (m.maxPacks == null) return true;
+    return totalPacks <= m.maxPacks;
+  });
+}
 
 const INVOICE_STATUSES: OrderStatus[] = [
   "accepted",
