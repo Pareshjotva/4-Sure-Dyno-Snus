@@ -45,79 +45,76 @@ export default async function AdminHomePage() {
         ))}
       </div>
 
-      <section className="mt-10">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-2xl text-navy">Latest orders</h2>
-          <Link href="/admin/orders" className="text-sm text-cyan">
-            View all
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {orders.slice(0, 4).map((order) => (
-            <div
-              key={order.id}
-              className="surface flex h-full flex-col rounded-xl p-4 text-sm"
-            >
-              <div className="flex justify-between gap-2">
-                <p className="font-semibold text-navy">{order.orderNumber}</p>
-                <span className="rounded-md bg-mist px-2 py-0.5 text-xs uppercase">
-                  {orderStatusLabel(order.status)}
-                </span>
-              </div>
-              <p className="mt-1 text-navy/60">
-                {order.company || order.userName} · {formatDate(order.createdAt)}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-3">
-                <Link
-                  href={`/admin/orders/${order.id}`}
-                  className="text-xs font-semibold text-cyan"
-                >
-                  Edit order
-                </Link>
-                {isInvoiceAvailable(order.status) ? (
+      <div className="mt-10 grid gap-6 lg:grid-cols-2">
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-2xl text-navy">Latest orders</h2>
+            <Link href="/admin/orders" className="text-sm text-cyan">
+              View all
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {orders.slice(0, 4).map((order) => (
+              <div key={order.id} className="surface rounded-xl p-4 text-sm">
+                <div className="flex justify-between gap-2">
+                  <p className="font-semibold text-navy">{order.orderNumber}</p>
+                  <span className="rounded-md bg-mist px-2 py-0.5 text-xs uppercase">
+                    {orderStatusLabel(order.status)}
+                  </span>
+                </div>
+                <p className="mt-1 text-navy/60">
+                  {order.company || order.userName} · {formatDate(order.createdAt)}
+                </p>
+                <div className="mt-1 flex flex-wrap gap-3">
                   <Link
-                    href={`/admin/orders/${order.id}/invoice`}
+                    href={`/admin/orders/${order.id}`}
                     className="text-xs font-semibold text-cyan"
                   >
-                    Invoice
+                    Edit order
                   </Link>
-                ) : (
-                  <span className="text-xs text-white/45">
-                    Invoice after accept
-                  </span>
-                )}
-              </div>
-              <div className="mt-auto">
+                  {isInvoiceAvailable(order.status) ? (
+                    <Link
+                      href={`/admin/orders/${order.id}/invoice`}
+                      className="text-xs font-semibold text-cyan"
+                    >
+                      Invoice
+                    </Link>
+                  ) : (
+                    <span className="text-xs text-white/45">
+                      Invoice after accept
+                    </span>
+                  )}
+                </div>
                 <OrderTotals order={order} />
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
 
-      <section className="mt-10">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-2xl text-navy">New leads</h2>
-          <Link href="/admin/leads" className="text-sm text-cyan">
-            View all
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {leads.slice(0, 4).map((lead) => (
-            <div key={lead.id} className="surface h-full rounded-xl p-4 text-sm">
-              <p className="font-semibold text-white">{lead.name}</p>
-              <p className="text-white/75">
-                {lead.email}
-                {lead.phone ? ` · ${lead.phone}` : ""} · {lead.status}
-              </p>
-              <p className="mt-2 text-white/80">{lead.message}</p>
-            </div>
-          ))}
-        </div>
-        {leads.length === 0 && (
-          <p className="text-sm text-white/70">No contact inquiries yet.</p>
-        )}
-      </section>
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-2xl text-navy">New leads</h2>
+            <Link href="/admin/leads" className="text-sm text-cyan">
+              View all
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {leads.slice(0, 4).map((lead) => (
+              <div key={lead.id} className="surface rounded-xl p-4 text-sm">
+                <p className="font-semibold text-white">{lead.name}</p>
+                <p className="text-white/75">
+                  {lead.email}
+                  {lead.phone ? ` · ${lead.phone}` : ""} · {lead.status}
+                </p>
+                <p className="mt-2 text-white/80">{lead.message}</p>
+              </div>
+            ))}
+            {leads.length === 0 && (
+              <p className="text-sm text-white/70">No contact inquiries yet.</p>
+            )}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

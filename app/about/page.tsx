@@ -70,10 +70,7 @@ export default async function AboutPage() {
               <p className="mt-2 text-sm">
                 {site.phone}
                 <br />
-                <EmailLinks
-                  emails={[site.email, site.secondaryEmail]}
-                  className="text-cyan"
-                />
+                <EmailLinks primary={site.email} className="text-cyan" />
                 <br />
                 {site.website}
               </p>

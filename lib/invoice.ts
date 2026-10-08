@@ -3,6 +3,8 @@ import type { Order, ProvincePricing, User } from "./types";
 export const INVOICE_LETTERHEAD = {
   companyName: "4Sure International",
   address: "27 Royal Street, St Albert, AB T8N7N9",
+  email: "4sureinternational@gmail.com",
+  phone: "587-456-2417",
   gst: "73336 7106 RT0001",
   importLicence: "73336 7106 RM0001",
   exciseDuty: "73336 7106 RD0001",

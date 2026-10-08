@@ -156,7 +156,6 @@ export interface SiteContent {
   tagline: string;
   phone: string;
   email: string;
-  secondaryEmail: string;
   website: string;
   address: string;
   salesContact: string;

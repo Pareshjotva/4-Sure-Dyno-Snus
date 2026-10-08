@@ -109,32 +109,6 @@ export const faqSchema = z.object({
     .optional(),
 });
 
-const publicEmail = z
-  .string()
-  .trim()
-  .min(1, "Enter an email address.")
-  .email("Enter a valid email address.")
-  .refine(
-    (value) => value.toLowerCase() !== "octavio4sure@gmail.com",
-    "Use a public contact email."
-  );
-
-export const siteContactSchema = z.object({
-  phone: z
-    .string()
-    .trim()
-    .min(1, "Enter a phone number.")
-    .refine(
-      (value) => value.replace(/\D/g, "").length >= 7,
-      "Enter a valid phone number."
-    ),
-  email: publicEmail,
-  secondaryEmail: publicEmail,
-  address: z.string().trim().min(1, "Enter the office address."),
-  website: z.string().trim(),
-  salesContact: z.string().trim(),
-});
-
 export const blogSchema = z.object({
   title: z.string().trim().min(2, "Enter a blog title."),
   slug: optionalText(2, "Slug must be at least 2 characters."),

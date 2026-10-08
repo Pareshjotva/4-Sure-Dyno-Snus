@@ -36,15 +36,12 @@ export function AdminOrdersClient({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div className="space-y-4">
       {orders.map((order) => {
         const statusValue =
           order.status === "confirmed" ? "accepted" : order.status;
         return (
-          <article
-            key={order.id}
-            className="surface flex h-full flex-col rounded-2xl p-5"
-          >
+          <article key={order.id} className="surface rounded-2xl p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-semibold text-navy">{order.orderNumber}</p>
@@ -61,7 +58,7 @@ export function AdminOrdersClient({
               showPrice={false}
             />
             <OrderTotals order={order} />
-            <div className="mt-auto flex flex-wrap items-center gap-3 pt-4">
+            <div className="mt-4 flex flex-wrap items-center gap-3">
               <Link
                 href={`/admin/orders/${order.id}`}
                 className="text-sm font-semibold text-cyan"

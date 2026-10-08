@@ -24,7 +24,6 @@ const adminLinks = [
   { href: "/admin/leads", label: "Leads" },
   { href: "/admin/blogs", label: "Blogs" },
   { href: "/admin/faqs", label: "FAQ" },
-  { href: "/admin/contact", label: "Contact" },
 ];
 
 export function PanelNav({

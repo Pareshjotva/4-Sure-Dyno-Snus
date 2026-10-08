@@ -1,19 +1,19 @@
 import { contactEmails } from "@/lib/site";
 
 export function EmailLinks({
-  emails,
+  primary,
   className,
   separator = "line",
 }: {
-  emails: Array<string | null | undefined>;
+  primary?: string;
   className?: string;
   separator?: "line" | "dot";
 }) {
-  const list = contactEmails(...emails);
+  const emails = contactEmails(primary);
 
   return (
     <>
-      {list.map((email, index) => (
+      {emails.map((email, index) => (
         <span key={email}>
           {index > 0 && separator === "line" ? <br /> : null}
           {index > 0 && separator === "dot" ? " · " : null}

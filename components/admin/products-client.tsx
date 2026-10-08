@@ -275,67 +275,85 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
         {message && <p className="text-sm text-cyan">{message}</p>}
         {error && <p className="text-sm text-warn-red">{error}</p>}
 
-        {rows.length === 0 ? (
-          <p className="surface rounded-2xl px-4 py-10 text-center text-sm text-slate-ink">
-            No products yet. Add your first SKU.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {rows.map((product) => (
-              <article
-                key={product.id}
-                className="surface flex h-full flex-col rounded-2xl p-4"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-black">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                    sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
-                  />
-                </div>
-                <div className="mt-3 flex items-start justify-between gap-3">
-                  <div>
+        <div className="overflow-x-auto surface rounded-2xl">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-black/50 text-white/70">
+              <tr>
+                <th className="px-4 py-3 font-semibold">Photo</th>
+                <th className="px-4 py-3 font-semibold">Product</th>
+                <th className="px-4 py-3 font-semibold">Nicotine</th>
+                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((product) => (
+                <tr key={product.id} className="border-t border-white/8">
+                  <td className="px-4 py-3">
+                    <div className="relative h-14 w-20 overflow-hidden rounded-md bg-black">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
                     <p className="font-semibold text-white">{product.name}</p>
                     <p className="text-xs text-white/45">{product.slug}</p>
-                  </div>
-                  <span
-                    className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold uppercase ${
-                      product.active
-                        ? "bg-cyan/20 text-cyan"
-                        : "bg-white/10 text-white/50"
-                    }`}
+                  </td>
+                  <td className="px-4 py-3 text-white/75">
+                    {product.nicotinePerPortionMg} mg / portion
+                    <br />
+                    {product.nicotinePerGramMg} mg / g
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-md px-2 py-1 text-xs font-semibold uppercase ${
+                        product.active
+                          ? "bg-cyan/20 text-cyan"
+                          : "bg-white/10 text-white/50"
+                      }`}
+                    >
+                      {product.active ? "Active" : "Hidden"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openEdit(product)}
+                      >
+                        <Pencil size={14} /> Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => onDelete(product.id)}
+                        disabled={busy}
+                      >
+                        <Trash2 size={14} /> Delete
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {rows.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-4 py-10 text-center text-slate-ink"
                   >
-                    {product.active ? "Active" : "Hidden"}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-white/75">
-                  {product.nicotinePerPortionMg} mg / portion
-                  <br />
-                  {product.nicotinePerGramMg} mg / g
-                </p>
-                <div className="mt-auto flex flex-wrap gap-2 pt-4">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => openEdit(product)}
-                  >
-                    <Pencil size={14} /> Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => onDelete(product.id)}
-                    disabled={busy}
-                  >
-                    <Trash2 size={14} /> Delete
-                  </Button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+                    No products yet. Add your first SKU.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }

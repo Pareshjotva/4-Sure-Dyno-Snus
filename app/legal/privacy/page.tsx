@@ -26,7 +26,7 @@ export default async function PrivacyPage() {
           <p>
             For privacy requests, email{" "}
             <EmailLinks
-              emails={[site.email, site.secondaryEmail]}
+              primary={site.email}
               separator="dot"
               className="text-cyan"
             />{" "}

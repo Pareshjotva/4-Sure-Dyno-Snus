@@ -36,13 +36,13 @@ export function AdminPricingClient({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+    <div className="space-y-4">
       {rows.map((row, index) => (
-        <div key={row.id} className="surface flex h-full flex-col rounded-2xl p-5">
+        <div key={row.id} className="surface rounded-2xl p-5">
           <p className="font-semibold text-navy">
             {row.province} · {productNames[row.productId] || row.productId}
           </p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-3 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {(
               [
                 ["wholesale", "Wholesale"],
@@ -73,15 +73,14 @@ export function AdminPricingClient({
               </div>
             ))}
           </div>
-          <div className="mt-auto pt-4">
-            <Button
-              size="sm"
-              onClick={() => save(row)}
-              disabled={saving === row.id}
-            >
-              {saving === row.id ? "Saving…" : "Save"}
-            </Button>
-          </div>
+          <Button
+            className="mt-4"
+            size="sm"
+            onClick={() => save(row)}
+            disabled={saving === row.id}
+          >
+            {saving === row.id ? "Saving…" : "Save"}
+          </Button>
         </div>
       ))}
     </div>

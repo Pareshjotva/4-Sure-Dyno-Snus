@@ -1,9 +1,8 @@
 import { InvoiceDocument } from "@/components/orders/invoice-document";
 import { requireSession } from "@/lib/auth";
-import { getOrderById, getOrders, getPricing, getSite, getUserById } from "@/lib/db";
+import { getOrderById, getOrders, getPricing, getUserById } from "@/lib/db";
 import { buildInvoice } from "@/lib/invoice";
 import { isInvoiceAvailable } from "@/lib/orders";
-import { invoicePaymentEmail } from "@/lib/site";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -36,11 +35,10 @@ export default async function AdminInvoicePage({
     redirect(`/admin/orders/${order.id}`);
   }
 
-  const [user, pricing, orders, site] = await Promise.all([
+  const [user, pricing, orders] = await Promise.all([
     getUserById(order.userId),
     getPricing(order.province),
     getOrders(),
-    getSite(),
   ]);
 
   return (
@@ -50,10 +48,6 @@ export default async function AdminInvoicePage({
       canEdit
       backHref={`/admin/orders/${order.id}`}
       backLabel="Back to order"
-      contact={{
-        email: invoicePaymentEmail(site.email, site.secondaryEmail),
-        phone: site.phone,
-      }}
     />
   );
 }

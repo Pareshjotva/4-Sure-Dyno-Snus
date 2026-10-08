@@ -18,7 +18,8 @@ export async function SiteFooter() {
             className="h-14 w-auto"
           />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/65">
-            Premium snus. Reliable wholesale. Built for licensed adult retailers.
+            {site.productLine} by {site.companyName}. Premium snus for licensed
+            adult tobacco retailers across Canada.
           </p>
           <p className="mt-4 text-xs uppercase tracking-[0.18em] text-cyan">
             Adults 19+ only · Nicotine is addictive
@@ -61,7 +62,7 @@ export async function SiteFooter() {
                 {site.phone}
               </a>
             </li>
-            {contactEmails(site.email, site.secondaryEmail).map((email) => (
+            {contactEmails(site.email).map((email) => (
               <li key={email}>
                 <a href={`mailto:${email}`} className="hover:text-white">
                   {email}

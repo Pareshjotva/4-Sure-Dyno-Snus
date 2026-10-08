@@ -154,36 +154,37 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
         </div>
         {message && <p className="text-sm text-cyan">{message}</p>}
         {error && <p className="text-sm text-warn-red">{error}</p>}
-        {rows.length === 0 ? (
-          <p className="text-sm text-slate-ink">No questions yet.</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {rows.map((faq) => (
-              <article
-                key={faq.id}
-                className="surface flex h-full flex-col rounded-xl p-4"
-              >
+        <div className="space-y-3">
+          {rows.map((faq) => (
+            <article
+              key={faq.id}
+              className="surface flex flex-wrap items-center justify-between gap-3 rounded-xl p-4"
+            >
+              <div>
                 <p className="font-semibold text-white">{faq.question}</p>
                 <p className="mt-1 text-xs text-white/60">
                   Order {faq.sortOrder} · {faq.published ? "Published" : "Draft"}
                 </p>
-                <div className="mt-auto flex flex-wrap gap-2 pt-4">
-                  <Button size="sm" variant="outline" onClick={() => openEdit(faq)}>
-                    <Pencil size={14} /> Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => onDelete(faq.id)}
-                    disabled={busy}
-                  >
-                    <Trash2 size={14} /> Delete
-                  </Button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => openEdit(faq)}>
+                  <Pencil size={14} /> Edit
+                </Button>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={() => onDelete(faq.id)}
+                  disabled={busy}
+                >
+                  <Trash2 size={14} /> Delete
+                </Button>
+              </div>
+            </article>
+          ))}
+          {rows.length === 0 && (
+            <p className="text-sm text-slate-ink">No questions yet.</p>
+          )}
+        </div>
       </div>
     );
   }

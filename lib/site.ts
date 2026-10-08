@@ -76,29 +76,22 @@ export const NAV_LINKS = [
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://4sureinternational.ca";
 
+export const COMPANY_EMAILS = [
+  "info@4sureinternational.ca",
+  "4sureinternational@gmail.com",
+] as const;
+
 const HIDDEN_EMAILS = ["octavio4sure@gmail.com"];
 
-function isHiddenEmail(email: string) {
-  return HIDDEN_EMAILS.some(
-    (hidden) => hidden.toLowerCase() === email.toLowerCase()
-  );
-}
-
-export function contactEmails(...values: Array<string | null | undefined>) {
-  const emails: string[] = [];
-  for (const value of values) {
-    const email = value?.trim();
-    if (!email || isHiddenEmail(email)) continue;
-    if (emails.some((existing) => existing.toLowerCase() === email.toLowerCase())) {
-      continue;
-    }
-    emails.push(email);
+export function contactEmails(primary?: string) {
+  const emails: string[] = [...COMPANY_EMAILS];
+  const extra = primary?.trim();
+  if (
+    extra &&
+    !emails.some((email) => email.toLowerCase() === extra.toLowerCase()) &&
+    !HIDDEN_EMAILS.some((email) => email.toLowerCase() === extra.toLowerCase())
+  ) {
+    emails.push(extra);
   }
   return emails;
-}
-
-export function invoicePaymentEmail(primary?: string, secondary?: string) {
-  const preferred = secondary?.trim();
-  if (preferred && !isHiddenEmail(preferred)) return preferred;
-  return contactEmails(primary)[0] || "";
 }
