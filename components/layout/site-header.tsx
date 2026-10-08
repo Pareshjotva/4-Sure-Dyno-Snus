@@ -14,16 +14,22 @@ type Props = {
     name: string;
     role: string;
   } | null;
+  wide?: boolean;
 };
 
-export function SiteHeader({ user }: Props) {
+export function SiteHeader({ user, wide = false }: Props) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const panelHref = user?.role === "admin" ? "/admin" : "/account";
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-md print:hidden">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+      <div
+        className={cn(
+          "mx-auto flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-6",
+          wide ? "xl:px-8" : "max-w-6xl"
+        )}
+      >
         <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
           <Image
             src="/images/logo-4sure-white.png"

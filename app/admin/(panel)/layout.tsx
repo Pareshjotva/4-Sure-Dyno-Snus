@@ -19,10 +19,10 @@ export default async function AdminLayout({
   return (
     <>
       <AgeGate minimumAge={legalAge} />
-      <SiteHeader user={session} />
-      <div className="panel-shell mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[240px_1fr]">
+      <SiteHeader user={session} wide />
+      <div className="panel-shell grid w-full gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[240px_minmax(0,1fr)] xl:px-8">
         <PanelNav mode="admin" userName={session.name} />
-        <div>{children}</div>
+        <div className="min-w-0">{children}</div>
       </div>
     </>
   );
