@@ -5,6 +5,7 @@ import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { VolumeProgress } from "@/components/orders/volume-progress";
 import type { FieldErrors } from "@/lib/form-errors";
 import { licenceNumberSchema } from "@/lib/form-schemas";
 import { quoteVolumeDiscount } from "@/lib/site";
@@ -118,6 +119,8 @@ export function OrderForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5">
+      <VolumeProgress monthPacks={monthPacks} thisOrderPacks={packCount} />
+
       <div className="surface space-y-4 rounded-2xl p-5">
         {products.map((product) => (
           <div

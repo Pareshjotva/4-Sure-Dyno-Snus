@@ -1,5 +1,4 @@
 import { OrderForm } from "@/components/account/order-form";
-import { VolumeProgress } from "@/components/orders/volume-progress";
 import { requireSession } from "@/lib/auth";
 import { getIncentives, getOrders, getProducts, getSite, getUserById } from "@/lib/db";
 import { packsThisMonth } from "@/lib/site";
@@ -27,8 +26,6 @@ export default async function NewOrderPage() {
         discount uses packs already bought this month plus the packs on this
         order. 40–59 combined is 5% off, 60–79 is 10% off, and 80+ is 15% off.
       </p>
-
-      <VolumeProgress monthPacks={monthPacks} className="mt-6" />
 
       <div className="mt-6">
         <OrderForm
