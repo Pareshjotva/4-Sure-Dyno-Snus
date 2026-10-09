@@ -80,7 +80,7 @@ export function WholesaleContent({ minOrderPacks }: { minOrderPacks: number }) {
           </ol>
         </section>
 
-        <aside className="space-y-4 lg:sticky lg:top-24">
+        <aside className="lg:sticky lg:top-24">
           <div className="surface overflow-hidden rounded-2xl">
             <Image
               src="/images/wholesale-banner.png"
@@ -93,26 +93,29 @@ export function WholesaleContent({ minOrderPacks }: { minOrderPacks: number }) {
               priority
             />
           </div>
-          <div className="surface rounded-2xl p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan">
-              Ready to start?
-            </p>
-            <h2 className="mt-2 font-display text-2xl text-white">
-              Send a wholesale inquiry
-            </h2>
-            <p className="mt-2 text-sm text-white/70">
-              Share your store details in the form. Our team reviews every
-              inquiry in the admin panel and follows up.
-            </p>
-            <Button
-              size="lg"
-              className="mt-5 w-full"
-              onClick={() => setOpen(true)}
-            >
-              Open inquiry form
-            </Button>
-          </div>
         </aside>
+      </div>
+
+      <div className="surface mt-10 flex flex-col gap-5 rounded-2xl p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan">
+            Ready to start?
+          </p>
+          <h2 className="mt-2 font-display text-2xl text-white sm:text-3xl">
+            Send a wholesale inquiry
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm text-white/70">
+            Share your store details in the form. Our team reviews every inquiry
+            in the admin panel and follows up.
+          </p>
+        </div>
+        <Button
+          size="lg"
+          className="w-full shrink-0 sm:w-auto sm:min-w-[240px] lg:self-center"
+          onClick={() => setOpen(true)}
+        >
+          Wholesale inquiry now
+        </Button>
       </div>
 
       {open ? (
