@@ -80,18 +80,16 @@ export function WholesaleContent({ minOrderPacks }: { minOrderPacks: number }) {
           </ol>
         </section>
 
-        <aside className="min-h-[280px] lg:min-h-0">
-          <div className="surface relative h-full min-h-[280px] overflow-hidden rounded-2xl">
-            <Image
-              src="/images/wholesale-banner.png"
-              alt="Dyno Snus wholesale program"
-              fill
-              quality={90}
-              sizes="(max-width:1024px) 100vw, 480px"
-              className="object-cover object-center"
-              priority
-            />
-          </div>
+        <aside className="relative min-h-[320px] overflow-hidden rounded-2xl lg:min-h-0">
+          <Image
+            src="/images/wholesale-banner.png"
+            alt="Dyno Snus wholesale program"
+            fill
+            quality={90}
+            sizes="(max-width:1024px) 100vw, 480px"
+            className="object-cover object-center"
+            priority
+          />
         </aside>
       </div>
 
