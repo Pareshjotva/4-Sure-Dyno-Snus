@@ -96,20 +96,22 @@ export function WholesaleContent({ minOrderPacks }: { minOrderPacks: number }) {
         </aside>
       </div>
 
-      <div className="surface mt-10 rounded-2xl p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan">
-          Ready to start?
-        </p>
-        <h2 className="mt-2 font-display text-2xl text-white sm:text-3xl">
-          Send a wholesale inquiry
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm text-white/70">
-          Share your store details in the form. Our team reviews every inquiry
-          in the admin panel and follows up.
-        </p>
+      <div className="surface mt-10 flex flex-col gap-5 rounded-2xl p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan">
+            Ready to start?
+          </p>
+          <h2 className="mt-2 font-display text-2xl text-white sm:text-3xl">
+            Send a wholesale inquiry
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm text-white/70">
+            Share your store details in the form. Our team reviews every inquiry
+            in the admin panel and follows up.
+          </p>
+        </div>
         <Button
           size="lg"
-          className="mt-5 w-full sm:w-auto sm:min-w-[240px]"
+          className="w-full shrink-0 sm:w-auto sm:min-w-[240px] lg:self-center"
           onClick={() => setOpen(true)}
         >
           Wholesale inquiry now
