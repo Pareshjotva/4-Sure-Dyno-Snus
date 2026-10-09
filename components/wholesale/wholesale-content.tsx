@@ -55,7 +55,7 @@ export function WholesaleContent({ minOrderPacks }: { minOrderPacks: number }) {
 
   return (
     <>
-      <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+      <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch">
         <section>
           <h2 className="font-display text-2xl text-navy">Account setup</h2>
           <p className="mt-2 text-sm text-slate-ink">
@@ -80,16 +80,15 @@ export function WholesaleContent({ minOrderPacks }: { minOrderPacks: number }) {
           </ol>
         </section>
 
-        <aside className="lg:sticky lg:top-24">
-          <div className="surface overflow-hidden rounded-2xl">
+        <aside className="min-h-[280px] lg:min-h-0">
+          <div className="surface relative h-full min-h-[280px] overflow-hidden rounded-2xl">
             <Image
               src="/images/wholesale-banner.png"
               alt="Dyno Snus wholesale program"
-              width={1082}
-              height={874}
+              fill
               quality={90}
               sizes="(max-width:1024px) 100vw, 480px"
-              className="h-auto w-full object-cover"
+              className="object-cover object-center"
               priority
             />
           </div>
