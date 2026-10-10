@@ -15,11 +15,8 @@ export async function POST(req: Request) {
       email: data.email,
       passwordHash,
       role: "retailer",
-      company: data.company,
       phone: data.phone,
-      province: data.province,
-      address: data.address,
-      ...(data.licenceNumber ? { licenceNumber: data.licenceNumber } : {}),
+      verificationReview: undefined,
     });
     const session = await createSession(user);
     return NextResponse.json({ ok: true, user: session });

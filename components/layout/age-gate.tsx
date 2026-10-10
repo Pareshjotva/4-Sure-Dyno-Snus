@@ -55,7 +55,7 @@ export function AgeGate({
             className="h-12 w-auto"
           />
         </div>
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-cyan">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.08em] text-cyan">
           Age verification
         </p>
         <h2 className="mt-3 text-center font-display text-3xl text-white sm:text-4xl">

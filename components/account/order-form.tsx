@@ -7,7 +7,6 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { VolumeProgress } from "@/components/orders/volume-progress";
 import type { FieldErrors } from "@/lib/form-errors";
-import { licenceNumberSchema } from "@/lib/form-schemas";
 import { quoteVolumeDiscount } from "@/lib/site";
 import type { IncentiveTier } from "@/lib/types";
 import Image from "next/image";
@@ -24,14 +23,14 @@ export function OrderForm({
   products,
   defaultProvince,
   minOrderPacks,
-  needsLicence,
+  pendingNotice = "",
   tiers,
   monthPacks,
 }: {
   products: ProductOption[];
   defaultProvince: string;
   minOrderPacks: number;
-  needsLicence: boolean;
+  pendingNotice?: string;
   tiers: IncentiveTier[];
   monthPacks: number;
 }) {
@@ -66,18 +65,6 @@ export function OrderForm({
       }
     }
     const form = new FormData(e.currentTarget);
-    let licenceNumber = "";
-    if (needsLicence) {
-      const parsed = licenceNumberSchema.safeParse(
-        String(form.get("licenceNumber") || "")
-      );
-      if (!parsed.success) {
-        next.licenceNumber =
-          parsed.error.issues[0]?.message || "Enter the tobacco licence number.";
-      } else {
-        licenceNumber = parsed.data;
-      }
-    }
     const items = products
       .filter((p) => (qty[p.id] || 0) > 0)
       .map((p) => ({ productId: p.id, quantity: qty[p.id] }));
@@ -100,7 +87,6 @@ export function OrderForm({
       body: JSON.stringify({
         province: form.get("province"),
         notes: form.get("notes"),
-        ...(needsLicence ? { licenceNumber } : {}),
         items,
       }),
     });
@@ -226,17 +212,10 @@ export function OrderForm({
         </div>
       </div>
 
-      {needsLicence && (
-        <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70">
-            Tobacco licence #
-          </label>
-          <Input name="licenceNumber" placeholder="Required to place this order" />
-          <FieldError message={errors.licenceNumber} />
-          <p className="mt-1 text-xs text-white/55">
-            Required once. After this order it stays on your profile.
-          </p>
-        </div>
+      {pendingNotice && (
+        <p className="rounded-xl border border-warn-yellow/40 bg-warn-yellow/10 px-4 py-3 text-sm text-warn-yellow">
+          {pendingNotice}
+        </p>
       )}
 
       <div>

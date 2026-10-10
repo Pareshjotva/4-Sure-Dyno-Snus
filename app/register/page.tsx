@@ -19,7 +19,8 @@ export default async function RegisterPage() {
           Open a wholesale account
         </h1>
         <p className="mt-2 text-sm text-slate-ink">
-          For licensed adult tobacco retailers in BC, Alberta, and Ontario.
+          Create your account with your name, email, and phone. Store details
+          and your tobacco license are completed in your profile.
         </p>
         <div className="mt-6">
           <RegisterForm />

@@ -7,15 +7,16 @@ import { usePathname, useRouter } from "next/navigation";
 
 const accountLinks = [
   { href: "/account", label: "Overview" },
+  { href: "/account/program", label: "Retailer Program" },
   { href: "/account/orders", label: "Orders" },
   { href: "/account/order/new", label: "Place order" },
   { href: "/account/pricing", label: "Pricing" },
-  { href: "/account/program", label: "Retailer Program" },
   { href: "/account/profile", label: "Profile" },
 ];
 
 const adminLinks = [
   { href: "/admin", label: "Overview" },
+  { href: "/admin/analytics", label: "Analytics" },
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/reports", label: "Reports" },
   { href: "/admin/products", label: "Products" },

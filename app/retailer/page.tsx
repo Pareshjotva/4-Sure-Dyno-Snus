@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "Dyno Snus Retailer Incentive Program — buy more, save more with 5%, 10%, and 15% monthly volume tiers.",
 };
 
-export default async function IncentivesPage() {
+export default async function RetailerProgramPage() {
   const incentives = await getIncentives();
   const maxOff = incentives.reduce(
     (max, tier) => Math.max(max, tier.discountPercent),

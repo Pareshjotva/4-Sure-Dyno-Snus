@@ -8,21 +8,29 @@ import {
   isInvoiceAvailable,
   orderStatusLabel,
 } from "@/lib/orders";
+import { PROFILE_STATUS_LABEL } from "@/lib/profile-status";
 import type { Order, OrderStatus } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+type AdminOrderRow = Order & { verificationLabel?: string };
+
 export function AdminOrdersClient({
   orders,
   images,
 }: {
-  orders: Order[];
+  orders: AdminOrderRow[];
   images: Record<string, string>;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "unverified">("all");
+  const visible =
+    filter === "unverified"
+      ? orders.filter((order) => order.profileVerificationStatus !== "verified")
+      : orders;
 
   async function updateStatus(id: string, status: OrderStatus) {
     setBusy(id);
@@ -37,7 +45,23 @@ export function AdminOrdersClient({
 
   return (
     <div className="space-y-4">
-      {orders.map((order) => {
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className={`rounded-md px-3 py-2 text-sm font-semibold ${filter === "all" ? "bg-cyan text-white" : "bg-white/10 text-white"}`}
+          onClick={() => setFilter("all")}
+        >
+          All orders
+        </button>
+        <button
+          type="button"
+          className={`rounded-md px-3 py-2 text-sm font-semibold ${filter === "unverified" ? "bg-cyan text-white" : "bg-white/10 text-white"}`}
+          onClick={() => setFilter("unverified")}
+        >
+          Unverified profiles
+        </button>
+      </div>
+      {visible.map((order) => {
         const statusValue =
           order.status === "confirmed" ? "accepted" : order.status;
         return (
@@ -49,6 +73,16 @@ export function AdminOrdersClient({
                   {order.company || order.userName} · {order.province} ·{" "}
                   {formatDate(order.createdAt)}
                 </p>
+                {order.profileVerificationStatus &&
+                  order.profileVerificationStatus !== "verified" && (
+                    <p className="mt-2 text-sm font-semibold text-warn-yellow">
+                      Pending Profile Verification — this customer&apos;s profile
+                      and license have not been verified (
+                      {order.verificationLabel ||
+                        PROFILE_STATUS_LABEL[order.profileVerificationStatus]}
+                      ).
+                    </p>
+                  )}
               </div>
             </div>
             <OrderItemList
@@ -98,7 +132,7 @@ export function AdminOrdersClient({
           </article>
         );
       })}
-      {orders.length === 0 && (
+      {visible.length === 0 && (
         <p className="text-sm text-slate-ink">No orders yet.</p>
       )}
     </div>

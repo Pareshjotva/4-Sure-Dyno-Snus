@@ -1,6 +1,8 @@
+import { AdminNotices } from "@/components/admin/admin-notices";
 import { OrderTotals } from "@/components/orders/order-totals";
 import { requireSession } from "@/lib/auth";
 import {
+  getAdminNotices,
   getDashboardStats,
   getLeads,
   getOrders,
@@ -16,11 +18,12 @@ export const dynamic = "force-dynamic";
 export default async function AdminHomePage() {
   const session = await requireSession("admin");
   if (!session) redirect("/admin/login");
-  const [stats, orders, leads, wholesaleInquiries] = await Promise.all([
+  const [stats, orders, leads, wholesaleInquiries, notices] = await Promise.all([
     getDashboardStats(),
     getOrders(),
     getLeads(),
     getWholesaleInquiries(),
+    getAdminNotices(),
   ]);
 
   const cards = [
@@ -43,6 +46,8 @@ export default async function AdminHomePage() {
         Manage Dyno Snus catalogue, retailer orders, contact leads, and
         wholesale inquiries.
       </p>
+
+      <AdminNotices notices={notices} />
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {cards.map((card) => (

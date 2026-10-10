@@ -6,7 +6,7 @@ export default function NotFound() {
   return (
     <SiteShell>
       <div className="mx-auto max-w-xl px-4 py-24 text-center sm:px-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan">
+        <p className="text-sm font-semibold uppercase tracking-[0.08em] text-cyan">
           404
         </p>
         <h1 className="mt-3 font-display text-4xl text-navy">Page not found</h1>

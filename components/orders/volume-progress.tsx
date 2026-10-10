@@ -49,7 +49,7 @@ export function VolumeProgress({
   return (
     <div className={cn("surface rounded-2xl p-5 sm:p-6", className)}>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan">
+        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-cyan">
           This calendar month
         </p>
         <p className="mt-1 font-display text-3xl text-white sm:text-4xl">

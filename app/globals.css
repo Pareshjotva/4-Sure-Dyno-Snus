@@ -36,26 +36,26 @@ body {
     linear-gradient(180deg, #070707 0%, #0d0d0d 45%, #111 100%);
   color: var(--foreground);
   font-family: var(--font-body), system-ui, sans-serif;
+  font-synthesis: none;
+  letter-spacing: -0.011em;
+  line-height: 1.55;
   min-height: 100vh;
 }
 
 h1,
 h2,
-h3,
 .font-display {
   font-family: var(--font-display), Impact, sans-serif;
-  letter-spacing: 0.02em;
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0.01em;
+  line-height: 0.95;
   text-transform: uppercase;
-  font-weight: 700;
-}
-
-h3 {
-  letter-spacing: 2px;
 }
 
 .font-brand {
   font-family: var(--font-brand), Impact, sans-serif;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
 a {

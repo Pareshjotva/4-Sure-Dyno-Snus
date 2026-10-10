@@ -33,7 +33,7 @@ export default async function HomePage() {
             <h1 className="font-display text-5xl leading-none text-white sm:text-7xl lg:text-8xl">
               Dyno Snus
             </h1>
-            <p className="mt-2 font-display text-2xl tracking-[0.12em] text-cyan sm:text-3xl">
+            <p className="mt-2 font-display text-2xl tracking-[0.04em] text-cyan sm:text-3xl">
               Premium snus. Exceptional experience.
             </p>
             <p className="mt-5 max-w-lg text-base leading-relaxed text-white/75 sm:text-lg">
@@ -187,7 +187,7 @@ export default async function HomePage() {
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_1.1fr] lg:items-center">
           <RevealOnScroll>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-cyan">
                 Buy more. Save more.
               </p>
               <h2 className="mt-3 font-display text-4xl text-white sm:text-5xl">
@@ -197,14 +197,14 @@ export default async function HomePage() {
                 Monthly volume tiers reward growth partners with invoice
                 discounts or month-end account credits.
               </p>
-              <Link href="/incentives" className="mt-6 inline-block">
+              <Link href="/retailer" className="mt-6 inline-block">
                 <Button>See program details</Button>
               </Link>
             </div>
           </RevealOnScroll>
           <RevealOnScroll>
             <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-cyan/30 bg-black/50 px-6 py-10 text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-cyan">
                 Volume discount
               </p>
               <p className="mt-3 font-display text-6xl leading-none text-white sm:text-7xl">

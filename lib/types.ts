@@ -55,19 +55,67 @@ export interface IncentiveTier {
   savePerPack: number;
 }
 
+export type LicenseReview = "pending" | "approved" | "rejected";
+
+export type ProfileStatus =
+  | "incomplete"
+  | "license_missing"
+  | "pending"
+  | "rejected"
+  | "expired"
+  | "verified";
+
+export interface StoredLicense {
+  fileName: string;
+  storedName: string;
+  expiryDate: string;
+  uploadedAt: string;
+  review: LicenseReview;
+  reviewedAt?: string;
+  reviewNote?: string;
+}
+
+export interface ProfileAuditEntry {
+  id: string;
+  at: string;
+  actor: "customer" | "admin";
+  message: string;
+}
+
 export interface User {
   id: string;
   email: string;
   passwordHash: string;
   name: string;
   role: UserRole;
+  firstName?: string;
+  lastName?: string;
+  country?: string;
   company?: string;
   phone?: string;
   province?: string;
   address?: string;
+  city?: string;
+  postalCode?: string;
   licenceNumber?: string;
+  license?: StoredLicense;
+  license2?: StoredLicense;
+  license3?: StoredLicense;
+  verificationReview?: LicenseReview;
+  profileAudit?: ProfileAuditEntry[];
   createdAt: string;
   active: boolean;
+}
+
+export interface AdminNotice {
+  id: string;
+  userId: string;
+  userName: string;
+  kind: "profile" | "license" | "order";
+  message: string;
+  href: string;
+  createdAt: string;
+  read: boolean;
 }
 
 export interface OrderItem {
@@ -109,6 +157,8 @@ export interface Order {
   qualifyingPacks?: number;
   total: number;
   status: OrderStatus;
+  profileVerificationStatus?: ProfileStatus;
+  pendingProfileVerification?: boolean;
   notes?: string;
   invoiceOverrides?: InvoiceOverrides;
   createdAt: string;

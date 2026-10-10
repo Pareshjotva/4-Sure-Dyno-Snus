@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { requireSession } from "@/lib/auth";
 import { getOrders, getSite, getUserById } from "@/lib/db";
 import { isInvoiceAvailable, orderStatusLabel } from "@/lib/orders";
+import { orderEligibility, profileCompletion, profileDetail } from "@/lib/profile-status";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -17,6 +18,7 @@ export default async function AccountHomePage() {
     getSite(),
     getUserById(session.id),
   ]);
+  const completion = user ? profileCompletion(user) : null;
 
   return (
     <div>
@@ -25,13 +27,20 @@ export default async function AccountHomePage() {
         {session.company || "Retailer account"} · Province{" "}
         {session.province || "—"}
       </p>
-      <ProfileProgress complete={Boolean(user?.licenceNumber?.trim())} />
-      {!user?.licenceNumber?.trim() && (
+      {completion && (
+        <ProfileProgress
+          percent={completion.percent}
+          status={completion.status}
+          label={completion.label}
+          detail={profileDetail(completion.status)}
+        />
+      )}
+      {user && !orderEligibility(user).allowed && (
         <p className="mt-3 text-sm text-white/75">
           <Link href="/account/profile" className="font-semibold text-cyan">
             Open your profile
           </Link>{" "}
-          to add the licence, or enter it when you place an order.
+          to upload a valid tobacco license before placing an order.
         </p>
       )}
 

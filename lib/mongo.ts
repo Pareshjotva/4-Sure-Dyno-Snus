@@ -13,8 +13,14 @@ declare global {
 
 function clientPromise() {
   if (!global._mongoClientPromise) {
-    const client = new MongoClient(uri!);
-    global._mongoClientPromise = client.connect();
+    const client = new MongoClient(uri!, {
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
+    });
+    global._mongoClientPromise = client.connect().catch((error) => {
+      global._mongoClientPromise = undefined;
+      throw error;
+    });
   }
   return global._mongoClientPromise;
 }

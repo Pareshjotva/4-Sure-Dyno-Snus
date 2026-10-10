@@ -67,7 +67,7 @@ export function discountTierLabel(percent: number, stored?: string) {
 export const NAV_LINKS = [
   { href: "/products", label: "Products" },
   { href: "/wholesale", label: "Wholesale" },
-  { href: "/incentives", label: "Retailer Program" },
+  { href: "/retailer", label: "Retailer Program" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },

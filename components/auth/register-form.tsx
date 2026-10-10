@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import type { FieldErrors } from "@/lib/form-errors";
 import { registerSchema } from "@/lib/form-schemas";
 import Link from "next/link";
@@ -18,6 +17,9 @@ function issuesToFields(issues: { path: PropertyKey[]; message: string }[]) {
   }
   return next;
 }
+
+const labelClass =
+  "mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -51,93 +53,43 @@ export function RegisterForm() {
       );
       return;
     }
-    router.push("/account");
+    router.push("/account/profile");
     router.refresh();
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      noValidate
-      className="surface space-y-4 rounded-2xl p-6"
-    >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70">
-            Contact name
-          </label>
-          <Input name="name" />
-          <FieldError message={errors.name} />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70">
-            Business email
-          </label>
-          <Input name="email" type="email" />
-          <FieldError message={errors.email} />
-        </div>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70">
-            Company / store
-          </label>
-          <Input name="company" />
-          <FieldError message={errors.company} />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70">
-            Phone
-          </label>
-          <Input name="phone" />
-          <FieldError message={errors.phone} />
-        </div>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70">
-            Province
-          </label>
-          <Select name="province" defaultValue="BC">
-            <option value="BC">British Columbia</option>
-            <option value="AB">Alberta</option>
-            <option value="ON">Ontario</option>
-          </Select>
-          <FieldError message={errors.province} />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70">
-            Tobacco licence #
-          </label>
-          <Input name="licenceNumber" placeholder="Optional" />
-          <FieldError message={errors.licenceNumber} />
-          <p className="mt-1 text-xs text-white/55">
-            Not needed to register. You can view pricing now. Add the licence
-            once, when you place an order.
-          </p>
-        </div>
+    <form onSubmit={onSubmit} noValidate className="surface space-y-4 rounded-2xl p-6">
+      <div>
+        <label className={labelClass}>Name</label>
+        <Input name="name" autoComplete="name" />
+        <FieldError message={errors.name} />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70">
-          Business address
-        </label>
-        <Input name="address" />
-        <FieldError message={errors.address} />
+        <label className={labelClass}>Email address</label>
+        <Input name="email" type="email" autoComplete="email" />
+        <FieldError message={errors.email} />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70">
-          Password
-        </label>
-        <Input name="password" type="password" />
+        <label className={labelClass}>Phone number</label>
+        <Input name="phone" type="tel" autoComplete="tel" />
+        <FieldError message={errors.phone} />
+      </div>
+      <div>
+        <label className={labelClass}>Password</label>
+        <Input name="password" type="password" autoComplete="new-password" />
         <FieldError message={errors.password} />
       </div>
+      <p className="text-sm text-white/60">
+        Store details and your tobacco license are added in your profile after
+        you create the account.
+      </p>
       {formError && (
         <p className="text-sm text-warn-red" role="alert">
           {formError}
         </p>
       )}
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Creating account…" : "Create wholesale account"}
+        {loading ? "Creating account…" : "Create account"}
       </Button>
       <p className="text-center text-sm text-slate-ink">
         Already registered?{" "}

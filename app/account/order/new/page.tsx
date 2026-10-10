@@ -1,7 +1,10 @@
 import { OrderForm } from "@/components/account/order-form";
+import { Button } from "@/components/ui/button";
 import { requireSession } from "@/lib/auth";
 import { getIncentives, getOrders, getProducts, getSite, getUserById } from "@/lib/db";
+import { orderEligibility } from "@/lib/profile-status";
 import { packsThisMonth } from "@/lib/site";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function NewOrderPage() {
@@ -17,6 +20,7 @@ export default async function NewOrderPage() {
   if (!user) redirect("/login");
 
   const monthPacks = packsThisMonth(orders);
+  const gate = orderEligibility(user);
 
   return (
     <div>
@@ -28,18 +32,29 @@ export default async function NewOrderPage() {
       </p>
 
       <div className="mt-6">
-        <OrderForm
-          products={products.map((p) => ({
-            id: p.id,
-            name: p.name,
-            image: p.image,
-          }))}
-          defaultProvince={session.province || "BC"}
-          minOrderPacks={site.minOrderPacks}
-          needsLicence={!user.licenceNumber?.trim()}
-          tiers={incentives}
-          monthPacks={monthPacks}
-        />
+        {!gate.allowed ? (
+          <div className="surface rounded-2xl p-5">
+            <p className="text-sm text-warn-red" role="alert">
+              {gate.message}
+            </p>
+            <Link href="/account/profile" className="mt-4 inline-block">
+              <Button>Go to profile</Button>
+            </Link>
+          </div>
+        ) : (
+          <OrderForm
+            products={products.map((p) => ({
+              id: p.id,
+              name: p.name,
+              image: p.image,
+            }))}
+            defaultProvince={session.province || user.province || "BC"}
+            minOrderPacks={site.minOrderPacks}
+            pendingNotice={gate.pending ? gate.message : ""}
+            tiers={incentives}
+            monthPacks={monthPacks}
+          />
+        )}
       </div>
     </div>
   );

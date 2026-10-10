@@ -30,7 +30,7 @@ export default async function AccountProgramPage() {
         <Link href="/account/order/new">
           <Button>Place an order</Button>
         </Link>
-        <Link href="/incentives">
+        <Link href="/retailer">
           <Button variant="outline">Public program page</Button>
         </Link>
       </div>

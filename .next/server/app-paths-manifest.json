@@ -1,6 +1,12 @@
 {
-  "/account/page": "app/account/page.js",
-  "/api/auth/register/route": "app/api/auth/register/route.js",
+  "/admin/(panel)/analytics/page": "app/admin/(panel)/analytics/page.js",
+  "/admin/(panel)/page": "app/admin/(panel)/page.js",
+  "/admin/login/page": "app/admin/login/page.js",
+  "/api/admin/analytics/events/route": "app/api/admin/analytics/events/route.js",
+  "/api/admin/analytics/export/route": "app/api/admin/analytics/export/route.js",
+  "/api/admin/analytics/route": "app/api/admin/analytics/route.js",
+  "/api/analytics/collect/route": "app/api/analytics/collect/route.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
   "/page": "app/page.js",
-  "/register/page": "app/register/page.js"
+  "/products/page": "app/products/page.js"
 }

@@ -3,7 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   serverExternalPackages: ["mongodb"],
   async redirects() {
-    return [{ source: "/pricing", destination: "/wholesale", permanent: true }];
+    return [
+      { source: "/pricing", destination: "/wholesale", permanent: true },
+      { source: "/incentives", destination: "/retailer", permanent: true },
+    ];
   },
   images: {
     formats: ["image/avif", "image/webp"],

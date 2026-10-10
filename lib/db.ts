@@ -1,12 +1,14 @@
 import type { Collection, Document } from "mongodb";
 import { getDb } from "./mongo";
 import type {
+  AdminNotice,
   ContactLead,
   Blog,
   Faq,
   IncentiveTier,
   Order,
   Product,
+  ProfileStatus,
   ProvincePricing,
   SiteContent,
   User,
@@ -154,6 +156,44 @@ export async function updateUser(id: string, patch: Partial<User>) {
     { returnDocument: "after" }
   );
   return strip(updated);
+}
+
+export async function syncOrderVerification(userId: string, status: ProfileStatus) {
+  const orders = await collection<Order>("orders");
+  await orders.updateMany(
+    { userId },
+    {
+      $set: {
+        profileVerificationStatus: status,
+        pendingProfileVerification: status !== "verified",
+      },
+    }
+  );
+}
+
+export async function createAdminNotice(
+  notice: Omit<AdminNotice, "id" | "createdAt" | "read">
+) {
+  const notices = await collection<AdminNotice>("adminNotices");
+  const record: AdminNotice = {
+    ...notice,
+    id: `notice_${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    read: false,
+  };
+  await notices.insertOne(record);
+  return record;
+}
+
+export async function getAdminNotices(limit = 20) {
+  const notices = await collection<AdminNotice>("adminNotices");
+  const rows = await notices.find().sort({ createdAt: -1 }).limit(limit).toArray();
+  return rows.map((row) => strip(row)!);
+}
+
+export async function markAdminNoticeRead(id: string) {
+  const notices = await collection<AdminNotice>("adminNotices");
+  await notices.updateOne({ id }, { $set: { read: true } });
 }
 
 export async function getOrders(userId?: string) {

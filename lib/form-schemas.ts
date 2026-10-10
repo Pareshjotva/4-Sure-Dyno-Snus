@@ -55,25 +55,40 @@ export const licenceNumberSchema = z
   .trim()
   .min(3, "Enter the tobacco licence number.");
 
+export const phoneSchema = z
+  .string()
+  .trim()
+  .min(7, "Enter your phone number.")
+  .max(30, "Enter a shorter phone number.");
+
 export const registerSchema = z.object({
-  name: z.string().trim().min(2, "Enter the contact name."),
+  name: z.string().trim().min(2, "Enter your name."),
   email: z
     .string()
     .trim()
-    .min(1, "Enter a business email.")
+    .min(1, "Enter your email address.")
     .email("Enter a valid email address."),
   password: z
     .string()
     .min(1, "Enter a password.")
     .min(8, "Password must be at least 8 characters."),
-  company: z.string().trim().min(2, "Enter the store or company name."),
-  phone: z.string().trim().optional(),
-  province: z.string().trim().min(2, "Choose a province."),
-  address: z.string().trim().optional(),
-  licenceNumber: optionalText(
-    3,
-    "Licence number must be at least 3 characters."
-  ),
+  phone: phoneSchema,
+});
+
+export const profileFieldsSchema = z.object({
+  firstName: z.string().trim().min(1, "Enter your first name."),
+  lastName: z.string().trim().min(1, "Enter your last name."),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Enter your email address.")
+    .email("Enter a valid email address."),
+  country: z.string().trim().min(2, "Enter your country."),
+  company: z.string().trim().min(2, "Enter the company or store name."),
+  address: z.string().trim().min(4, "Enter the store address."),
+  city: z.string().trim().min(2, "Enter the city."),
+  postalCode: z.string().trim().min(3, "Enter the postal code."),
+  phone: phoneSchema,
 });
 
 export const orderSchema = z.object({

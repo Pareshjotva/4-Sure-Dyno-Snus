@@ -21,13 +21,13 @@ export async function SiteFooter() {
             {site.productLine} by {site.companyName}. Premium snus for licensed
             adult tobacco retailers across Canada.
           </p>
-          <p className="mt-4 text-xs uppercase tracking-[0.18em] text-cyan">
+          <p className="mt-4 text-xs uppercase tracking-[0.08em] text-cyan">
             Adults 19+ only · Nicotine is addictive
           </p>
         </div>
 
         <div>
-          <h3 className="font-display text-lg tracking-[0.16em] text-cyan">
+          <h3 className="font-display text-lg tracking-[0.06em] text-cyan">
             Explore
           </h3>
           <ul className="mt-4 space-y-2 text-sm text-white/70">
@@ -52,7 +52,7 @@ export async function SiteFooter() {
         </div>
 
         <div>
-          <h3 className="font-display text-lg tracking-[0.16em] text-cyan">
+          <h3 className="font-display text-lg tracking-[0.06em] text-cyan">
             Contact
           </h3>
           <ul className="mt-4 space-y-2 text-sm text-white/70">

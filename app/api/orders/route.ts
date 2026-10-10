@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth";
 import {
+  createAdminNotice,
   createOrder,
   getIncentives,
   getOrders,
   getProductById,
   getSite,
   getUserById,
-  updateUser,
 } from "@/lib/db";
 import { zodFieldErrors } from "@/lib/form-errors";
-import { licenceNumberSchema, orderSchema } from "@/lib/form-schemas";
+import { orderSchema } from "@/lib/form-schemas";
+import { orderEligibility, PROFILE_STATUS_LABEL } from "@/lib/profile-status";
 import { packsThisMonth, quoteVolumeDiscount } from "@/lib/site";
 import { z } from "zod";
 
@@ -26,22 +27,9 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    let licenceToSave = "";
-    if (!user.licenceNumber?.trim()) {
-      const licence = licenceNumberSchema.safeParse(body.licenceNumber || "");
-      if (!licence.success) {
-        return NextResponse.json(
-          {
-            fieldErrors: {
-              licenceNumber:
-                licence.error.issues[0]?.message ||
-                "Enter the tobacco licence number.",
-            },
-          },
-          { status: 400 }
-        );
-      }
-      licenceToSave = licence.data;
+    const gate = orderEligibility(user);
+    if (!gate.allowed) {
+      return NextResponse.json({ error: gate.message }, { status: 400 });
     }
     const site = await getSite();
     const incentives = await getIncentives();
@@ -93,10 +81,6 @@ export async function POST(req: Request) {
       subtotal
     );
 
-    if (licenceToSave) {
-      await updateUser(session.id, { licenceNumber: licenceToSave });
-    }
-
     const order = await createOrder({
       userId: session.id,
       userName: session.name,
@@ -111,12 +95,24 @@ export async function POST(req: Request) {
       qualifyingPacks: quote.qualifyingPacks,
       total: quote.total,
       status: "pending",
+      profileVerificationStatus: gate.status,
+      pendingProfileVerification: gate.pending,
       notes:
         body.notes ||
         (packCount >= site.minOrderPacks
           ? "Minimum order met — free shipping."
           : undefined),
     });
+
+    if (gate.pending) {
+      await createAdminNotice({
+        userId: user.id,
+        userName: user.name,
+        kind: "order",
+        message: `${user.name} placed ${order.orderNumber} while their profile is ${PROFILE_STATUS_LABEL[gate.status]}.`,
+        href: `/admin/orders/${order.id}`,
+      });
+    }
 
     return NextResponse.json({ ok: true, order });
   } catch (err) {
