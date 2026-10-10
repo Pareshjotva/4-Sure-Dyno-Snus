@@ -55,7 +55,7 @@ export function WholesaleContent({ minOrderPacks }: { minOrderPacks: number }) {
 
   return (
     <>
-      <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+      <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch">
         <section>
           <h2 className="font-display text-2xl text-navy">Account setup</h2>
           <p className="mt-2 text-sm text-slate-ink">
@@ -68,55 +68,51 @@ export function WholesaleContent({ minOrderPacks }: { minOrderPacks: number }) {
                 key={step.title}
                 className="flex gap-4 rounded-2xl border border-white/10 bg-black/40 p-4"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cyan/20 text-sm font-semibold text-cyan">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cyan/20 font-display text-sm text-cyan">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <div>
-                  <h3 className="text-base font-semibold leading-snug text-white">
-                    {step.title}
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-white/70">
-                    {step.detail}
-                  </p>
+                  <h3 className="font-semibold text-white">{step.title}</h3>
+                  <p className="mt-1 text-sm text-white/70">{step.detail}</p>
                 </div>
               </li>
             ))}
           </ol>
         </section>
 
-        <aside className="space-y-4 lg:sticky lg:top-24">
-          <div className="surface overflow-hidden rounded-2xl">
-            <Image
-              src="/images/wholesale-banner.png"
-              alt="Dyno Snus wholesale program"
-              width={1082}
-              height={874}
-              quality={90}
-              sizes="(max-width:1024px) 100vw, 480px"
-              className="h-auto w-full object-cover"
-              priority
-            />
-          </div>
-          <div className="surface rounded-2xl p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-cyan">
-              Ready to start?
-            </p>
-            <h2 className="mt-2 font-display text-2xl text-white">
-              Send a wholesale inquiry
-            </h2>
-            <p className="mt-2 text-sm text-white/70">
-              Share your store details in the form. Our team reviews every
-              inquiry in the admin panel and follows up.
-            </p>
-            <Button
-              size="lg"
-              className="mt-5 w-full"
-              onClick={() => setOpen(true)}
-            >
-              Open inquiry form
-            </Button>
-          </div>
+        <aside className="relative min-h-[320px] overflow-hidden rounded-2xl lg:min-h-0">
+          <Image
+            src="/images/wholesale-banner.png"
+            alt="Dyno Snus wholesale program"
+            fill
+            quality={90}
+            sizes="(max-width:1024px) 100vw, 480px"
+            className="object-cover object-center"
+            priority
+          />
         </aside>
+      </div>
+
+      <div className="surface mt-10 flex flex-col gap-5 rounded-2xl p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan">
+            Ready to start?
+          </p>
+          <h2 className="mt-2 font-display text-2xl text-white sm:text-3xl">
+            Send a wholesale inquiry
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm text-white/70">
+            Share your store details in the form. Our team reviews every inquiry
+            in the admin panel and follows up.
+          </p>
+        </div>
+        <Button
+          size="lg"
+          className="w-full shrink-0 sm:w-auto sm:min-w-[240px] lg:self-center"
+          onClick={() => setOpen(true)}
+        >
+          Wholesale inquiry now
+        </Button>
       </div>
 
       {open ? (
@@ -134,7 +130,7 @@ export function WholesaleContent({ minOrderPacks }: { minOrderPacks: number }) {
           >
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-cyan">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan">
                   Wholesale inquiry
                 </p>
                 <h2
