@@ -49,12 +49,12 @@ export interface AnalyticsReport {
   summary: AnalyticsMetrics;
   previous: AnalyticsMetrics;
   series: { date: string; pageViews: number; sessions: number }[];
-  countries: { country: string; region: string; city: string; sessions: number }[];
+  countries: { country: string; city: string; users: number }[];
   sources: { source: string; sessions: number }[];
   devices: { name: string; sessions: number }[];
   browsers: { name: string; sessions: number }[];
   operatingSystems: { name: string; sessions: number }[];
-  topPages: { path: string; views: number; avgEngagementMs: number }[];
+  topPages: { path: string; views: number; users: number; avgEngagementMs: number }[];
   landingPages: { path: string; sessions: number }[];
   exitPages: { path: string; sessions: number; bounces: number }[];
   eventCounts: { type: string; count: number }[];

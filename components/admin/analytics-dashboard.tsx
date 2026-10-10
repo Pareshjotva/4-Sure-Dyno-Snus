@@ -1,6 +1,5 @@
 "use client";
 
-import { VisitorMap } from "@/components/admin/visitor-map";
 import { ANALYTICS_EVENTS, type AnalyticsReport } from "@/lib/analytics-shared";
 import { formatDate } from "@/lib/utils";
 import { FormEvent, useEffect, useState } from "react";
@@ -157,7 +156,7 @@ export function AnalyticsDashboard() {
           [
             ["overview", "Overview"],
             ["locations", "Locations"],
-            ["journeys", "Journeys"],
+            ["journeys", "Pages"],
             ["events", "Events"],
             ["monthly", "Monthly"],
           ] as const
@@ -252,23 +251,9 @@ export function AnalyticsDashboard() {
 
       {report && tab === "locations" && (
         <div className="mt-4 space-y-4">
-          <section className="surface rounded-2xl p-5">
-            <h2 className="font-display text-2xl text-white">Visitor distribution</h2>
-            <div className="mt-4">
-              <VisitorMap
-                rows={Object.values(
-                  report.countries.reduce<Record<string, { country: string; sessions: number }>>((acc, row) => {
-                    acc[row.country] = acc[row.country] || { country: row.country, sessions: 0 };
-                    acc[row.country].sessions += row.sessions;
-                    return acc;
-                  }, {})
-                )}
-              />
-            </div>
-          </section>
           <DataTable
-            headers={["Country", "Region", "City", "Sessions"]}
-            rows={report.countries.map((row) => [row.country, row.region || "—", row.city || "—", String(row.sessions)])}
+            headers={["Country", "City", "Users"]}
+            rows={report.countries.map((row) => [row.country, row.city || "—", String(row.users)])}
             empty="No location data in this range."
           />
           <div className="grid gap-4 lg:grid-cols-2">
@@ -279,38 +264,12 @@ export function AnalyticsDashboard() {
       )}
 
       {report && tab === "journeys" && (
-        <div className="mt-4 space-y-4">
-          <div className="grid gap-4 lg:grid-cols-2">
-            <NameList title="Landing pages" rows={report.landingPages.map((row) => ({ name: row.path, value: row.sessions }))} />
-            <NameList title="Estimated exit pages" rows={report.exitPages.map((row) => ({ name: row.path, value: row.sessions }))} />
-          </div>
+        <div className="mt-4">
           <DataTable
-            headers={["Estimated exit", "Sessions", "Single-page drop-off"]}
-            rows={report.exitPages.map((row) => [row.path, String(row.sessions), String(row.bounces)])}
-            empty="No exit estimates yet."
+            headers={["Page", "Users"]}
+            rows={report.topPages.map((row) => [row.path, String(row.users)])}
+            empty="No page visits in this range."
           />
-          <div className="space-y-3">
-            {report.journeys.length === 0 && (
-              <p className="text-sm text-white/60">No sessions in this range.</p>
-            )}
-            {report.journeys.map((journey) => (
-              <article key={journey.sessionId} className="surface rounded-2xl p-4">
-                <p className="text-sm font-semibold text-white">
-                  {journey.country} {journey.city ? `· ${journey.city}` : ""} · {journey.device} · {journey.source}
-                </p>
-                <p className="text-xs text-white/50">
-                  {formatDate(journey.startedAt)} · last observed {journey.exitPath}
-                </p>
-                <ol className="mt-3 space-y-1 text-sm text-white/80">
-                  {journey.pages.map((page, index) => (
-                    <li key={`${page.ts}-${page.path}`}>
-                      {index + 1}. {page.path} <span className="text-white/45">{page.title}</span>
-                    </li>
-                  ))}
-                </ol>
-              </article>
-            ))}
-          </div>
         </div>
       )}
 

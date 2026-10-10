@@ -428,6 +428,11 @@ async function metricsFor(from: string, to: string) {
   return { started, pageEvents, summary, truncated };
 }
 
+function pageKey(path: string) {
+  const bare = (path.split("?")[0] || "/").trim() || "/";
+  return bare.length > 1 && bare.endsWith("/") ? bare.slice(0, -1) : bare;
+}
+
 function countBy<T>(rows: T[], key: (row: T) => string) {
   const map = new Map<string, number>();
   for (const row of rows) {
@@ -459,41 +464,47 @@ export async function getAnalyticsReport(from: string, to: string, compareFrom: 
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([date, row]) => ({ date, ...row }));
 
-  const placeMap = new Map<string, number>();
+  const placeMap = new Map<string, Set<string>>();
   for (const session of current.started) {
-    const key = `${session.country}|${session.region}|${session.city}`;
-    placeMap.set(key, (placeMap.get(key) || 0) + 1);
+    const key = `${session.country}|${session.city}`;
+    const users = placeMap.get(key) || new Set<string>();
+    if (session.visitorId) users.add(session.visitorId);
+    placeMap.set(key, users);
   }
   const countries = [...placeMap.entries()]
-    .map(([key, count]) => {
-      const [country, region, city] = key.split("|");
-      return { country, region, city, sessions: count };
+    .map(([key, users]) => {
+      const [country, city] = key.split("|");
+      return { country, city, users: users.size };
     })
-    .sort((a, b) => b.sessions - a.sessions)
+    .sort((a, b) => b.users - a.users)
     .slice(0, 40);
 
   const pageViews = current.pageEvents.filter((event) => event.type === "pageview");
   const engagement = current.pageEvents.filter((event) => event.type === "engagement");
-  const pageMap = new Map<string, { views: number; engaged: number; engagedCount: number }>();
+  const pageMap = new Map<string, { views: number; users: Set<string>; engaged: number; engagedCount: number }>();
   for (const event of pageViews) {
-    const row = pageMap.get(event.path) || { views: 0, engaged: 0, engagedCount: 0 };
+    const path = pageKey(event.path);
+    const row = pageMap.get(path) || { views: 0, users: new Set<string>(), engaged: 0, engagedCount: 0 };
     row.views += 1;
-    pageMap.set(event.path, row);
+    if (event.visitorId) row.users.add(event.visitorId);
+    pageMap.set(path, row);
   }
   for (const event of engagement) {
-    const row = pageMap.get(event.path) || { views: 0, engaged: 0, engagedCount: 0 };
+    const path = pageKey(event.path);
+    const row = pageMap.get(path) || { views: 0, users: new Set<string>(), engaged: 0, engagedCount: 0 };
     row.engaged += event.engagementMs;
     row.engagedCount += 1;
-    pageMap.set(event.path, row);
+    pageMap.set(path, row);
   }
   const topPages = [...pageMap.entries()]
     .map(([path, row]) => ({
       path,
       views: row.views,
+      users: row.users.size,
       avgEngagementMs: row.engagedCount ? Math.round(row.engaged / row.engagedCount) : 0,
     }))
-    .sort((a, b) => b.views - a.views)
-    .slice(0, 15);
+    .sort((a, b) => b.users - a.users || b.views - a.views)
+    .slice(0, 40);
 
   const landingMap = new Map<string, number>();
   const exitMap = new Map<string, { sessions: number; bounces: number }>();
@@ -664,7 +675,7 @@ export async function monthlyAnalyticsCsv(month: string) {
     ...report.topPages.map((row) => csvRow("top_page", row.path, row.views, "")),
     ...report.landingPages.map((row) => csvRow("landing_page", row.path, row.sessions, "")),
     ...report.exitPages.map((row) => csvRow("estimated_exit", row.path, row.sessions, row.bounces)),
-    ...report.countries.map((row) => csvRow("location", `${row.country} / ${row.region} / ${row.city}`, row.sessions, "")),
+    ...report.countries.map((row) => csvRow("location", `${row.country} / ${row.city}`, row.users, "")),
     ...report.sources.map((row) => csvRow("source", row.source, row.sessions, "")),
     ...report.devices.map((row) => csvRow("device", row.name, row.sessions, "")),
     ...report.browsers.map((row) => csvRow("browser", row.name, row.sessions, "")),

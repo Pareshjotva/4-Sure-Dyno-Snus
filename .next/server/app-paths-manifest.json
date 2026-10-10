@@ -1,4 +1,6 @@
 {
+  "/admin/(panel)/analytics/page": "app/admin/(panel)/analytics/page.js",
+  "/api/admin/analytics/route": "app/api/admin/analytics/route.js",
   "/api/analytics/collect/route": "app/api/analytics/collect/route.js",
   "/page": "app/page.js"
 }
