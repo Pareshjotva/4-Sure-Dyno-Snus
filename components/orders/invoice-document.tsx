@@ -4,7 +4,6 @@ import { DownloadInvoiceButton } from "@/components/orders/download-invoice-butt
 import { Button } from "@/components/ui/button";
 import {
   INVOICE_LETTERHEAD,
-  priceInvoice,
   type InvoiceDocumentModel,
 } from "@/lib/invoice";
 import { formatCurrency } from "@/lib/utils";
@@ -12,6 +11,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+type LineDraft = {
+  productId: string;
+  no: number;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  pttUnit: number;
+  totalPtt: number;
+  amount: number;
+};
 
 type Draft = {
   billToName: string;
@@ -21,14 +32,17 @@ type Draft = {
   shipToAddress: string;
   shipToPhone: string;
   discountPercent: number;
-  lines: {
-    productId: string;
-    description: string;
-    quantity: number;
-    unitPrice: number;
-    pttUnit: number;
-  }[];
+  discountAmount: number;
+  subtotal: number;
+  ptt: number;
+  totalAmount: number;
+  gst: number;
+  amountDue: number;
+  lines: LineDraft[];
 };
+
+const fieldClass =
+  "w-full rounded-sm border border-[#9aafc4] bg-white px-1.5 py-1 text-sm text-[#1c2430] outline-none [color-scheme:light] focus:border-[#1a7abf]";
 
 export function InvoiceDocument({
   invoice,
@@ -49,7 +63,7 @@ export function InvoiceDocument({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const view = editing ? pricedDraft(invoice, draft) : invoice;
+  const view = invoice;
   const discountLabel = view.discountTier
     ? `${view.discountTier} ${view.discountPercent}%`
     : `${view.discountPercent}%`;
@@ -60,8 +74,25 @@ export function InvoiceDocument({
     setEditing(true);
   }
 
+  function patchLine(index: number, patch: Partial<LineDraft>) {
+    setDraft((current) => {
+      const lines = current.lines.map((line, lineIndex) =>
+        lineIndex === index ? applyLinePatch(line, patch) : line
+      );
+      return { ...current, lines, ...summaryFrom(lines, current.discountPercent) };
+    });
+  }
+
+  function patchSummary(patch: Partial<Draft>) {
+    setDraft((current) => applySummaryPatch(current, patch));
+  }
+
   async function save() {
     if (!orderId) return;
+    if (draft.lines.some((line) => !line.description.trim())) {
+      setError("Each line needs a description.");
+      return;
+    }
     setSaving(true);
     setError("");
     const res = await fetch(`/api/orders/${orderId}`, {
@@ -240,29 +271,39 @@ export function InvoiceDocument({
               </tr>
             </thead>
             <tbody>
-              {view.lines.map((line, index) => (
-                <tr key={line.productId || line.no} className="border-b border-[#e6ebf1]">
+              {(editing ? draft.lines : view.lines).map((line, index) => (
+                <tr key={`${line.productId}-${index}`} className="border-b border-[#e6ebf1]">
                   <td className="px-3 py-3">
                     {editing ? (
                       <input
-                        className="w-full min-w-36 border border-[#c5ced8] px-2 py-1"
+                        className={`${fieldClass} min-w-36`}
                         value={draft.lines[index]?.description || ""}
+                        aria-label="Description"
                         onChange={(event) =>
-                          updateLine(setDraft, index, {
-                            description: event.target.value,
-                          })
+                          patchLine(index, { description: event.target.value })
                         }
                       />
                     ) : (
                       line.description
                     )}
                   </td>
-                  <td className="px-3 py-3">{line.no}</td>
+                  <td className="px-3 py-3">
+                    {editing ? (
+                      <NumberField
+                        value={draft.lines[index]?.no}
+                        ariaLabel="Line number"
+                        onChange={(no) => patchLine(index, { no })}
+                      />
+                    ) : (
+                      line.no
+                    )}
+                  </td>
                   <td className="px-3 py-3 text-right">
                     {editing ? (
                       <NumberField
                         value={draft.lines[index]?.quantity}
-                        onChange={(quantity) => updateLine(setDraft, index, { quantity })}
+                        ariaLabel="Quantity"
+                        onChange={(quantity) => patchLine(index, { quantity })}
                       />
                     ) : (
                       line.quantity
@@ -273,66 +314,178 @@ export function InvoiceDocument({
                       <NumberField
                         value={draft.lines[index]?.unitPrice}
                         step="0.01"
-                        onChange={(unitPrice) =>
-                          updateLine(setDraft, index, { unitPrice })
-                        }
+                        ariaLabel="Unit price"
+                        onChange={(unitPrice) => patchLine(index, { unitPrice })}
                       />
                     ) : (
                       formatCurrency(line.unitPrice)
                     )}
                   </td>
-                  <td className="px-3 py-3 text-right">{formatCurrency(line.totalPrice)}</td>
+                  <td className="px-3 py-3 text-right">
+                    {editing ? (
+                      <NumberField
+                        value={draft.lines[index]?.totalPrice}
+                        step="0.01"
+                        ariaLabel="Total price"
+                        onChange={(totalPrice) => patchLine(index, { totalPrice })}
+                      />
+                    ) : (
+                      formatCurrency(line.totalPrice)
+                    )}
+                  </td>
                   <td className="px-3 py-3 text-right">
                     {editing ? (
                       <NumberField
                         value={draft.lines[index]?.pttUnit}
                         step="0.01"
-                        onChange={(pttUnit) => updateLine(setDraft, index, { pttUnit })}
+                        ariaLabel="PTT per unit"
+                        onChange={(pttUnit) => patchLine(index, { pttUnit })}
                       />
                     ) : (
                       formatCurrency(line.pttUnit)
                     )}
                   </td>
-                  <td className="px-3 py-3 text-right">{formatCurrency(line.totalPtt)}</td>
+                  <td className="px-3 py-3 text-right">
+                    {editing ? (
+                      <NumberField
+                        value={draft.lines[index]?.totalPtt}
+                        step="0.01"
+                        ariaLabel="Total PTT"
+                        onChange={(totalPtt) => patchLine(index, { totalPtt })}
+                      />
+                    ) : (
+                      formatCurrency(line.totalPtt)
+                    )}
+                  </td>
                   <td className="px-3 py-3 text-right font-medium">
-                    {formatCurrency(line.amount)}
+                    {editing ? (
+                      <div className="flex items-center justify-end gap-2">
+                        <NumberField
+                          value={draft.lines[index]?.amount}
+                          step="0.01"
+                          ariaLabel="Amount"
+                          onChange={(amount) => patchLine(index, { amount })}
+                        />
+                        <button
+                          type="button"
+                          className="no-print text-xs font-semibold text-[#1a7abf]"
+                          onClick={() =>
+                            setDraft((current) => {
+                              const lines = current.lines.filter((_, i) => i !== index);
+                              return {
+                                ...current,
+                                lines,
+                                ...summaryFrom(lines, current.discountPercent),
+                              };
+                            })
+                          }
+                          disabled={draft.lines.length <= 1}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      formatCurrency(line.amount)
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {editing && (
+            <button
+              type="button"
+              className="no-print mt-3 text-sm font-semibold text-[#1a7abf]"
+              onClick={() =>
+                setDraft((current) => ({
+                  ...current,
+                  lines: [
+                    ...current.lines,
+                    {
+                      productId: `custom-${crypto.randomUUID()}`,
+                      no: current.lines.length + 1,
+                      description: "",
+                      quantity: 1,
+                      unitPrice: 0,
+                      totalPrice: 0,
+                      pttUnit: 0,
+                      totalPtt: 0,
+                      amount: 0,
+                    },
+                  ],
+                }))
+              }
+            >
+              Add line
+            </button>
+          )}
         </div>
 
         <div className="mt-6 flex justify-end">
           <dl className="w-full max-w-sm text-sm">
-            <Row label="Subtotal" value={formatCurrency(view.subtotal)} />
-            {(view.discountAmount > 0 || editing) && (
-              <div className="flex items-center justify-between gap-6 border-b border-[#eef2f6] px-3 py-1.5">
-                <dt className="text-[#3d4a5c]">
-                  {editing ? "Discount %" : `Discount ${discountLabel}`}
-                </dt>
-                <dd className="font-medium">
-                  {editing ? (
+            {editing ? (
+              <>
+                <TotalField
+                  label="Subtotal"
+                  value={draft.subtotal}
+                  onChange={(subtotal) => patchSummary({ subtotal })}
+                />
+                <TotalField
+                  label="Discount %"
+                  value={draft.discountPercent}
+                  onChange={(discountPercent) => patchSummary({ discountPercent })}
+                />
+                <TotalField
+                  label="Discount amount"
+                  value={draft.discountAmount}
+                  onChange={(discountAmount) => patchSummary({ discountAmount })}
+                />
+                <TotalField
+                  label="P.T.T/ Tobacco Tax"
+                  value={draft.ptt}
+                  onChange={(ptt) => patchSummary({ ptt })}
+                />
+                <TotalField
+                  label="Total Amount"
+                  value={draft.totalAmount}
+                  onChange={(totalAmount) => patchSummary({ totalAmount })}
+                />
+                <TotalField
+                  label="GST (5%)"
+                  value={draft.gst}
+                  onChange={(gst) => patchSummary({ gst })}
+                />
+                <div className="mt-2 flex items-center justify-between gap-4 bg-[#163a62] px-3 py-2.5 font-semibold text-white">
+                  <dt>Amount To be Paid</dt>
+                  <dd>
                     <NumberField
-                      value={draft.discountPercent}
+                      value={draft.amountDue}
                       step="0.01"
-                      onChange={(discountPercent) =>
-                        setDraft((current) => ({ ...current, discountPercent }))
-                      }
+                      ariaLabel="Amount to be paid"
+                      light={false}
+                      onChange={(amountDue) => patchSummary({ amountDue })}
                     />
-                  ) : (
-                    `−${formatCurrency(view.discountAmount)}`
-                  )}
-                </dd>
-              </div>
+                  </dd>
+                </div>
+              </>
+            ) : (
+              <>
+                <Row label="Subtotal" value={formatCurrency(view.subtotal)} />
+                {view.discountAmount > 0 && (
+                  <Row
+                    label={`Discount ${discountLabel}`}
+                    value={`−${formatCurrency(view.discountAmount)}`}
+                  />
+                )}
+                <Row label="P.T.T/ Tobacco Tax" value={formatCurrency(view.ptt)} />
+                <Row label="Total Amount" value={formatCurrency(view.totalAmount)} />
+                <Row label="GST (5%)" value={formatCurrency(view.gst)} />
+                <div className="mt-2 flex justify-between bg-[#163a62] px-3 py-2.5 font-semibold text-white">
+                  <dt>Amount To be Paid</dt>
+                  <dd>{formatCurrency(view.amountDue)}</dd>
+                </div>
+              </>
             )}
-            <Row label="P.T.T/ Tobacco Tax" value={formatCurrency(view.ptt)} />
-            <Row label="Total Amount" value={formatCurrency(view.totalAmount)} />
-            <Row label="GST (5%)" value={formatCurrency(view.gst)} />
-            <div className="mt-2 flex justify-between bg-[#163a62] px-3 py-2.5 font-semibold text-white">
-              <dt>Amount To be Paid</dt>
-              <dd>{formatCurrency(view.amountDue)}</dd>
-            </div>
           </dl>
         </div>
 
@@ -348,6 +501,10 @@ export function InvoiceDocument({
   );
 }
 
+function money(amount: number) {
+  return Math.round((Number(amount) || 0) * 100) / 100;
+}
+
 function draftFrom(invoice: InvoiceDocumentModel): Draft {
   return {
     billToName: invoice.billToName,
@@ -357,51 +514,108 @@ function draftFrom(invoice: InvoiceDocumentModel): Draft {
     shipToAddress: invoice.shipToAddress,
     shipToPhone: invoice.shipToPhone,
     discountPercent: invoice.discountPercent,
+    discountAmount: invoice.discountAmount,
+    subtotal: invoice.subtotal,
+    ptt: invoice.ptt,
+    totalAmount: invoice.totalAmount,
+    gst: invoice.gst,
+    amountDue: invoice.amountDue,
     lines: invoice.lines.map((line) => ({
       productId: line.productId,
+      no: line.no,
       description: line.description,
       quantity: line.quantity,
       unitPrice: line.unitPrice,
+      totalPrice: line.totalPrice,
       pttUnit: line.pttUnit,
+      totalPtt: line.totalPtt,
+      amount: line.amount,
     })),
   };
 }
 
-function pricedDraft(invoice: InvoiceDocumentModel, draft: Draft): InvoiceDocumentModel {
-  const priced = priceInvoice(draft.lines, draft.discountPercent);
-  const tier =
-    priced.discountPercent === invoice.discountPercent ? invoice.discountTier : "";
+function applyLinePatch(line: LineDraft, patch: Partial<LineDraft>): LineDraft {
+  const next = { ...line, ...patch };
+  if ("no" in patch) next.no = Math.max(1, Math.round(Number(next.no) || 1));
+  if ("quantity" in patch) {
+    next.quantity = Math.max(1, Math.round(Number(next.quantity) || 1));
+  }
+  const quantity = Number(next.quantity) || 0;
+  if ("quantity" in patch || "unitPrice" in patch) {
+    next.totalPrice = money(quantity * (Number(next.unitPrice) || 0));
+  }
+  if ("quantity" in patch || "pttUnit" in patch) {
+    next.totalPtt = money(quantity * (Number(next.pttUnit) || 0));
+  }
+  if (
+    "quantity" in patch ||
+    "unitPrice" in patch ||
+    "pttUnit" in patch ||
+    "totalPrice" in patch ||
+    "totalPtt" in patch
+  ) {
+    next.amount = money((Number(next.totalPrice) || 0) + (Number(next.totalPtt) || 0));
+  }
+  return next;
+}
+
+function summaryFrom(lines: LineDraft[], discountPercent: number) {
+  const subtotal = money(lines.reduce((sum, line) => sum + (Number(line.totalPrice) || 0), 0));
+  const ptt = money(lines.reduce((sum, line) => sum + (Number(line.totalPtt) || 0), 0));
+  const percent = Math.min(100, Math.max(0, Number(discountPercent) || 0));
+  const discountAmount = money(subtotal * (percent / 100));
+  const totalAmount = money(subtotal - discountAmount + ptt);
+  const gst = money(totalAmount * 0.05);
   return {
-    ...invoice,
-    billToName: draft.billToName,
-    billToAddress: draft.billToAddress,
-    billToPhone: draft.billToPhone,
-    shipToName: draft.shipToName,
-    shipToAddress: draft.shipToAddress,
-    shipToPhone: draft.shipToPhone,
-    lines: priced.lines,
-    subtotal: priced.subtotal,
-    discountPercent: priced.discountPercent,
-    discountAmount: priced.discountAmount,
-    discountTier: tier,
-    ptt: priced.ptt,
-    totalAmount: priced.totalAmount,
-    gst: priced.gst,
-    amountDue: priced.amountDue,
+    subtotal,
+    ptt,
+    discountPercent: percent,
+    discountAmount,
+    totalAmount,
+    gst,
+    amountDue: money(totalAmount + gst),
   };
 }
 
-function updateLine(
-  setDraft: (updater: (current: Draft) => Draft) => void,
-  index: number,
-  patch: Partial<Draft["lines"][number]>
-) {
-  setDraft((current) => ({
-    ...current,
-    lines: current.lines.map((line, lineIndex) =>
-      lineIndex === index ? { ...line, ...patch } : line
-    ),
-  }));
+function applySummaryPatch(current: Draft, patch: Partial<Draft>): Draft {
+  const next = { ...current, ...patch };
+  if ("discountPercent" in patch) {
+    next.discountAmount = money(
+      (Number(next.subtotal) || 0) * ((Number(next.discountPercent) || 0) / 100)
+    );
+  }
+  if (
+    "subtotal" in patch ||
+    "discountPercent" in patch ||
+    "discountAmount" in patch ||
+    "ptt" in patch
+  ) {
+    next.totalAmount = money(
+      (Number(next.subtotal) || 0) -
+        (Number(next.discountAmount) || 0) +
+        (Number(next.ptt) || 0)
+    );
+  }
+  if (
+    "subtotal" in patch ||
+    "discountPercent" in patch ||
+    "discountAmount" in patch ||
+    "ptt" in patch ||
+    "totalAmount" in patch
+  ) {
+    next.gst = money((Number(next.totalAmount) || 0) * 0.05);
+  }
+  if (
+    "subtotal" in patch ||
+    "discountPercent" in patch ||
+    "discountAmount" in patch ||
+    "ptt" in patch ||
+    "totalAmount" in patch ||
+    "gst" in patch
+  ) {
+    next.amountDue = money((Number(next.totalAmount) || 0) + (Number(next.gst) || 0));
+  }
+  return next;
 }
 
 function Meta({ label, value }: { label: string; value: string }) {
@@ -436,19 +650,22 @@ function Party({
       {editing ? (
         <div className="mt-2 space-y-2">
           <input
-            className="w-full border border-[#c5ced8] bg-white px-2 py-1 text-sm font-semibold"
+            className={`${fieldClass} font-semibold`}
             value={name}
+            aria-label={`${title} name`}
             onChange={(event) => onChange("Name", event.target.value)}
           />
           <textarea
-            className="w-full border border-[#c5ced8] bg-white px-2 py-1 text-sm"
+            className={fieldClass}
             rows={2}
             value={address}
+            aria-label={`${title} address`}
             onChange={(event) => onChange("Address", event.target.value)}
           />
           <input
-            className="w-full border border-[#c5ced8] bg-white px-2 py-1 text-sm"
+            className={fieldClass}
             value={phone}
+            aria-label={`${title} phone`}
             onChange={(event) => onChange("Phone", event.target.value)}
           />
         </div>
@@ -475,10 +692,14 @@ function Row({ label, value }: { label: string; value: string }) {
 function NumberField({
   value,
   step = "1",
+  ariaLabel,
+  light = true,
   onChange,
 }: {
   value: number | undefined;
   step?: string;
+  ariaLabel: string;
+  light?: boolean;
   onChange: (value: number) => void;
 }) {
   return (
@@ -486,9 +707,33 @@ function NumberField({
       type="number"
       min={0}
       step={step}
-      className="w-24 border border-[#c5ced8] bg-white px-2 py-1 text-right"
+      aria-label={ariaLabel}
+      className={
+        light
+          ? `${fieldClass} w-24 text-right`
+          : "w-28 rounded-sm border border-white/40 bg-white/10 px-1.5 py-1 text-right text-white outline-none [color-scheme:dark]"
+      }
       value={Number.isFinite(value) ? value : 0}
       onChange={(event) => onChange(Number(event.target.value))}
     />
+  );
+}
+
+function TotalField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-[#eef2f6] px-3 py-1.5">
+      <dt className="text-[#3d4a5c]">{label}</dt>
+      <dd>
+        <NumberField value={value} step="0.01" ariaLabel={label} onChange={onChange} />
+      </dd>
+    </div>
   );
 }

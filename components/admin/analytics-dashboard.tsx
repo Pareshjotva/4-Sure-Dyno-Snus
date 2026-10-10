@@ -1,22 +1,10 @@
 "use client";
 
-import { ANALYTICS_EVENTS, type AnalyticsReport } from "@/lib/analytics-shared";
-import { formatDate } from "@/lib/utils";
+import { type AnalyticsReport } from "@/lib/analytics-shared";
+import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { FormEvent, useEffect, useState } from "react";
 
 type Tab = "overview" | "locations" | "journeys" | "events" | "monthly";
-type EventRow = {
-  id: string;
-  sessionId: string;
-  type: string;
-  name: string;
-  path: string;
-  title: string;
-  ts: string;
-  scrollDepth: number;
-  country: string;
-  device: string;
-};
 
 function todayKey() {
   return new Intl.DateTimeFormat("en-CA", {
@@ -53,6 +41,10 @@ function duration(ms: number) {
   return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
 }
 
+function eventLabel(type: string) {
+  return type.replaceAll("_", " ").replace(/^\w/, (letter) => letter.toUpperCase());
+}
+
 function change(current: number, previous: number) {
   if (previous === 0) return current === 0 ? "0%" : "New";
   const value = Math.round(((current - previous) / previous) * 100);
@@ -68,14 +60,7 @@ export function AnalyticsDashboard() {
   const [report, setReport] = useState<AnalyticsReport | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [events, setEvents] = useState<EventRow[]>([]);
-  const [eventTotal, setEventTotal] = useState(0);
-  const [eventPage, setEventPage] = useState(0);
-  const [eventType, setEventType] = useState("");
-  const [eventPath, setEventPath] = useState("");
-  const [eventCountry, setEventCountry] = useState("");
-  const [eventDevice, setEventDevice] = useState("");
-  const [eventSession, setEventSession] = useState("");
+  const [query, setQuery] = useState("");
 
   const compare =
     tab === "monthly" ? monthBounds(month) : { from, to, compareFrom: "", compareTo: "" };
@@ -112,32 +97,8 @@ export function AnalyticsDashboard() {
   }, [rangeFrom, rangeTo, compare.compareFrom, compare.compareTo]);
 
   useEffect(() => {
-    if (tab !== "events") return;
-    let stop = false;
-    async function loadEvents() {
-      const params = new URLSearchParams({
-        from: rangeFrom,
-        to: rangeTo,
-        page: String(eventPage),
-        type: eventType,
-        path: eventPath,
-        country: eventCountry,
-        device: eventDevice,
-        session: eventSession,
-      });
-      const response = await fetch(`/api/admin/analytics/events?${params}`);
-      const json = await response.json();
-      if (stop || !response.ok) return;
-      setEvents(json.rows || []);
-      setEventTotal(json.total || 0);
-    }
-    void loadEvents();
-    const timer = window.setInterval(() => void loadEvents(), 15000);
-    return () => {
-      stop = true;
-      window.clearInterval(timer);
-    };
-  }, [tab, rangeFrom, rangeTo, eventPage, eventType, eventPath, eventCountry, eventDevice, eventSession]);
+    setQuery("");
+  }, [tab]);
 
   function applyRange(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -251,10 +212,13 @@ export function AnalyticsDashboard() {
 
       {report && tab === "locations" && (
         <div className="mt-4 space-y-4">
+          <FilterBar query={query} onQuery={setQuery} placeholder="Search country or city" />
           <DataTable
             headers={["Country", "City", "Users"]}
-            rows={report.countries.map((row) => [row.country, row.city || "—", String(row.users)])}
-            empty="No location data in this range."
+            rows={report.countries
+              .filter((row) => matchesQuery(query, row.country, row.city))
+              .map((row) => [row.country, row.city || "—", String(row.users)])}
+            empty={query ? "Nothing matches this filter." : "No location data in this range."}
           />
           <div className="grid gap-4 lg:grid-cols-2">
             <NameList title="Browsers" rows={report.browsers.map((row) => ({ name: row.name, value: row.sessions }))} />
@@ -264,58 +228,29 @@ export function AnalyticsDashboard() {
       )}
 
       {report && tab === "journeys" && (
-        <div className="mt-4">
+        <div className="mt-4 space-y-4">
+          <FilterBar query={query} onQuery={setQuery} placeholder="Search page" />
           <DataTable
             headers={["Page", "Users"]}
-            rows={report.topPages.map((row) => [row.path, String(row.users)])}
-            empty="No page visits in this range."
+            rows={report.topPages
+              .filter((row) => matchesQuery(query, row.path))
+              .map((row) => [row.path, String(row.users)])}
+            empty={query ? "Nothing matches this filter." : "No page visits in this range."}
           />
         </div>
       )}
 
-      {tab === "events" && (
-        <form
-          className="mt-4 grid gap-3 sm:grid-cols-3"
-          onSubmit={(event) => {
-            event.preventDefault();
-            const data = new FormData(event.currentTarget);
-            setEventPage(0);
-            setEventType(String(data.get("type") || ""));
-            setEventPath(String(data.get("path") || ""));
-            setEventCountry(String(data.get("country") || ""));
-            setEventDevice(String(data.get("device") || ""));
-            setEventSession(String(data.get("session") || ""));
-          }}
-        >
-          <select name="type" defaultValue={eventType} className="h-11 rounded-md border border-white/15 bg-black/40 px-3 text-sm text-white">
-            <option value="">All events</option>
-            {ANALYTICS_EVENTS.map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-          <input name="path" defaultValue={eventPath} placeholder="Page path" className="h-11 rounded-md border border-white/15 bg-black/40 px-3 text-sm text-white" />
-          <input name="country" defaultValue={eventCountry} placeholder="Country" className="h-11 rounded-md border border-white/15 bg-black/40 px-3 text-sm text-white" />
-          <select name="device" defaultValue={eventDevice} className="h-11 rounded-md border border-white/15 bg-black/40 px-3 text-sm text-white">
-            <option value="">All devices</option>
-            <option value="desktop">Desktop</option>
-            <option value="mobile">Mobile</option>
-            <option value="tablet">Tablet</option>
-          </select>
-          <input name="session" defaultValue={eventSession} placeholder="Session id" className="h-11 rounded-md border border-white/15 bg-black/40 px-3 text-sm text-white" />
-          <button className="h-11 rounded-md bg-cyan px-4 text-sm font-semibold text-white" type="submit">Filter</button>
-          <div className="sm:col-span-3">
-            <DataTable
-              headers={["Time", "Event", "Name", "Page", "Country", "Device", "Session"]}
-              rows={events.map((row) => [formatDate(row.ts), row.type, row.name, row.path, row.country || "—", row.device || "—", row.sessionId.slice(0, 10)])}
-              empty="No events match these filters."
-            />
-            <div className="mt-3 flex items-center gap-3 text-sm text-white/70">
-              <button type="button" className="text-cyan" disabled={eventPage === 0} onClick={() => setEventPage((page) => Math.max(0, page - 1))}>Previous</button>
-              <span>{eventTotal === 0 ? "0" : `${eventPage * 25 + 1}–${Math.min(eventTotal, eventPage * 25 + events.length)}`} of {eventTotal}</span>
-              <button type="button" className="text-cyan" disabled={(eventPage + 1) * 25 >= eventTotal} onClick={() => setEventPage((page) => page + 1)}>Next</button>
-            </div>
-          </div>
-        </form>
+      {report && tab === "events" && (
+        <div className="mt-4 space-y-4">
+          <FilterBar query={query} onQuery={setQuery} placeholder="Search event" />
+          <DataTable
+            headers={["Event", "Count"]}
+            rows={report.eventCounts
+              .filter((row) => matchesQuery(query, eventLabel(row.type), row.type))
+              .map((row) => [eventLabel(row.type), String(row.count)])}
+            empty={query ? "Nothing matches this filter." : "No events in this range."}
+          />
+        </div>
       )}
 
       {report && tab === "monthly" && (
@@ -340,12 +275,27 @@ export function AnalyticsDashboard() {
             <Stat label="Page views" value={report.summary.pageViews} delta={`${change(report.summary.pageViews, report.previous.pageViews)} vs previous month`} />
             <Stat label="Engagement" value={duration(report.summary.avgEngagementMs)} delta={`${change(report.summary.avgEngagementMs, report.previous.avgEngagementMs)} vs previous month`} />
           </div>
-          <NameList title="Top pages" rows={report.topPages.map((row) => ({ name: row.path, value: row.views }))} />
-          <NameList title="Event counts" rows={report.eventCounts.map((row) => ({ name: row.type, value: row.count }))} />
+          <FilterBar query={query} onQuery={setQuery} placeholder="Search pages or events" />
+          <NameList
+            title="Top pages"
+            rows={report.topPages
+              .filter((row) => matchesQuery(query, row.path))
+              .map((row) => ({ name: row.path, value: row.views }))}
+            empty={query ? "Nothing matches this filter." : "Nothing in this range."}
+          />
+          <NameList
+            title="Event counts"
+            rows={report.eventCounts
+              .filter((row) => matchesQuery(query, eventLabel(row.type), row.type))
+              .map((row) => ({ name: eventLabel(row.type), value: row.count }))}
+            empty={query ? "Nothing matches this filter." : "Nothing in this range."}
+          />
           <DataTable
             headers={["Estimated exit", "Sessions", "Drop-off"]}
-            rows={report.exitPages.map((row) => [row.path, String(row.sessions), String(row.bounces)])}
-            empty="No drop-off data for this month."
+            rows={report.exitPages
+              .filter((row) => matchesQuery(query, row.path))
+              .map((row) => [row.path, String(row.sessions), String(row.bounces)])}
+            empty={query ? "Nothing matches this filter." : "No drop-off data for this month."}
           />
         </div>
       )}
@@ -363,12 +313,20 @@ function Stat({ label, value, delta }: { label: string; value: string | number; 
   );
 }
 
-function NameList({ title, rows }: { title: string; rows: { name: string; value: number }[] }) {
+function NameList({
+  title,
+  rows,
+  empty = "Nothing in this range.",
+}: {
+  title: string;
+  rows: { name: string; value: number }[];
+  empty?: string;
+}) {
   return (
     <section className="surface rounded-2xl p-5">
       <h2 className="font-display text-2xl text-white">{title}</h2>
       {rows.length === 0 ? (
-        <p className="mt-3 text-sm text-white/60">Nothing in this range.</p>
+        <p className="mt-3 text-sm text-white/60">{empty}</p>
       ) : (
         <ul className="mt-3 space-y-2 text-sm text-white/80">
           {rows.map((row) => (

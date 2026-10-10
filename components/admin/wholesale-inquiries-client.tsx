@@ -1,5 +1,6 @@
 "use client";
 
+import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Select } from "@/components/ui/select";
 import type { WholesaleInquiry } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
@@ -13,6 +14,22 @@ export function AdminWholesaleInquiriesClient({
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("");
+  const visible = inquiries.filter(
+    (row) =>
+      (!status || row.status === status) &&
+      matchesQuery(
+        query,
+        row.name,
+        row.email,
+        row.phone,
+        row.company,
+        row.province,
+        row.licenceNumber,
+        row.message
+      )
+  );
 
   async function updateStatus(
     id: string,
@@ -30,7 +47,19 @@ export function AdminWholesaleInquiriesClient({
 
   return (
     <div className="space-y-4">
-      {inquiries.map((row) => (
+      <FilterBar
+        query={query}
+        onQuery={setQuery}
+        placeholder="Search company, name, or message"
+        status={status}
+        onStatus={setStatus}
+        statuses={[
+          { value: "new", label: "New" },
+          { value: "contacted", label: "Contacted" },
+          { value: "closed", label: "Closed" },
+        ]}
+      />
+      {visible.map((row) => (
         <article key={row.id} className="surface rounded-2xl p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -67,8 +96,12 @@ export function AdminWholesaleInquiriesClient({
           </p>
         </article>
       ))}
-      {inquiries.length === 0 && (
-        <p className="text-sm text-white/70">No wholesale inquiries yet.</p>
+      {visible.length === 0 && (
+        <p className="text-sm text-white/70">
+          {inquiries.length === 0
+            ? "No wholesale inquiries yet."
+            : "Nothing matches this filter."}
+        </p>
       )}
     </div>
   );

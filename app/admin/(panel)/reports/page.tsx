@@ -1,3 +1,4 @@
+import { ReportLists } from "@/components/admin/report-lists";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,7 @@ import {
   type ReportMode,
   type SalesReport,
 } from "@/lib/sales-report";
-import { cn, formatCurrency, formatDate } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -301,102 +302,7 @@ function ReportBody({ report }: { report: SalesReport }) {
         </div>
       )}
 
-      {report.byCustomer.length > 0 && (
-        <section className="mt-8">
-          <h3 className="font-display text-2xl text-white">By customer</h3>
-          <p className="mt-1 text-xs text-white/50">
-            Overall customer report for this period. Money totals leave out
-            cancelled orders.
-          </p>
-          <div className="mt-3 overflow-x-auto surface rounded-2xl">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-black/50 text-white/70">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Customer</th>
-                  <th className="px-4 py-3 font-semibold">Company</th>
-                  <th className="px-4 py-3 font-semibold">Orders</th>
-                  <th className="px-4 py-3 font-semibold">Packs</th>
-                  <th className="px-4 py-3 font-semibold">Subtotal</th>
-                  <th className="px-4 py-3 font-semibold">Discount</th>
-                  <th className="px-4 py-3 font-semibold">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.byCustomer.map((row) => (
-                  <tr key={row.key} className="border-t border-white/8">
-                    <td className="px-4 py-3 font-medium text-white">
-                      {row.customer}
-                    </td>
-                    <td className="px-4 py-3 text-white/75">{row.company}</td>
-                    <td className="px-4 py-3 text-white/75">{row.orders}</td>
-                    <td className="px-4 py-3 text-white/75">{row.packs}</td>
-                    <td className="px-4 py-3 text-white">
-                      {formatCurrency(row.subtotal)}
-                    </td>
-                    <td className="px-4 py-3 text-white/75">
-                      {formatCurrency(row.discountAmount)}
-                    </td>
-                    <td className="px-4 py-3 text-white">
-                      {formatCurrency(row.total)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
-      {report.orders.length > 0 && (
-        <section className="mt-8">
-          <h3 className="font-display text-2xl text-white">Orders</h3>
-          <p className="mt-1 text-xs text-white/50">
-            Every order in this report, including cancelled orders.
-          </p>
-          <div className="mt-3 overflow-x-auto surface rounded-2xl">
-            <table className="min-w-full text-left text-sm">
-              <thead className="bg-black/50 text-white/70">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Date</th>
-                  <th className="px-4 py-3 font-semibold">Order</th>
-                  <th className="px-4 py-3 font-semibold">Customer</th>
-                  <th className="px-4 py-3 font-semibold">Company</th>
-                  <th className="px-4 py-3 font-semibold">Items</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">Discount</th>
-                  <th className="px-4 py-3 font-semibold">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.orders.map((order) => (
-                  <tr key={order.id} className="border-t border-white/8">
-                    <td className="px-4 py-3 text-white/75">
-                      {formatDate(order.createdAt)}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-white">
-                      {order.orderNumber}
-                    </td>
-                    <td className="px-4 py-3 text-white">{order.customer}</td>
-                    <td className="px-4 py-3 text-white/75">{order.company}</td>
-                    <td className="px-4 py-3 text-white/75">{order.summary}</td>
-                    <td className="px-4 py-3 capitalize text-white/75">
-                      {order.status}
-                    </td>
-                    <td className="px-4 py-3 text-white/75">
-                      {order.discountPercent > 0
-                        ? `${order.discountTier ? `${order.discountTier} ` : ""}${order.discountPercent}% (−${formatCurrency(order.discountAmount)})`
-                        : formatCurrency(0)}
-                    </td>
-                    <td className="px-4 py-3 text-white">
-                      {formatCurrency(order.total)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
+      <ReportLists customers={report.byCustomer} orders={report.orders} />
     </div>
   );
 }

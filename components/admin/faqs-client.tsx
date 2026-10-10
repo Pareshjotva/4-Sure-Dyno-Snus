@@ -1,5 +1,6 @@
 "use client";
 
+import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,8 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("");
 
   function openCreate() {
     setMode("create");
@@ -142,6 +145,11 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
   }
 
   if (mode === "list") {
+    const visible = rows.filter(
+      (faq) =>
+        (!status || (status === "published" ? faq.published : !faq.published)) &&
+        matchesQuery(query, faq.question, faq.answer)
+    );
     return (
       <div className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -154,8 +162,19 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
         </div>
         {message && <p className="text-sm text-cyan">{message}</p>}
         {error && <p className="text-sm text-warn-red">{error}</p>}
+        <FilterBar
+          query={query}
+          onQuery={setQuery}
+          placeholder="Search questions"
+          status={status}
+          onStatus={setStatus}
+          statuses={[
+            { value: "published", label: "Published" },
+            { value: "draft", label: "Draft" },
+          ]}
+        />
         <div className="space-y-3">
-          {rows.map((faq) => (
+          {visible.map((faq) => (
             <article
               key={faq.id}
               className="surface flex flex-wrap items-center justify-between gap-3 rounded-xl p-4"
@@ -181,8 +200,10 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
               </div>
             </article>
           ))}
-          {rows.length === 0 && (
-            <p className="text-sm text-slate-ink">No questions yet.</p>
+          {visible.length === 0 && (
+            <p className="text-sm text-slate-ink">
+              {rows.length === 0 ? "No questions yet." : "Nothing matches this filter."}
+            </p>
           )}
         </div>
       </div>

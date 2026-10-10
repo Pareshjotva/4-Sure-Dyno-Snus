@@ -17,12 +17,18 @@ const statusSchema = z.object({
   ]),
 });
 
+const moneyField = z.number().min(0).max(1000000);
+
 const invoiceLineSchema = z.object({
   productId: z.string().min(1),
   description: z.string().trim().min(1).max(160),
   quantity: z.number().int().min(1).max(5000),
   unitPrice: z.number().min(0).max(10000),
   pttUnit: z.number().min(0).max(10000),
+  no: z.number().int().min(1).max(999).optional(),
+  totalPrice: moneyField.optional(),
+  totalPtt: moneyField.optional(),
+  amount: moneyField.optional(),
 });
 
 const invoiceSchema = z.object({
@@ -34,6 +40,12 @@ const invoiceSchema = z.object({
     shipToAddress: z.string().trim().min(1).max(400),
     shipToPhone: z.string().trim().max(40),
     discountPercent: z.number().min(0).max(100),
+    discountAmount: moneyField.optional(),
+    subtotal: moneyField.optional(),
+    ptt: moneyField.optional(),
+    totalAmount: moneyField.optional(),
+    gst: moneyField.optional(),
+    amountDue: moneyField.optional(),
     lines: z.array(invoiceLineSchema).min(1),
   }),
 });
@@ -89,7 +101,19 @@ export async function PATCH(
       if (!current) {
         return NextResponse.json({ error: "Order not found" }, { status: 404 });
       }
-      const items = body.invoice.lines.map((line) => {
+      const round = (amount: number) => Math.round((Number(amount) || 0) * 100) / 100;
+      const lines = body.invoice.lines.map((line, index) => {
+        const totalPrice = round(line.totalPrice ?? line.quantity * line.unitPrice);
+        const totalPtt = round(line.totalPtt ?? line.quantity * line.pttUnit);
+        return {
+          ...line,
+          no: line.no ?? index + 1,
+          totalPrice,
+          totalPtt,
+          amount: round(line.amount ?? totalPrice + totalPtt),
+        };
+      });
+      const items = lines.map((line) => {
         const existing = current.items.find(
           (item) => item.productId === line.productId
         );
@@ -100,16 +124,29 @@ export async function PATCH(
           unitPrice: line.unitPrice,
         };
       });
-      const priced = priceInvoice(body.invoice.lines, body.invoice.discountPercent);
-      const percentChanged =
-        priced.discountPercent !== (current.discountPercent || 0);
+      const subtotal = round(
+        body.invoice.subtotal ?? lines.reduce((sum, line) => sum + line.totalPrice, 0)
+      );
+      const discountPercent = Math.min(100, Math.max(0, body.invoice.discountPercent));
+      const discountAmount = round(
+        body.invoice.discountAmount ?? subtotal * (discountPercent / 100)
+      );
+      const ptt = round(
+        body.invoice.ptt ?? lines.reduce((sum, line) => sum + line.totalPtt, 0)
+      );
+      const totalAmount = round(
+        body.invoice.totalAmount ?? subtotal - discountAmount + ptt
+      );
+      const gst = round(body.invoice.gst ?? totalAmount * 0.05);
+      const amountDue = round(body.invoice.amountDue ?? totalAmount + gst);
+      const percentChanged = discountPercent !== (current.discountPercent || 0);
       const order = await updateOrder(id, {
         items,
-        subtotal: priced.subtotal,
-        discountPercent: priced.discountPercent,
-        discountAmount: priced.discountAmount,
+        subtotal,
+        discountPercent,
+        discountAmount,
         discountTier: percentChanged ? "" : current.discountTier,
-        total: Math.round((priced.subtotal - priced.discountAmount) * 100) / 100,
+        total: round(subtotal - discountAmount),
         invoiceOverrides: {
           billToName: body.invoice.billToName,
           billToAddress: body.invoice.billToAddress,
@@ -117,10 +154,22 @@ export async function PATCH(
           shipToName: body.invoice.shipToName,
           shipToAddress: body.invoice.shipToAddress,
           shipToPhone: body.invoice.shipToPhone,
-          lines: body.invoice.lines.map((line) => ({
+          subtotal,
+          discountAmount,
+          ptt,
+          totalAmount,
+          gst,
+          amountDue,
+          lines: lines.map((line) => ({
             productId: line.productId,
             description: line.description,
             pttUnit: line.pttUnit,
+            no: line.no,
+            quantity: line.quantity,
+            unitPrice: line.unitPrice,
+            totalPrice: line.totalPrice,
+            totalPtt: line.totalPtt,
+            amount: line.amount,
           })),
         },
       });

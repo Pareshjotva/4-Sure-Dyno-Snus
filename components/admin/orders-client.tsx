@@ -2,6 +2,7 @@
 
 import { OrderItemList } from "@/components/orders/order-item-list";
 import { OrderTotals } from "@/components/orders/order-totals";
+import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Select } from "@/components/ui/select";
 import {
   ORDER_STATUSES,
@@ -27,10 +28,22 @@ export function AdminOrdersClient({
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "unverified">("all");
-  const visible =
-    filter === "unverified"
-      ? orders.filter((order) => order.profileVerificationStatus !== "verified")
-      : orders;
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("");
+  const visible = orders.filter((order) => {
+    if (filter === "unverified" && order.profileVerificationStatus === "verified") {
+      return false;
+    }
+    const current = order.status === "confirmed" ? "accepted" : order.status;
+    if (status && current !== status) return false;
+    return matchesQuery(
+      query,
+      order.orderNumber,
+      order.company,
+      order.userName,
+      order.province
+    );
+  });
 
   async function updateStatus(id: string, status: OrderStatus) {
     setBusy(id);
@@ -61,6 +74,17 @@ export function AdminOrdersClient({
           Unverified profiles
         </button>
       </div>
+      <FilterBar
+        query={query}
+        onQuery={setQuery}
+        placeholder="Search order, store, or province"
+        status={status}
+        onStatus={setStatus}
+        statuses={ORDER_STATUSES.map((item) => ({
+          value: item,
+          label: orderStatusLabel(item),
+        }))}
+      />
       {visible.map((order) => {
         const statusValue =
           order.status === "confirmed" ? "accepted" : order.status;
@@ -133,7 +157,9 @@ export function AdminOrdersClient({
         );
       })}
       {visible.length === 0 && (
-        <p className="text-sm text-slate-ink">No orders yet.</p>
+        <p className="text-sm text-slate-ink">
+          {orders.length === 0 ? "No orders yet." : "Nothing matches this filter."}
+        </p>
       )}
     </div>
   );

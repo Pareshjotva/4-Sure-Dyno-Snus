@@ -129,6 +129,12 @@ export interface InvoiceLineOverride {
   productId: string;
   description: string;
   pttUnit: number;
+  no?: number;
+  quantity?: number;
+  unitPrice?: number;
+  totalPrice?: number;
+  totalPtt?: number;
+  amount?: number;
 }
 
 export interface InvoiceOverrides {
@@ -139,6 +145,12 @@ export interface InvoiceOverrides {
   shipToAddress: string;
   shipToPhone: string;
   lines: InvoiceLineOverride[];
+  subtotal?: number;
+  discountAmount?: number;
+  ptt?: number;
+  totalAmount?: number;
+  gst?: number;
+  amountDue?: number;
 }
 
 export interface Order {

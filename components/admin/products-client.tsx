@@ -1,5 +1,6 @@
 "use client";
 
+import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
@@ -81,6 +82,8 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("");
 
   function openCreate() {
     setMode("create");
@@ -262,6 +265,11 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   }
 
   if (mode === "list") {
+    const visible = rows.filter(
+      (product) =>
+        (!status || (status === "active" ? product.active : !product.active)) &&
+        matchesQuery(query, product.name, product.shortName, product.flavour, product.slug)
+    );
     return (
       <div className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -274,6 +282,17 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
         </div>
         {message && <p className="text-sm text-cyan">{message}</p>}
         {error && <p className="text-sm text-warn-red">{error}</p>}
+        <FilterBar
+          query={query}
+          onQuery={setQuery}
+          placeholder="Search products"
+          status={status}
+          onStatus={setStatus}
+          statuses={[
+            { value: "active", label: "Active" },
+            { value: "hidden", label: "Hidden" },
+          ]}
+        />
 
         <div className="overflow-x-auto surface rounded-2xl">
           <table className="min-w-full text-left text-sm">
@@ -287,7 +306,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((product) => (
+              {visible.map((product) => (
                 <tr key={product.id} className="border-t border-white/8">
                   <td className="px-4 py-3">
                     <div className="relative h-14 w-20 overflow-hidden rounded-md bg-black">
@@ -341,13 +360,15 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
                   </td>
                 </tr>
               ))}
-              {rows.length === 0 && (
+              {visible.length === 0 && (
                 <tr>
                   <td
                     colSpan={5}
                     className="px-4 py-10 text-center text-slate-ink"
                   >
-                    No products yet. Add your first SKU.
+                    {rows.length === 0
+                      ? "No products yet. Add your first SKU."
+                      : "Nothing matches this filter."}
                   </td>
                 </tr>
               )}

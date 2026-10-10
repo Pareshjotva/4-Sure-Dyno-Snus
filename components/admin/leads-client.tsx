@@ -1,5 +1,6 @@
 "use client";
 
+import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Select } from "@/components/ui/select";
 import type { ContactLead } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
@@ -9,6 +10,21 @@ import { useState } from "react";
 export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("");
+  const visible = leads.filter(
+    (lead) =>
+      (!status || lead.status === status) &&
+      matchesQuery(
+        query,
+        lead.name,
+        lead.email,
+        lead.phone,
+        lead.company,
+        lead.province,
+        lead.message
+      )
+  );
 
   async function updateStatus(
     id: string,
@@ -26,7 +42,19 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
 
   return (
     <div className="space-y-4">
-      {leads.map((lead) => (
+      <FilterBar
+        query={query}
+        onQuery={setQuery}
+        placeholder="Search name, email, or message"
+        status={status}
+        onStatus={setStatus}
+        statuses={[
+          { value: "new", label: "New" },
+          { value: "contacted", label: "Contacted" },
+          { value: "closed", label: "Closed" },
+        ]}
+      />
+      {visible.map((lead) => (
         <article key={lead.id} className="surface rounded-2xl p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -61,8 +89,10 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
           </p>
         </article>
       ))}
-      {leads.length === 0 && (
-        <p className="text-sm text-white/70">No contact inquiries yet.</p>
+      {visible.length === 0 && (
+        <p className="text-sm text-white/70">
+          {leads.length === 0 ? "No contact inquiries yet." : "Nothing matches this filter."}
+        </p>
       )}
     </div>
   );

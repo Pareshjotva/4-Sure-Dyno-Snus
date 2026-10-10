@@ -151,6 +151,17 @@ export function buildInvoice(
     };
   });
   const priced = priceInvoice(draftLines, order.discountPercent || 0);
+  const lines = priced.lines.map((line) => {
+    const saved = overrides?.lines?.find((row) => row.productId === line.productId);
+    if (!saved) return line;
+    return {
+      ...line,
+      no: saved.no ?? line.no,
+      totalPrice: saved.totalPrice ?? line.totalPrice,
+      totalPtt: saved.totalPtt ?? line.totalPtt,
+      amount: saved.amount ?? line.amount,
+    };
+  });
   const name = user?.company?.trim() || order.company?.trim() || order.userName || "Retailer";
   const address = user?.address?.trim() || province || "—";
   const phone = user?.phone?.trim() || "";
@@ -166,14 +177,14 @@ export function buildInvoice(
     shipToAddress: overrides?.shipToAddress?.trim() || address,
     shipToPhone: overrides?.shipToPhone?.trim() || phone,
     province,
-    lines: priced.lines,
-    subtotal: priced.subtotal,
-    discountAmount: priced.discountAmount,
+    lines,
+    subtotal: overrides?.subtotal ?? priced.subtotal,
+    discountAmount: overrides?.discountAmount ?? priced.discountAmount,
     discountPercent: priced.discountPercent,
     discountTier: order.discountTier?.trim() || "",
-    ptt: priced.ptt,
-    totalAmount: priced.totalAmount,
-    gst: priced.gst,
-    amountDue: priced.amountDue,
+    ptt: overrides?.ptt ?? priced.ptt,
+    totalAmount: overrides?.totalAmount ?? priced.totalAmount,
+    gst: overrides?.gst ?? priced.gst,
+    amountDue: overrides?.amountDue ?? priced.amountDue,
   };
 }
