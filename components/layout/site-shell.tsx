@@ -14,7 +14,9 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
     <>
       <AgeGate minimumAge={legalAge} />
       <SiteHeader user={session} />
-      <main className="min-h-[70vh]">{children}</main>
+      <main className="min-h-[70vh]" data-page-loading>
+        {children}
+      </main>
       <SiteFooter />
     </>
   );

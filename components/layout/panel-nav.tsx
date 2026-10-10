@@ -74,7 +74,7 @@ export function PanelNav({
         <Link href="/" className="mb-2 block text-sm text-cyan hover:underline">
           ← Back to site
         </Link>
-        <Button variant="outline" size="sm" className="w-full" onClick={logout}>
+        <Button variant="outline" size="sm" className="w-full" data-page-action onClick={logout}>
           Sign out
         </Button>
       </div>

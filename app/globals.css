@@ -184,3 +184,83 @@ a {
     transition: none;
   }
 }
+
+[data-click-loading] {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-click-loading]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.32), transparent);
+  transform: translateX(-120%);
+  animation: click-sheen 0.85s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.page-loading-veil {
+  position: fixed;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+  padding: 28px 20px;
+  background: #070707;
+  pointer-events: auto;
+}
+
+.page-loading-sweep {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 34%;
+  background: linear-gradient(90deg, transparent, #e31e24, transparent);
+  animation: load-sweep 1.05s ease-in-out infinite;
+}
+
+.page-loading-line {
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #161616 0%, #3a3a3a 45%, #161616 90%);
+  background-size: 220% 100%;
+  animation: line-shimmer 1.15s linear infinite;
+}
+
+@keyframes click-sheen {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes load-sweep {
+  from {
+    transform: translateX(-40%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+@keyframes line-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-click-loading]::after,
+  .page-loading-sweep,
+  .page-loading-line {
+    animation: none;
+  }
+}
