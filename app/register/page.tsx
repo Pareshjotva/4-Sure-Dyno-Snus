@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Open wholesale account" };
+export const metadata: Metadata = { title: "Open Retailer account" };
 
 export default async function RegisterPage() {
   const session = await getSession();

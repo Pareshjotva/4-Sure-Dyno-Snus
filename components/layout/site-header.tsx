@@ -73,7 +73,7 @@ export function SiteHeader({ user, wide = false }: Props) {
                 </Button>
               </Link>
               <Link href="/register">
-                <Button size="sm">Open wholesale account</Button>
+                <Button size="sm">Open Retailer account</Button>
               </Link>
             </>
           )}
@@ -117,7 +117,7 @@ export function SiteHeader({ user, wide = false }: Props) {
                     </Button>
                   </Link>
                   <Link href="/register" onClick={() => setOpen(false)}>
-                    <Button className="w-full">Open wholesale account</Button>
+                    <Button className="w-full">Open Retailer account</Button>
                   </Link>
                 </>
               )}

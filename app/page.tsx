@@ -48,7 +48,7 @@ export default async function HomePage() {
                   size="lg"
                   className="animate-pulse-red h-auto min-h-11 w-full whitespace-normal px-2 py-2.5 text-center text-xs leading-tight sm:h-12 sm:px-6 sm:text-base"
                 >
-                  Open wholesale account
+                  Open Retailer account
                   <ArrowRight size={16} />
                 </Button>
               </Link>
