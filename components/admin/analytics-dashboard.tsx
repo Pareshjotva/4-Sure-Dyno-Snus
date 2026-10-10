@@ -202,7 +202,7 @@ export function AnalyticsDashboard() {
       {error && <p className="mt-4 text-sm text-warn-red">{error}</p>}
       {report && report.summary.sessions === 0 && tab !== "events" && (
         <p className="surface mt-4 rounded-xl p-4 text-sm text-white/70">
-          No visits in this range yet. Open the public site and choose Allow on the analytics prompt to start collection.
+          No visits in this range yet. Open a public page and the visit will be tracked automatically.
         </p>
       )}
       {report?.truncated && (

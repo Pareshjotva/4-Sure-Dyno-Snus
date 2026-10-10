@@ -14,7 +14,7 @@ export default async function AdminAnalyticsPage() {
     <div>
       <h1 className="font-display text-3xl text-navy">Analytics</h1>
       <p className="mt-2 max-w-3xl text-sm text-slate-ink">
-        Traffic from visitors who allow analytics. Country, region, and city come from
+        Traffic from public pages is tracked automatically. Country, region, and city come from
         approximate IP geolocation. The exit page is the last page observed in the session,
         not a guaranteed exit.
       </p>

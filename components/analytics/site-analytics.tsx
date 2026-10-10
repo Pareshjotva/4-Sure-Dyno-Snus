@@ -1,9 +1,8 @@
 "use client";
 
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
 
-const CONSENT_KEY = "dyno_analytics_consent";
 const VISITOR_KEY = "dyno_vid";
 const SESSION_KEY = "dyno_sid";
 
@@ -13,14 +12,6 @@ function id(prefix: string) {
       ? crypto.randomUUID().replace(/-/g, "")
       : Math.random().toString(36).slice(2);
   return `${prefix}${random}`.slice(0, 40);
-}
-
-function readConsent() {
-  try {
-    return localStorage.getItem(CONSENT_KEY);
-  } catch {
-    return "denied";
-  }
 }
 
 function send(payload: Record<string, unknown>) {
@@ -43,7 +34,7 @@ function AnalyticsTracker() {
   const query = search.toString();
 
   useEffect(() => {
-    if (pathname.startsWith("/admin") || readConsent() !== "granted") return;
+    if (pathname.startsWith("/admin")) return;
     let visitorId = "";
     let sessionId = "";
     try {
@@ -193,77 +184,11 @@ function AnalyticsTracker() {
 
 export function SiteAnalytics() {
   const pathname = usePathname();
-  const [consent, setConsent] = useState<string | null | undefined>(undefined);
-  useEffect(() => {
-    setConsent(readConsent());
-  }, []);
   if (pathname.startsWith("/admin")) return null;
 
-  function choose(value: "granted" | "denied") {
-    try {
-      localStorage.setItem(CONSENT_KEY, value);
-      if (value === "denied") {
-        localStorage.removeItem(VISITOR_KEY);
-        sessionStorage.removeItem(SESSION_KEY);
-      }
-    } catch {
-      /* storage unavailable */
-    }
-    setConsent(value);
-  }
-
   return (
-    <>
-      {consent === "granted" && (
-        <Suspense fallback={null}>
-          <AnalyticsTracker />
-        </Suspense>
-      )}
-      <div
-        data-analytics-ignore
-        className="fixed bottom-4 left-4 z-40 max-w-sm print:hidden"
-      >
-        {consent === undefined ? null : consent === "granted" ? (
-          <button
-            type="button"
-            className="rounded-full border border-white/15 bg-black/80 px-3 py-2 text-xs text-white/70"
-            onClick={() => choose("denied")}
-          >
-            Analytics on · Opt out
-          </button>
-        ) : consent === "denied" ? (
-          <button
-            type="button"
-            className="rounded-full border border-white/15 bg-black/80 px-3 py-2 text-xs text-white/70"
-            onClick={() => choose("granted")}
-          >
-            Analytics off · Allow
-          </button>
-        ) : (
-          <div className="surface rounded-2xl p-4 shadow-2xl">
-            <p className="text-sm font-semibold text-white">Website analytics</p>
-            <p className="mt-1 text-xs leading-relaxed text-white/70">
-              Allow anonymous page and click measurement. This does not use exact GPS. You can opt out at any time.
-            </p>
-            <div className="mt-3 flex gap-2">
-              <button
-                type="button"
-                className="rounded-md bg-cyan px-3 py-2 text-xs font-semibold text-white"
-                onClick={() => choose("granted")}
-              >
-                Allow
-              </button>
-              <button
-                type="button"
-                className="rounded-md border border-white/20 px-3 py-2 text-xs font-semibold text-white"
-                onClick={() => choose("denied")}
-              >
-                Decline
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </>
+    <Suspense fallback={null}>
+      <AnalyticsTracker />
+    </Suspense>
   );
 }
