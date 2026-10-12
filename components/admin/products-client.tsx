@@ -1,6 +1,14 @@
 "use client";
 
-import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
+import {
+  BulkArchiveBar,
+  ListSelectCheckbox,
+  TrashAction,
+  TrashBinButton,
+  setTrash,
+  setTrashMany,
+  useListSelection,
+} from "@/components/admin/trash-bin";
 import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Button } from "@/components/ui/button";
@@ -10,10 +18,10 @@ import { Textarea } from "@/components/ui/textarea";
 import type { FieldErrors } from "@/lib/form-errors";
 import { productSchema } from "@/lib/form-schemas";
 import type { Product } from "@/lib/types";
-import { Pencil, Plus, Trash2, Upload, X } from "lucide-react";
+import { Archive, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 type Draft = {
   name: string;
@@ -87,6 +95,26 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
   const [bin, setBin] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const listPool = rows.filter((product) =>
+    bin ? product.trashedAt : !product.trashedAt
+  );
+  const listVisible = listPool.filter(
+    (product) =>
+      (!status || (status === "active" ? product.active : !product.active)) &&
+      matchesQuery(
+        query,
+        product.name,
+        product.shortName,
+        product.flavour,
+        product.slug
+      )
+  );
+  const visibleIds = useMemo(
+    () => listVisible.map((product) => product.id),
+    [listVisible]
+  );
+  const selection = useListSelection(visibleIds);
 
   function openCreate() {
     setMode("create");
@@ -186,9 +214,9 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   async function onTrash(id: string, restore = false) {
     if (
       !restore &&
-      !(await confirmAction("Move this product to trash?", {
+      !(await confirmAction("Archive this product?", {
         danger: true,
-        confirmLabel: "Yes, move to trash",
+        confirmLabel: "Yes, archive",
       }))
     ) {
       return;
@@ -199,15 +227,48 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
       await setTrash("product", id, restore);
     } catch {
       setBusy(false);
-      setError(restore ? "Could not restore the product." : "Could not move the product to trash.");
+      setError(restore ? "Could not restore the product." : "Could not archive the product.");
       return;
     }
     setBusy(false);
     const stamp = restore ? null : new Date().toISOString();
     const next = rows.map((row) => (row.id === id ? { ...row, trashedAt: stamp } : row));
     setRows(next);
-    setMessage(restore ? "Product restored" : "Product moved to trash");
+    setMessage(restore ? "Product restored" : "Product archived");
+    selection.removeIds([id]);
     if (!restore && editingId === id) backToList(next);
+    await refreshList();
+  }
+
+  async function onBulk(restore: boolean) {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      restore
+        ? `Restore ${ids.length} selected product${ids.length === 1 ? "" : "s"}?`
+        : `Archive ${ids.length} selected product${ids.length === 1 ? "" : "s"}?`,
+      {
+        danger: !restore,
+        confirmLabel: restore ? "Yes, restore" : "Yes, archive",
+      }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    setError("");
+    try {
+      await setTrashMany("product", ids, restore);
+    } catch {
+      setBulkBusy(false);
+      setError(restore ? "Could not restore products." : "Could not archive products.");
+      return;
+    }
+    setBulkBusy(false);
+    const stamp = restore ? null : new Date().toISOString();
+    setRows((prev) =>
+      prev.map((row) => (ids.includes(row.id) ? { ...row, trashedAt: stamp } : row))
+    );
+    setMessage(restore ? "Products restored" : "Products archived");
+    selection.removeIds(ids);
     await refreshList();
   }
 
@@ -291,24 +352,21 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   }
 
   if (mode === "list") {
-    const pool = rows.filter((product) => (bin ? product.trashedAt : !product.trashedAt));
-    const visible = pool.filter(
-      (product) =>
-        (!status || (status === "active" ? product.active : !product.active)) &&
-        matchesQuery(query, product.name, product.shortName, product.flavour, product.slug)
-    );
     return (
       <div className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-slate-ink">
-            {pool.length} product{pool.length === 1 ? "" : "s"}
-            {bin ? " in trash" : " in catalogue"}
+            {listPool.length} product{listPool.length === 1 ? "" : "s"}
+            {bin ? " archived" : " in catalogue"}
           </p>
           <div className="flex flex-wrap gap-2">
             <TrashBinButton
               open={bin}
               count={rows.filter((product) => product.trashedAt).length}
-              onToggle={() => setBin((current) => !current)}
+              onToggle={() => {
+                setBin((current) => !current);
+                selection.clear();
+              }}
             />
             {!bin && (
               <Button onClick={openCreate}>
@@ -330,11 +388,27 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
             { value: "hidden", label: "Hidden" },
           ]}
         />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <ListSelectCheckbox
+            checked={selection.allVisibleSelected}
+            onChange={selection.toggleAllVisible}
+            label="Select all"
+          />
+          <BulkArchiveBar
+            count={selection.selectedVisible.length}
+            archivedView={bin}
+            busy={bulkBusy || busy}
+            onArchive={() => onBulk(false)}
+            onRestore={() => onBulk(true)}
+            onClear={selection.clear}
+          />
+        </div>
 
         <div className="overflow-x-auto surface rounded-2xl">
           <table className="min-w-full text-left text-sm">
             <thead className="bg-black/50 text-white/70">
               <tr>
+                <th className="px-4 py-3 font-semibold">Select</th>
                 <th className="px-4 py-3 font-semibold">Photo</th>
                 <th className="px-4 py-3 font-semibold">Product</th>
                 <th className="px-4 py-3 font-semibold">Nicotine</th>
@@ -343,8 +417,17 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
               </tr>
             </thead>
             <tbody>
-              {visible.map((product) => (
+              {listVisible.map((product) => (
                 <tr key={product.id} className="border-t border-white/8">
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-white/30 bg-black accent-cyan"
+                      checked={selection.selected.includes(product.id)}
+                      onChange={() => selection.toggle(product.id)}
+                      aria-label={`Select ${product.name}`}
+                    />
+                  </td>
                   <td className="px-4 py-3">
                     <div className="relative h-14 w-20 overflow-hidden rounded-md bg-black">
                       <Image
@@ -397,15 +480,15 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
                   </td>
                 </tr>
               ))}
-              {visible.length === 0 && (
+              {listVisible.length === 0 && (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-4 py-10 text-center text-slate-ink"
                   >
-                    {pool.length === 0
+                    {listPool.length === 0
                       ? bin
-                        ? "Trash is empty."
+                        ? "Archive is empty."
                         : "No products yet. Add your first SKU."
                       : "Nothing matches this filter."}
                   </td>
@@ -644,7 +727,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
             disabled={busy}
             onClick={() => onTrash(editingId)}
           >
-            <Trash2 size={14} /> Move to trash
+            <Archive size={14} /> Archive
           </Button>
         )}
       </div>

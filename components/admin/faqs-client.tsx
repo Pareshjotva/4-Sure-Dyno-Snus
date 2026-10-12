@@ -1,6 +1,14 @@
 "use client";
 
-import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
+import {
+  BulkArchiveBar,
+  ListSelectCheckbox,
+  TrashAction,
+  TrashBinButton,
+  setTrash,
+  setTrashMany,
+  useListSelection,
+} from "@/components/admin/trash-bin";
 import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Button } from "@/components/ui/button";
@@ -12,7 +20,7 @@ import { faqSchema } from "@/lib/form-schemas";
 import type { Faq } from "@/lib/types";
 import { Pencil, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 type Draft = {
   question: string;
@@ -50,6 +58,18 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
   const [bin, setBin] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const listPool = rows.filter((faq) => (bin ? faq.trashedAt : !faq.trashedAt));
+  const listVisible = listPool.filter(
+    (faq) =>
+      (!status || (status === "published" ? faq.published : !faq.published)) &&
+      matchesQuery(query, faq.question, faq.answer)
+  );
+  const visibleIds = useMemo(
+    () => listVisible.map((faq) => faq.id),
+    [listVisible]
+  );
+  const selection = useListSelection(visibleIds);
 
   function openCreate() {
     setMode("create");
@@ -140,9 +160,9 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
   async function onTrash(id: string, restore = false) {
     if (
       !restore &&
-      !(await confirmAction("Move this question to trash?", {
+      !(await confirmAction("Archive this question?", {
         danger: true,
-        confirmLabel: "Yes, move to trash",
+        confirmLabel: "Yes, archive",
       }))
     ) {
       return;
@@ -153,35 +173,65 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
       await setTrash("faq", id, restore);
     } catch {
       setBusy(false);
-      setError(restore ? "Could not restore the question." : "Could not move the question to trash.");
+      setError(restore ? "Could not restore the question." : "Could not archive the question.");
       return;
     }
     setBusy(false);
     const stamp = restore ? null : new Date().toISOString();
     setRows((prev) => prev.map((row) => (row.id === id ? { ...row, trashedAt: stamp } : row)));
-    setMessage(restore ? "Question restored" : "Question moved to trash");
+    setMessage(restore ? "Question restored" : "Question archived");
+    selection.removeIds([id]);
+    router.refresh();
+  }
+
+  async function onBulk(restore: boolean) {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      restore
+        ? `Restore ${ids.length} selected question${ids.length === 1 ? "" : "s"}?`
+        : `Archive ${ids.length} selected question${ids.length === 1 ? "" : "s"}?`,
+      {
+        danger: !restore,
+        confirmLabel: restore ? "Yes, restore" : "Yes, archive",
+      }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    setError("");
+    try {
+      await setTrashMany("faq", ids, restore);
+    } catch {
+      setBulkBusy(false);
+      setError(restore ? "Could not restore questions." : "Could not archive questions.");
+      return;
+    }
+    setBulkBusy(false);
+    const stamp = restore ? null : new Date().toISOString();
+    setRows((prev) =>
+      prev.map((row) => (ids.includes(row.id) ? { ...row, trashedAt: stamp } : row))
+    );
+    setMessage(restore ? "Questions restored" : "Questions archived");
+    selection.removeIds(ids);
     router.refresh();
   }
 
   if (mode === "list") {
-    const pool = rows.filter((faq) => (bin ? faq.trashedAt : !faq.trashedAt));
-    const visible = pool.filter(
-      (faq) =>
-        (!status || (status === "published" ? faq.published : !faq.published)) &&
-        matchesQuery(query, faq.question, faq.answer)
-    );
     return (
       <div className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-slate-ink">
-            {pool.length} question{pool.length === 1 ? "" : "s"}
-            {bin ? " in trash" : ""}
+            {listPool.length} question{listPool.length === 1 ? "" : "s"}
+            {bin ? " archived" : ""}
           </p>
           <div className="flex flex-wrap gap-2">
             <TrashBinButton
               open={bin}
               count={rows.filter((faq) => faq.trashedAt).length}
-              onToggle={() => setBin((current) => !current)}
+              onToggle={() => {
+                setBin((current) => !current);
+                selection.clear();
+              }}
             />
             {!bin && (
               <Button onClick={openCreate}>
@@ -203,17 +253,41 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
             { value: "draft", label: "Draft" },
           ]}
         />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <ListSelectCheckbox
+            checked={selection.allVisibleSelected}
+            onChange={selection.toggleAllVisible}
+            label="Select all"
+          />
+          <BulkArchiveBar
+            count={selection.selectedVisible.length}
+            archivedView={bin}
+            busy={bulkBusy || busy}
+            onArchive={() => onBulk(false)}
+            onRestore={() => onBulk(true)}
+            onClear={selection.clear}
+          />
+        </div>
         <div className="space-y-3">
-          {visible.map((faq) => (
+          {listVisible.map((faq) => (
             <article
               key={faq.id}
               className="surface flex flex-wrap items-center justify-between gap-3 rounded-xl p-4"
             >
-              <div>
-                <p className="font-semibold text-white">{faq.question}</p>
-                <p className="mt-1 text-xs text-white/60">
-                  Order {faq.sortOrder} · {faq.published ? "Published" : "Draft"}
-                </p>
+              <div className="flex min-w-0 items-start gap-3">
+                <input
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 rounded border-white/30 bg-black accent-cyan"
+                  checked={selection.selected.includes(faq.id)}
+                  onChange={() => selection.toggle(faq.id)}
+                  aria-label={`Select ${faq.question}`}
+                />
+                <div>
+                  <p className="font-semibold text-white">{faq.question}</p>
+                  <p className="mt-1 text-xs text-white/60">
+                    Order {faq.sortOrder} · {faq.published ? "Published" : "Draft"}
+                  </p>
+                </div>
               </div>
               <div className="flex gap-2">
                 {!bin && (
@@ -230,11 +304,11 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
               </div>
             </article>
           ))}
-          {visible.length === 0 && (
+          {listVisible.length === 0 && (
             <p className="text-sm text-slate-ink">
-              {pool.length === 0
+              {listPool.length === 0
                 ? bin
-                  ? "Trash is empty."
+                  ? "Archive is empty."
                   : "No questions yet."
                 : "Nothing matches this filter."}
             </p>

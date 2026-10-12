@@ -1,19 +1,28 @@
 "use client";
 
-import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
+import {
+  BulkArchiveBar,
+  ListSelectCheckbox,
+  TrashAction,
+  TrashBinButton,
+  setTrash,
+  setTrashMany,
+  useListSelection,
+} from "@/components/admin/trash-bin";
 import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Select } from "@/components/ui/select";
 import type { ContactLead } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
   const router = useRouter();
   const [rows, setRows] = useState(leads);
   const [bin, setBin] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
   const pool = rows.filter((lead) => (bin ? lead.trashedAt : !lead.trashedAt));
@@ -30,6 +39,8 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
         lead.message
       )
   );
+  const visibleIds = useMemo(() => visible.map((lead) => lead.id), [visible]);
+  const selection = useListSelection(visibleIds);
 
   async function updateStatus(
     id: string,
@@ -52,9 +63,9 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
   async function onTrash(id: string, restore = false) {
     if (
       !restore &&
-      !(await confirmAction("Move this lead to trash?", {
+      !(await confirmAction("Archive this lead?", {
         danger: true,
-        confirmLabel: "Yes, move to trash",
+        confirmLabel: "Yes, archive",
       }))
     ) {
       return;
@@ -71,6 +82,37 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
     setRows((current) =>
       current.map((lead) => (lead.id === id ? { ...lead, trashedAt: stamp } : lead))
     );
+    selection.removeIds([id]);
+  }
+
+  async function onBulk(restore: boolean) {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      restore
+        ? `Restore ${ids.length} selected lead${ids.length === 1 ? "" : "s"}?`
+        : `Archive ${ids.length} selected lead${ids.length === 1 ? "" : "s"}?`,
+      {
+        danger: !restore,
+        confirmLabel: restore ? "Yes, restore" : "Yes, archive",
+      }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    try {
+      await setTrashMany("lead", ids, restore);
+    } catch {
+      setBulkBusy(false);
+      return;
+    }
+    setBulkBusy(false);
+    const stamp = restore ? null : new Date().toISOString();
+    setRows((current) =>
+      current.map((lead) =>
+        ids.includes(lead.id) ? { ...lead, trashedAt: stamp } : lead
+      )
+    );
+    selection.removeIds(ids);
   }
 
   return (
@@ -79,7 +121,10 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
         <TrashBinButton
           open={bin}
           count={rows.filter((lead) => lead.trashedAt).length}
-          onToggle={() => setBin((current) => !current)}
+          onToggle={() => {
+            setBin((current) => !current);
+            selection.clear();
+          }}
         />
       </div>
       <FilterBar
@@ -94,19 +139,43 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
           { value: "closed", label: "Closed" },
         ]}
       />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <ListSelectCheckbox
+          checked={selection.allVisibleSelected}
+          onChange={selection.toggleAllVisible}
+          label="Select all"
+        />
+        <BulkArchiveBar
+          count={selection.selectedVisible.length}
+          archivedView={bin}
+          busy={bulkBusy}
+          onArchive={() => onBulk(false)}
+          onRestore={() => onBulk(true)}
+          onClear={selection.clear}
+        />
+      </div>
       {visible.map((lead) => (
         <article key={lead.id} className="surface rounded-2xl p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="font-semibold text-white">{lead.name}</p>
-              <p className="text-sm text-white/80">
-                {lead.email}
-                {lead.phone ? ` · ${lead.phone}` : ""}
-              </p>
-              <p className="text-xs text-white/60">
-                {lead.company || "No company"} · {lead.province || "No province"} ·{" "}
-                {formatDate(lead.createdAt)}
-              </p>
+            <div className="flex min-w-0 items-start gap-3">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded border-white/30 bg-black accent-cyan"
+                checked={selection.selected.includes(lead.id)}
+                onChange={() => selection.toggle(lead.id)}
+                aria-label={`Select ${lead.name}`}
+              />
+              <div>
+                <p className="font-semibold text-white">{lead.name}</p>
+                <p className="text-sm text-white/80">
+                  {lead.email}
+                  {lead.phone ? ` · ${lead.phone}` : ""}
+                </p>
+                <p className="text-xs text-white/60">
+                  {lead.company || "No company"} · {lead.province || "No province"} ·{" "}
+                  {formatDate(lead.createdAt)}
+                </p>
+              </div>
             </div>
             <Select
               className="w-40"
@@ -139,7 +208,7 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
         <p className="text-sm text-white/70">
           {pool.length === 0
             ? bin
-              ? "Trash is empty."
+              ? "Archive is empty."
               : "No contact inquiries yet."
             : "Nothing matches this filter."}
         </p>

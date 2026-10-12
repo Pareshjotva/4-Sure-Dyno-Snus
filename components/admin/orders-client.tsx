@@ -1,6 +1,14 @@
 "use client";
 
-import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
+import {
+  BulkArchiveBar,
+  ListSelectCheckbox,
+  TrashAction,
+  TrashBinButton,
+  setTrash,
+  setTrashMany,
+  useListSelection,
+} from "@/components/admin/trash-bin";
 import { OrderItemList } from "@/components/orders/order-item-list";
 import { OrderTotals } from "@/components/orders/order-totals";
 import { confirmAction } from "@/components/ui/confirm-dialog";
@@ -16,7 +24,7 @@ import type { Order, OrderStatus } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type AdminOrderRow = Order & { verificationLabel?: string };
 
@@ -29,6 +37,7 @@ export function AdminOrdersClient({
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [rows, setRows] = useState(orders);
   const [bin, setBin] = useState(false);
   const [filter, setFilter] = useState<"all" | "verified" | "unverified">("all");
@@ -52,6 +61,8 @@ export function AdminOrdersClient({
       order.province
     );
   });
+  const visibleIds = useMemo(() => visible.map((order) => order.id), [visible]);
+  const selection = useListSelection(visibleIds);
 
   async function updateStatus(id: string, status: OrderStatus) {
     const ok = await confirmAction(
@@ -72,9 +83,9 @@ export function AdminOrdersClient({
   async function onTrash(id: string, restore = false) {
     if (
       !restore &&
-      !(await confirmAction("Move this order to trash?", {
+      !(await confirmAction("Archive this order?", {
         danger: true,
-        confirmLabel: "Yes, move to trash",
+        confirmLabel: "Yes, archive",
       }))
     ) {
       return;
@@ -91,6 +102,37 @@ export function AdminOrdersClient({
     setRows((current) =>
       current.map((order) => (order.id === id ? { ...order, trashedAt: stamp } : order))
     );
+    selection.removeIds([id]);
+  }
+
+  async function onBulk(restore: boolean) {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      restore
+        ? `Restore ${ids.length} selected order${ids.length === 1 ? "" : "s"}?`
+        : `Archive ${ids.length} selected order${ids.length === 1 ? "" : "s"}?`,
+      {
+        danger: !restore,
+        confirmLabel: restore ? "Yes, restore" : "Yes, archive",
+      }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    try {
+      await setTrashMany("order", ids, restore);
+    } catch {
+      setBulkBusy(false);
+      return;
+    }
+    setBulkBusy(false);
+    const stamp = restore ? null : new Date().toISOString();
+    setRows((current) =>
+      current.map((order) =>
+        ids.includes(order.id) ? { ...order, trashedAt: stamp } : order
+      )
+    );
+    selection.removeIds(ids);
   }
 
   return (
@@ -120,7 +162,10 @@ export function AdminOrdersClient({
         <TrashBinButton
           open={bin}
           count={rows.filter((order) => order.trashedAt).length}
-          onToggle={() => setBin((current) => !current)}
+          onToggle={() => {
+            setBin((current) => !current);
+            selection.clear();
+          }}
         />
       </div>
       <FilterBar
@@ -134,28 +179,52 @@ export function AdminOrdersClient({
           label: orderStatusLabel(item),
         }))}
       />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <ListSelectCheckbox
+          checked={selection.allVisibleSelected}
+          onChange={selection.toggleAllVisible}
+          label="Select all"
+        />
+        <BulkArchiveBar
+          count={selection.selectedVisible.length}
+          archivedView={bin}
+          busy={bulkBusy}
+          onArchive={() => onBulk(false)}
+          onRestore={() => onBulk(true)}
+          onClear={selection.clear}
+        />
+      </div>
       {visible.map((order) => {
         const statusValue =
           order.status === "confirmed" ? "accepted" : order.status;
         return (
           <article key={order.id} className="surface rounded-2xl p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold text-navy">{order.orderNumber}</p>
-                <p className="text-xs text-navy/60">
-                  {order.company || order.userName} · {order.province} ·{" "}
-                  {formatDate(order.createdAt)}
-                </p>
-                {order.profileVerificationStatus &&
-                  order.profileVerificationStatus !== "verified" && (
-                    <p className="mt-2 text-sm font-semibold text-warn-yellow">
-                      Pending Profile Verification — this customer&apos;s profile
-                      and license have not been verified (
-                      {order.verificationLabel ||
-                        PROFILE_STATUS_LABEL[order.profileVerificationStatus]}
-                      ).
-                    </p>
-                  )}
+              <div className="flex min-w-0 items-start gap-3">
+                <input
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 rounded border-white/30 bg-black accent-cyan"
+                  checked={selection.selected.includes(order.id)}
+                  onChange={() => selection.toggle(order.id)}
+                  aria-label={`Select ${order.orderNumber}`}
+                />
+                <div>
+                  <p className="font-semibold text-navy">{order.orderNumber}</p>
+                  <p className="text-xs text-navy/60">
+                    {order.company || order.userName} · {order.province} ·{" "}
+                    {formatDate(order.createdAt)}
+                  </p>
+                  {order.profileVerificationStatus &&
+                    order.profileVerificationStatus !== "verified" && (
+                      <p className="mt-2 text-sm font-semibold text-warn-yellow">
+                        Pending Profile Verification — this customer&apos;s profile
+                        and license have not been verified (
+                        {order.verificationLabel ||
+                          PROFILE_STATUS_LABEL[order.profileVerificationStatus]}
+                        ).
+                      </p>
+                    )}
+                </div>
               </div>
             </div>
             <OrderItemList
@@ -215,7 +284,7 @@ export function AdminOrdersClient({
         <p className="text-sm text-slate-ink">
           {pool.length === 0
             ? bin
-              ? "Trash is empty."
+              ? "Archive is empty."
               : "No orders yet."
             : "Nothing matches this filter."}
         </p>

@@ -1,6 +1,14 @@
 "use client";
 
-import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
+import {
+  BulkArchiveBar,
+  ListSelectCheckbox,
+  TrashAction,
+  TrashBinButton,
+  setTrash,
+  setTrashMany,
+  useListSelection,
+} from "@/components/admin/trash-bin";
 import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Button } from "@/components/ui/button";
@@ -13,7 +21,7 @@ import type { Blog } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { Pencil, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 type Draft = {
   title: string;
@@ -60,6 +68,18 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
   const [bin, setBin] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const listPool = rows.filter((blog) => (bin ? blog.trashedAt : !blog.trashedAt));
+  const listVisible = listPool.filter(
+    (blog) =>
+      (!status || (status === "published" ? blog.published : !blog.published)) &&
+      matchesQuery(query, blog.title, blog.excerpt)
+  );
+  const visibleIds = useMemo(
+    () => listVisible.map((blog) => blog.id),
+    [listVisible]
+  );
+  const selection = useListSelection(visibleIds);
 
   function openCreate() {
     setMode("create");
@@ -142,9 +162,9 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
   async function onTrash(id: string, restore = false) {
     if (
       !restore &&
-      !(await confirmAction("Move this blog post to trash?", {
+      !(await confirmAction("Archive this blog post?", {
         danger: true,
-        confirmLabel: "Yes, move to trash",
+        confirmLabel: "Yes, archive",
       }))
     ) {
       return;
@@ -155,35 +175,65 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
       await setTrash("blog", id, restore);
     } catch {
       setBusy(false);
-      setError(restore ? "Could not restore the post." : "Could not move the post to trash.");
+      setError(restore ? "Could not restore the post." : "Could not archive the post.");
       return;
     }
     setBusy(false);
     const stamp = restore ? null : new Date().toISOString();
     setRows((prev) => prev.map((row) => (row.id === id ? { ...row, trashedAt: stamp } : row)));
-    setMessage(restore ? "Blog post restored" : "Blog post moved to trash");
+    setMessage(restore ? "Blog post restored" : "Blog post archived");
+    selection.removeIds([id]);
+    router.refresh();
+  }
+
+  async function onBulk(restore: boolean) {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      restore
+        ? `Restore ${ids.length} selected post${ids.length === 1 ? "" : "s"}?`
+        : `Archive ${ids.length} selected post${ids.length === 1 ? "" : "s"}?`,
+      {
+        danger: !restore,
+        confirmLabel: restore ? "Yes, restore" : "Yes, archive",
+      }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    setError("");
+    try {
+      await setTrashMany("blog", ids, restore);
+    } catch {
+      setBulkBusy(false);
+      setError(restore ? "Could not restore posts." : "Could not archive posts.");
+      return;
+    }
+    setBulkBusy(false);
+    const stamp = restore ? null : new Date().toISOString();
+    setRows((prev) =>
+      prev.map((row) => (ids.includes(row.id) ? { ...row, trashedAt: stamp } : row))
+    );
+    setMessage(restore ? "Posts restored" : "Posts archived");
+    selection.removeIds(ids);
     router.refresh();
   }
 
   if (mode === "list") {
-    const pool = rows.filter((blog) => (bin ? blog.trashedAt : !blog.trashedAt));
-    const visible = pool.filter(
-      (blog) =>
-        (!status || (status === "published" ? blog.published : !blog.published)) &&
-        matchesQuery(query, blog.title, blog.excerpt)
-    );
     return (
       <div className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-slate-ink">
-            {pool.length} post{pool.length === 1 ? "" : "s"}
-            {bin ? " in trash" : ""}
+            {listPool.length} post{listPool.length === 1 ? "" : "s"}
+            {bin ? " archived" : ""}
           </p>
           <div className="flex flex-wrap gap-2">
             <TrashBinButton
               open={bin}
               count={rows.filter((blog) => blog.trashedAt).length}
-              onToggle={() => setBin((current) => !current)}
+              onToggle={() => {
+                setBin((current) => !current);
+                selection.clear();
+              }}
             />
             {!bin && (
               <Button onClick={openCreate}>
@@ -205,17 +255,41 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
             { value: "draft", label: "Draft" },
           ]}
         />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <ListSelectCheckbox
+            checked={selection.allVisibleSelected}
+            onChange={selection.toggleAllVisible}
+            label="Select all"
+          />
+          <BulkArchiveBar
+            count={selection.selectedVisible.length}
+            archivedView={bin}
+            busy={bulkBusy || busy}
+            onArchive={() => onBulk(false)}
+            onRestore={() => onBulk(true)}
+            onClear={selection.clear}
+          />
+        </div>
         <div className="space-y-3">
-          {visible.map((blog) => (
+          {listVisible.map((blog) => (
             <article
               key={blog.id}
               className="surface flex flex-wrap items-center justify-between gap-3 rounded-xl p-4"
             >
-              <div>
-                <p className="font-semibold text-white">{blog.title}</p>
-                <p className="mt-1 text-xs text-white/60">
-                  {formatDate(blog.createdAt)} · {blog.published ? "Published" : "Draft"}
-                </p>
+              <div className="flex min-w-0 items-start gap-3">
+                <input
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 rounded border-white/30 bg-black accent-cyan"
+                  checked={selection.selected.includes(blog.id)}
+                  onChange={() => selection.toggle(blog.id)}
+                  aria-label={`Select ${blog.title}`}
+                />
+                <div>
+                  <p className="font-semibold text-white">{blog.title}</p>
+                  <p className="mt-1 text-xs text-white/60">
+                    {formatDate(blog.createdAt)} · {blog.published ? "Published" : "Draft"}
+                  </p>
+                </div>
               </div>
               <div className="flex gap-2">
                 {!bin && (
@@ -232,11 +306,11 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
               </div>
             </article>
           ))}
-          {visible.length === 0 && (
+          {listVisible.length === 0 && (
             <p className="text-sm text-slate-ink">
-              {pool.length === 0
+              {listPool.length === 0
                 ? bin
-                  ? "Trash is empty."
+                  ? "Archive is empty."
                   : "No blog posts yet."
                 : "Nothing matches this filter."}
             </p>
