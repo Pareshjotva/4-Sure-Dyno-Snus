@@ -24,7 +24,7 @@ export default async function AccountProgramPage() {
         Program incentive tiers.
       </p>
       <div className="mt-6">
-        <ProgramRules tiers={incentives} />
+        <ProgramRules tiers={incentives} showSavePerPack />
       </div>
       <div className="mt-8 flex flex-wrap gap-3">
         <Link href="/account/order/new">

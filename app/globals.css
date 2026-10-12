@@ -200,6 +200,11 @@ a {
   pointer-events: none;
 }
 
+.page-skeleton {
+  min-height: 50vh;
+  overflow: hidden;
+}
+
 .page-loading-veil {
   position: fixed;
   z-index: 40;

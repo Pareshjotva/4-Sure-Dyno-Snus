@@ -5,7 +5,13 @@ function packRangeLabel(minPacks: number, maxPacks: number | null) {
   return maxPacks == null ? `${minPacks}+ packs` : `${minPacks}–${maxPacks} packs`;
 }
 
-export function ProgramRules({ tiers }: { tiers: IncentiveTier[] }) {
+export function ProgramRules({
+  tiers,
+  showSavePerPack = false,
+}: {
+  tiers: IncentiveTier[];
+  showSavePerPack?: boolean;
+}) {
   const sorted = [...tiers].sort((a, b) => a.minPacks - b.minPacks);
   const display =
     sorted.length > 0
@@ -36,6 +42,11 @@ export function ProgramRules({ tiers }: { tiers: IncentiveTier[] }) {
             <p className="mt-2 text-sm text-white/70">
               {packRangeLabel(tier.minPacks, tier.maxPacks)} in a calendar month
             </p>
+            {showSavePerPack && tier.savePerPack > 0 ? (
+              <p className="mt-3 text-sm font-semibold text-warn-red">
+                Save ${tier.savePerPack.toFixed(2)} / 50 g pack
+              </p>
+            ) : null}
           </article>
         ))}
       </div>

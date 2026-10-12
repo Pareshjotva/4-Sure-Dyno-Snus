@@ -5,16 +5,6 @@ import { Suspense, useEffect, useState } from "react";
 
 type Box = { top: number; left: number; width: number; height: number };
 
-function pageContent(page: Element): Element {
-  if (page.tagName !== "MAIN") return page;
-  const child = page.firstElementChild;
-  if (!child) return page;
-  const pageWidth = page.getBoundingClientRect().width;
-  const childWidth = child.getBoundingClientRect().width;
-  if (childWidth > 80 && childWidth < pageWidth - 32) return child;
-  return page;
-}
-
 function visibleBox(el: Element): Box {
   const rect = el.getBoundingClientRect();
   const header = document.querySelector("header");
@@ -37,13 +27,26 @@ function visibleBox(el: Element): Box {
 }
 
 function isModified(event: MouseEvent) {
-  return event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+  return (
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  );
 }
 
 function isPageLink(anchor: HTMLAnchorElement) {
   if (anchor.target === "_blank" || anchor.hasAttribute("download")) return false;
   const href = anchor.getAttribute("href") || "";
-  if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return false;
+  if (
+    !href ||
+    href.startsWith("#") ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:")
+  ) {
+    return false;
+  }
   let url: URL;
   try {
     url = new URL(anchor.href, location.href);
@@ -109,15 +112,21 @@ function ClickFeedbackInner() {
       if (isModified(event)) return;
       const target = event.target;
       if (!(target instanceof Element)) return;
-      if (target.closest("[data-loading-ignore], [data-analytics-ignore], .page-loading-veil")) return;
+      if (
+        target.closest(
+          "[data-loading-ignore], [data-analytics-ignore], .page-loading-veil, .page-skeleton"
+        )
+      ) {
+        return;
+      }
 
       const anchor = target.closest("a");
       if (anchor instanceof HTMLAnchorElement && isPageLink(anchor)) {
         anchor.setAttribute("data-click-loading", "");
+        // Route transitions use segment loading.tsx skeletons.
+        // Only overlay when a local section opts into section loading.
         const section = anchor.closest("[data-section-loading]");
-        const page = document.querySelector("[data-page-loading]");
-        const next = section || (page ? pageContent(page) : null);
-        if (next) reveal(next);
+        if (section) reveal(section);
         return;
       }
 
@@ -126,17 +135,21 @@ function ClickFeedbackInner() {
       control.setAttribute("data-click-loading", "");
       if (control.hasAttribute("data-page-action")) {
         const page = document.querySelector("[data-page-loading]");
-        if (page) reveal(pageContent(page));
+        if (page) reveal(page);
         return;
       }
 
       const form = control.closest("form");
       const type = control.getAttribute("type");
       const submitsForm =
-        form && (type === "submit" || (type === null && control.tagName === "BUTTON"));
+        form &&
+        (type === "submit" || (type === null && control.tagName === "BUTTON"));
       if (submitsForm && form) {
         const timer = window.setTimeout(() => {
-          if (control.hasAttribute("disabled") || control.getAttribute("aria-busy") === "true") {
+          if (
+            control.hasAttribute("disabled") ||
+            control.getAttribute("aria-busy") === "true"
+          ) {
             reveal(form);
           } else {
             control.removeAttribute("data-click-loading");
@@ -146,7 +159,10 @@ function ClickFeedbackInner() {
         return;
       }
 
-      const timer = window.setTimeout(() => control.removeAttribute("data-click-loading"), 650);
+      const timer = window.setTimeout(
+        () => control.removeAttribute("data-click-loading"),
+        650
+      );
       timers.add(timer);
     }
 
@@ -161,16 +177,25 @@ function ClickFeedbackInner() {
     if (!scope || !scope.closest("form")) return;
     const form = scope.closest("form");
     if (!form) return;
-    const button = form.querySelector("button[disabled], button[aria-busy='true']");
+    const button = form.querySelector(
+      "button[disabled], button[aria-busy='true']"
+    );
     if (!(button instanceof HTMLElement)) return;
     const obs = new MutationObserver(() => {
-      if (!button.isConnected || (!button.hasAttribute("disabled") && button.getAttribute("aria-busy") !== "true")) {
+      if (
+        !button.isConnected ||
+        (!button.hasAttribute("disabled") &&
+          button.getAttribute("aria-busy") !== "true")
+      ) {
         button.removeAttribute("data-click-loading");
         setBox(null);
         setScope(null);
       }
     });
-    obs.observe(button, { attributes: true, attributeFilter: ["disabled", "aria-busy"] });
+    obs.observe(button, {
+      attributes: true,
+      attributeFilter: ["disabled", "aria-busy"],
+    });
     return () => obs.disconnect();
   }, [scope]);
 
@@ -181,7 +206,12 @@ function ClickFeedbackInner() {
       className="page-loading-veil"
       role="status"
       aria-live="polite"
-      style={{ top: box.top, left: box.left, width: box.width, height: box.height }}
+      style={{
+        top: box.top,
+        left: box.left,
+        width: box.width,
+        height: box.height,
+      }}
     >
       <span className="page-loading-sweep" />
       <span className="sr-only">Loading</span>
