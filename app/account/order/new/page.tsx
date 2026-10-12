@@ -69,7 +69,7 @@ export default async function NewOrderPage() {
               name: p.name,
               image: p.image,
             }))}
-            defaultProvince={session.province || user.province || "BC"}
+            defaultProvince={user.province || session.province || ""}
             minOrderPacks={site.minOrderPacks}
             pendingNotice={gate.pending ? gate.message : ""}
             tiers={incentives}

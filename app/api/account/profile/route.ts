@@ -106,6 +106,7 @@ export async function POST(req: Request) {
       address: text(form, "address"),
       city: text(form, "city"),
       postalCode: text(form, "postalCode"),
+      province: text(form, "province"),
       phone: text(form, "phone"),
     });
 
@@ -155,6 +156,7 @@ export async function POST(req: Request) {
       fields.address !== (user.address || "") ||
       fields.city !== (user.city || "") ||
       fields.postalCode !== (user.postalCode || "") ||
+      fields.province !== (user.province || "") ||
       fields.phone !== (user.phone || "");
     const licenseChanged = primary.changed || second.changed || third.changed;
     if (!textChanged && !licenseChanged) {

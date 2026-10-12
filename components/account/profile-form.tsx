@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type { FieldErrors } from "@/lib/form-errors";
 import { profileFieldsSchema } from "@/lib/form-schemas";
 import {
@@ -60,6 +61,7 @@ export function ProfileForm({ user }: { user: Omit<User, "passwordHash"> }) {
       address: String(form.get("address") || ""),
       city: String(form.get("city") || ""),
       postalCode: String(form.get("postalCode") || ""),
+      province: String(form.get("province") || ""),
       phone: String(form.get("phone") || ""),
     };
     const parsed = profileFieldsSchema.safeParse(values);
@@ -180,6 +182,16 @@ export function ProfileForm({ user }: { user: Omit<User, "passwordHash"> }) {
           defaultValue={user.city || ""}
           error={errors.city}
         />
+        <div>
+          <label className={labelClass}>Province</label>
+          <Select name="province" defaultValue={user.province || ""}>
+            <option value="">Select province</option>
+            <option value="BC">British Columbia</option>
+            <option value="AB">Alberta</option>
+            <option value="ON">Ontario</option>
+          </Select>
+          <FieldError message={errors.province} />
+        </div>
         <Field
           name="postalCode"
           label="Postal code"

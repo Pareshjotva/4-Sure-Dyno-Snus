@@ -73,6 +73,9 @@ export const registerSchema = z.object({
     .min(1, "Enter a password.")
     .min(8, "Password must be at least 8 characters."),
   phone: phoneSchema,
+  province: z.enum(["BC", "AB", "ON"], {
+    message: "Choose a province.",
+  }),
 });
 
 export const profileFieldsSchema = z.object({
@@ -88,11 +91,13 @@ export const profileFieldsSchema = z.object({
   address: z.string().trim().min(4, "Enter the store address."),
   city: z.string().trim().min(2, "Enter the city."),
   postalCode: z.string().trim().min(3, "Enter the postal code."),
+  province: z.enum(["BC", "AB", "ON"], {
+    message: "Choose a province.",
+  }),
   phone: phoneSchema,
 });
 
 export const orderSchema = z.object({
-  province: z.string().trim().min(2, "Choose a province."),
   notes: z.string().optional(),
   licenceNumber: z.string().trim().optional(),
   items: z

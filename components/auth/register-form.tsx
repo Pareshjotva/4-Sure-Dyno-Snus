@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type { FieldErrors } from "@/lib/form-errors";
 import { registerSchema } from "@/lib/form-schemas";
 import Link from "next/link";
@@ -75,13 +76,23 @@ export function RegisterForm() {
         <FieldError message={errors.phone} />
       </div>
       <div>
+        <label className={labelClass}>Ship-to province</label>
+        <Select name="province" defaultValue="">
+          <option value="">Select province</option>
+          <option value="BC">British Columbia</option>
+          <option value="AB">Alberta</option>
+          <option value="ON">Ontario</option>
+        </Select>
+        <FieldError message={errors.province} />
+      </div>
+      <div>
         <label className={labelClass}>Password</label>
         <Input name="password" type="password" autoComplete="new-password" />
         <FieldError message={errors.password} />
       </div>
       <p className="text-sm text-white/60">
         Store details and your tobacco license are added in your profile after
-        you create the account.
+        you create the account. Province can be changed later in Profile.
       </p>
       {formError && (
         <p className="text-sm text-warn-red" role="alert">

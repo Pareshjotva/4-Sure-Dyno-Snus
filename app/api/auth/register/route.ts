@@ -16,6 +16,7 @@ export async function POST(req: Request) {
       passwordHash,
       role: "retailer",
       phone: data.phone,
+      province: data.province,
       verificationReview: undefined,
     });
     const session = await createSession(user);

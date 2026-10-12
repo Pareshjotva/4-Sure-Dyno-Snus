@@ -4,15 +4,21 @@ import { Button } from "@/components/ui/button";
 import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { VolumeProgress } from "@/components/orders/volume-progress";
 import type { FieldErrors } from "@/lib/form-errors";
 import type { IncentiveTier } from "@/lib/types";
 import { quoteCumulativeDiscount } from "@/lib/volume-discount";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
+
+const PROVINCE_LABELS: Record<string, string> = {
+  BC: "British Columbia",
+  AB: "Alberta",
+  ON: "Ontario",
+};
 
 type ProductOption = {
   id: string;
@@ -86,6 +92,9 @@ export function OrderForm({
     } else if (packCount < minOrderPacks) {
       next.packs = `Minimum order is ${minOrderPacks} packs (50 g).`;
     }
+    if (!defaultProvince) {
+      next.province = "Add your province in Profile before ordering.";
+    }
     if (Object.keys(next).length) {
       setErrors(next);
       return;
@@ -103,7 +112,6 @@ export function OrderForm({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        province: form.get("province"),
         notes: form.get("notes"),
         items,
       }),
@@ -174,15 +182,20 @@ export function OrderForm({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy/70">
+        <div className="surface rounded-xl p-4 text-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-navy/70">
             Ship-to province
-          </label>
-          <Select name="province" defaultValue={defaultProvince || "BC"}>
-            <option value="BC">British Columbia</option>
-            <option value="AB">Alberta</option>
-            <option value="ON">Ontario</option>
-          </Select>
+          </p>
+          <p className="mt-2 font-semibold text-navy">
+            {PROVINCE_LABELS[defaultProvince] || defaultProvince || "Not set"}
+          </p>
+          <p className="mt-2 text-xs text-navy/60">
+            Province comes from your profile. Change it in{" "}
+            <Link href="/account/profile" className="font-semibold text-cyan">
+              Profile
+            </Link>
+            .
+          </p>
           <FieldError message={errors.province} />
         </div>
         <div className="surface rounded-xl p-4 text-sm">

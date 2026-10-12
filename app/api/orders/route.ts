@@ -31,6 +31,17 @@ export async function POST(req: Request) {
     if (!gate.allowed) {
       return NextResponse.json({ error: gate.message }, { status: 400 });
     }
+    const province = (user.province || session.province || "").toUpperCase();
+    if (!["BC", "AB", "ON"].includes(province)) {
+      return NextResponse.json(
+        {
+          fieldErrors: {
+            province: "Add your province in Profile before ordering.",
+          },
+        },
+        { status: 400 }
+      );
+    }
     const site = await getSite();
     const incentives = await getIncentives();
 
@@ -85,7 +96,7 @@ export async function POST(req: Request) {
       userId: session.id,
       userName: session.name,
       company: session.company,
-      province: body.province,
+      province,
       items: lineItems,
       subtotal,
       discountPercent: quote.discountPercent,
