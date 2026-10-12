@@ -24,6 +24,7 @@ const adminLinks = [
   { href: "/admin/pricing", label: "Pricing" },
   { href: "/admin/incentives", label: "Discount slabs" },
   { href: "/admin/retailers", label: "Retailers" },
+  { href: "/admin/verifications", label: "Verify licenses" },
   { href: "/admin/leads", label: "Leads" },
   { href: "/admin/wholesale-inquiries", label: "Wholesale Inquiry" },
   { href: "/admin/blogs", label: "Blogs" },

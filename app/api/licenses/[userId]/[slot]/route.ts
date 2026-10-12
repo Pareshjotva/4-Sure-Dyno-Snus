@@ -26,10 +26,14 @@ export async function GET(
   }
   const bytes = await readLicenseFile(license.storedName);
   if (!bytes) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const download =
+    new URL(_req.url).searchParams.get("download") === "1" ||
+    new URL(_req.url).searchParams.get("download") === "true";
+  const safeName = license.fileName.replace(/"/g, "");
   return new NextResponse(new Uint8Array(bytes), {
     headers: {
       "Content-Type": licenseContentType(license.storedName),
-      "Content-Disposition": `inline; filename="${license.fileName.replace(/"/g, "")}"`,
+      "Content-Disposition": `${download ? "attachment" : "inline"}; filename="${safeName}"`,
       "Cache-Control": "private, no-store",
     },
   });

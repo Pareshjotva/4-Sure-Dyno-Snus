@@ -5,17 +5,36 @@ import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import type { FieldErrors } from "@/lib/form-errors";
 import { profileFieldsSchema } from "@/lib/form-schemas";
-import { isExpiryInPast, LICENSE_EXPIRED_MESSAGE, todayISODate } from "@/lib/profile-status";
-import type { User } from "@/lib/types";
+import {
+  isExpiryInPast,
+  LICENSE_EXPIRED_MESSAGE,
+  todayISODate,
+} from "@/lib/profile-status";
+import type { StoredLicense, User } from "@/lib/types";
+import { formatDate } from "@/lib/utils";
+import { Download, Eye, FileText, Upload } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
-const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-wide text-white/70";
+const labelClass =
+  "mb-1 block text-xs font-semibold uppercase tracking-wide text-white/70";
 
 function splitName(name: string) {
   const parts = name.trim().split(/\s+/);
   return { first: parts[0] || "", last: parts.slice(1).join(" ") };
+}
+
+function reviewLabel(review?: StoredLicense["review"]) {
+  if (review === "approved") return "Verified";
+  if (review === "rejected") return "Rejected — upload a new file";
+  return "Pending admin verification";
+}
+
+function reviewClass(review?: StoredLicense["review"]) {
+  if (review === "approved") return "bg-cyan/20 text-cyan";
+  if (review === "rejected") return "bg-warn-red/15 text-warn-red";
+  return "bg-warn-yellow/15 text-warn-yellow";
 }
 
 export function ProfileForm({ user }: { user: Omit<User, "passwordHash"> }) {
@@ -70,7 +89,8 @@ export function ProfileForm({ user }: { user: Omit<User, "passwordHash"> }) {
         next[errorKey] = "Your license was rejected. Upload a new license file.";
         continue;
       }
-      if ((hasFile || current) && !expiry) next[errorKey] = "Enter the license expiry date.";
+      if ((hasFile || current) && !expiry)
+        next[errorKey] = "Enter the license expiry date.";
       if (expiry && isExpiryInPast(expiry)) next[errorKey] = LICENSE_EXPIRED_MESSAGE;
       if (expiry && !hasFile && !current) {
         next[errorKey] = "Upload the license file for this expiry date.";
@@ -89,7 +109,9 @@ export function ProfileForm({ user }: { user: Omit<User, "passwordHash"> }) {
     setLoading(false);
     if (!res.ok) {
       setErrors(json.fieldErrors || {});
-      setFormError(json.fieldErrors ? "" : json.error || "Could not save the profile.");
+      setFormError(
+        json.fieldErrors ? "" : json.error || "Could not save the profile."
+      );
       return;
     }
     setSaved(
@@ -101,17 +123,69 @@ export function ProfileForm({ user }: { user: Omit<User, "passwordHash"> }) {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="surface mt-4 space-y-5 rounded-2xl p-5">
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      className="surface mt-4 space-y-5 rounded-2xl p-5"
+    >
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field name="firstName" label="First name" defaultValue={user.firstName || guessed.first} error={errors.firstName} />
-        <Field name="lastName" label="Last name" defaultValue={user.lastName || guessed.last} error={errors.lastName} />
-        <Field name="email" label="Email address" type="email" defaultValue={user.email} error={errors.email} />
-        <Field name="phone" label="Phone number" type="tel" defaultValue={user.phone || ""} error={errors.phone} />
-        <Field name="country" label="Country" defaultValue={user.country || "Canada"} error={errors.country} />
-        <Field name="company" label="Company/store name" defaultValue={user.company || ""} error={errors.company} />
-        <Field name="address" label="Store address" defaultValue={user.address || ""} error={errors.address} className="sm:col-span-2" />
-        <Field name="city" label="City" defaultValue={user.city || ""} error={errors.city} />
-        <Field name="postalCode" label="Postal code" defaultValue={user.postalCode || ""} error={errors.postalCode} />
+        <Field
+          name="firstName"
+          label="First name"
+          defaultValue={user.firstName || guessed.first}
+          error={errors.firstName}
+        />
+        <Field
+          name="lastName"
+          label="Last name"
+          defaultValue={user.lastName || guessed.last}
+          error={errors.lastName}
+        />
+        <Field
+          name="email"
+          label="Email address"
+          type="email"
+          defaultValue={user.email}
+          error={errors.email}
+        />
+        <Field
+          name="phone"
+          label="Phone number"
+          type="tel"
+          defaultValue={user.phone || ""}
+          error={errors.phone}
+        />
+        <Field
+          name="country"
+          label="Country"
+          defaultValue={user.country || "Canada"}
+          error={errors.country}
+        />
+        <Field
+          name="company"
+          label="Company/store name"
+          defaultValue={user.company || ""}
+          error={errors.company}
+        />
+        <Field
+          name="address"
+          label="Store address"
+          defaultValue={user.address || ""}
+          error={errors.address}
+          className="sm:col-span-2"
+        />
+        <Field
+          name="city"
+          label="City"
+          defaultValue={user.city || ""}
+          error={errors.city}
+        />
+        <Field
+          name="postalCode"
+          label="Postal code"
+          defaultValue={user.postalCode || ""}
+          error={errors.postalCode}
+        />
       </div>
 
       <LicenseFields
@@ -209,34 +283,101 @@ function LicenseFields({
   today: string;
   required?: boolean;
 }) {
+  const [pickedName, setPickedName] = useState("");
+  const href = `/api/licenses/${userId}/${slot}`;
+  const uploaded = Boolean(current?.storedName);
+
   return (
     <div className="rounded-xl border border-white/10 p-4">
-      <p className="text-sm font-semibold text-white">
-        {title}
-        {required ? "" : ""}
+      <p className="text-sm font-semibold text-white">{title}</p>
+      <p className="mt-1 text-sm text-white/60">
+        {required
+          ? "A current license file and a future expiry date are required."
+          : "Leave blank if you have only one location."}
       </p>
-      {current?.storedName ? (
-        <p className="mt-1 text-sm text-white/70">
-          Current file:{" "}
-          <Link href={`/api/licenses/${userId}/${slot}`} className="font-semibold text-cyan" target="_blank">
-            {current.fileName}
-          </Link>
-          . Uploading a new file sends it for verification again.
-        </p>
+
+      {uploaded ? (
+        <div className="mt-3 rounded-lg border border-cyan/30 bg-cyan/10 p-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="mt-0.5 rounded-md bg-black/40 p-2 text-cyan">
+                <FileText size={18} />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate font-semibold text-white">
+                  {current?.fileName}
+                </p>
+                <p className="mt-1 text-xs text-white/70">
+                  Uploaded {current?.uploadedAt ? formatDate(current.uploadedAt) : "—"}
+                  {" · expires "}
+                  {current?.expiryDate || "—"}
+                </p>
+                <span
+                  className={`mt-2 inline-flex rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide ${reviewClass(current?.review)}`}
+                >
+                  {reviewLabel(current?.review)}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href={href}
+                target="_blank"
+                className="inline-flex items-center gap-1 rounded-md border border-white/20 px-3 py-1.5 text-xs font-semibold text-white hover:border-cyan hover:text-cyan"
+              >
+                <Eye size={14} /> View
+              </Link>
+              <Link
+                href={`${href}?download=1`}
+                className="inline-flex items-center gap-1 rounded-md border border-white/20 px-3 py-1.5 text-xs font-semibold text-white hover:border-cyan hover:text-cyan"
+              >
+                <Download size={14} /> Download
+              </Link>
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-white/55">
+            Choose a new file below only if you need to replace this document.
+          </p>
+        </div>
       ) : (
-        <p className="mt-1 text-sm text-white/60">
-          {required ? "A current license file and a future expiry date are required." : "Leave blank if you have only one location."}
-        </p>
+        <div className="mt-3 rounded-lg border border-dashed border-white/20 bg-black/30 px-3 py-3 text-sm text-white/55">
+          No document uploaded yet for this location.
+        </div>
       )}
+
       <div className="mt-3 grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelClass}>License file</label>
-          <Input name={fileName} type="file" accept="application/pdf,image/jpeg,image/png,image/webp" />
+          <label className={labelClass}>
+            {uploaded ? "Replace license file" : "License file"}
+          </label>
+          <Input
+            name={fileName}
+            type="file"
+            accept="application/pdf,image/jpeg,image/png,image/webp"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              setPickedName(file?.name || "");
+            }}
+          />
+          {pickedName ? (
+            <p className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-cyan">
+              <Upload size={12} /> Selected: {pickedName}
+            </p>
+          ) : (
+            <p className="mt-2 text-xs text-white/45">
+              PDF or image (JPEG, PNG, WebP)
+            </p>
+          )}
           <FieldError message={fileError} />
         </div>
         <div>
           <label className={labelClass}>Expiry date</label>
-          <Input name={expiryName} type="date" min={today} defaultValue={current?.expiryDate || ""} />
+          <Input
+            name={expiryName}
+            type="date"
+            min={today}
+            defaultValue={current?.expiryDate || ""}
+          />
           <FieldError message={expiryError} />
         </div>
       </div>
