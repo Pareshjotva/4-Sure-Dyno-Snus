@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Archive, ArchiveRestore } from "lucide-react";
+import { Archive, ArchiveRestore, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export type TrashKind =
@@ -35,6 +35,24 @@ export async function setTrashMany(
   if (!res.ok) throw new Error("Could not update archive");
 }
 
+export async function purgeTrash(kind: TrashKind, id: string) {
+  const res = await fetch("/api/admin/trash", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ kind, id, permanent: true }),
+  });
+  if (!res.ok) throw new Error("Could not permanently delete");
+}
+
+export async function purgeTrashMany(kind: TrashKind, ids: string[]) {
+  const res = await fetch("/api/admin/trash", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ kind, ids, permanent: true }),
+  });
+  if (!res.ok) throw new Error("Could not permanently delete");
+}
+
 export function TrashBinButton({
   open,
   count,
@@ -57,23 +75,29 @@ export function TrashAction({
   busy,
   onTrash,
   onRestore,
+  onPurge,
 }: {
   trashed: boolean;
   busy?: boolean;
   onTrash: () => void;
   onRestore: () => void;
+  onPurge: () => void;
 }) {
-  if (trashed) {
-    return (
-      <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onRestore}>
-        <ArchiveRestore size={14} /> Restore
-      </Button>
-    );
-  }
   return (
-    <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onTrash}>
-      <Archive size={14} /> Archive
-    </Button>
+    <>
+      {trashed ? (
+        <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onRestore}>
+          <ArchiveRestore size={14} /> Restore
+        </Button>
+      ) : (
+        <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onTrash}>
+          <Archive size={14} /> Archive
+        </Button>
+      )}
+      <Button type="button" size="sm" variant="danger" disabled={busy} onClick={onPurge}>
+        <Trash2 size={14} /> Delete permanently
+      </Button>
+    </>
   );
 }
 
@@ -154,6 +178,7 @@ export function BulkArchiveBar({
   busy,
   onArchive,
   onRestore,
+  onPurge,
   onClear,
 }: {
   count: number;
@@ -161,6 +186,7 @@ export function BulkArchiveBar({
   busy?: boolean;
   onArchive: () => void;
   onRestore: () => void;
+  onPurge: () => void;
   onClear: () => void;
 }) {
   if (count === 0) return null;
@@ -176,6 +202,9 @@ export function BulkArchiveBar({
           <Archive size={14} /> Archive selected
         </Button>
       )}
+      <Button type="button" size="sm" variant="danger" disabled={busy} onClick={onPurge}>
+        <Trash2 size={14} /> Delete permanently
+      </Button>
       <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onClear}>
         Clear
       </Button>

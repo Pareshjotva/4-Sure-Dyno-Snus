@@ -5,6 +5,8 @@ import {
   ListSelectCheckbox,
   TrashAction,
   TrashBinButton,
+  purgeTrash,
+  purgeTrashMany,
   setTrash,
   setTrashMany,
   useListSelection,
@@ -120,6 +122,46 @@ export function AdminWholesaleInquiriesClient({
     );
     selection.removeIds(ids);
   }
+  async function onPurge(id: string) {
+    if (
+      !(await confirmAction(
+        "Permanently delete this inquiry? This cannot be undone.",
+        { danger: true, confirmLabel: "Yes, delete forever" }
+      ))
+    ) {
+      return;
+    }
+    setBusy(id);
+    try {
+      await purgeTrash("wholesale", id);
+    } catch {
+      setBusy(null);
+      return;
+    }
+    setBusy(null);
+    setRows((prev) => prev.filter((row) => row.id !== id));
+    selection.removeIds([id]);
+  }
+
+  async function onBulkPurge() {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      `Permanently delete ${ids.length} selected inquir${ids.length === 1 ? "y" : "ies"}? This cannot be undone.`,
+      { danger: true, confirmLabel: "Yes, delete forever" }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    try {
+      await purgeTrashMany("wholesale", ids);
+    } catch {
+      setBulkBusy(false);
+      return;
+    }
+    setBulkBusy(false);
+    setRows((prev) => prev.filter((row) => !ids.includes(row.id)));
+    selection.removeIds(ids);
+  }
 
   return (
     <div className="space-y-4">
@@ -156,6 +198,7 @@ export function AdminWholesaleInquiriesClient({
           archivedView={bin}
           busy={bulkBusy}
           onArchive={() => onBulk(false)}
+          onPurge={onBulkPurge}
           onRestore={() => onBulk(true)}
           onClear={selection.clear}
         />
@@ -205,6 +248,7 @@ export function AdminWholesaleInquiriesClient({
               busy={busy === row.id}
               onTrash={() => onTrash(row.id)}
               onRestore={() => onTrash(row.id, true)}
+              onPurge={() => onPurge(row.id)}
             />
           </div>
           <p className="mt-3 text-sm leading-relaxed text-white/90">

@@ -5,6 +5,8 @@ import {
   ListSelectCheckbox,
   TrashAction,
   TrashBinButton,
+  purgeTrash,
+  purgeTrashMany,
   setTrash,
   setTrashMany,
   useListSelection,
@@ -217,6 +219,48 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
     selection.removeIds(ids);
     router.refresh();
   }
+  async function onPurge(id: string) {
+    if (
+      !(await confirmAction(
+        "Permanently delete this blog post? This cannot be undone.",
+        { danger: true, confirmLabel: "Yes, delete forever" }
+      ))
+    ) {
+      return;
+    }
+    setBusy(true);
+    try {
+      await purgeTrash("blog", id);
+    } catch {
+      setBusy(false);
+      return;
+    }
+    setBusy(false);
+    setRows((prev) => prev.filter((row) => row.id !== id));
+    selection.removeIds([id]);
+    router.refresh();
+  }
+
+  async function onBulkPurge() {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      `Permanently delete ${ids.length} selected post${ids.length === 1 ? "" : "s"}? This cannot be undone.`,
+      { danger: true, confirmLabel: "Yes, delete forever" }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    try {
+      await purgeTrashMany("blog", ids);
+    } catch {
+      setBulkBusy(false);
+      return;
+    }
+    setBulkBusy(false);
+    setRows((prev) => prev.filter((row) => !ids.includes(row.id)));
+    selection.removeIds(ids);
+    router.refresh();
+  }
 
   if (mode === "list") {
     return (
@@ -266,6 +310,7 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
             archivedView={bin}
             busy={bulkBusy || busy}
             onArchive={() => onBulk(false)}
+          onPurge={onBulkPurge}
             onRestore={() => onBulk(true)}
             onClear={selection.clear}
           />
@@ -302,6 +347,7 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
                   busy={busy}
                   onTrash={() => onTrash(blog.id)}
                   onRestore={() => onTrash(blog.id, true)}
+                  onPurge={() => onPurge(blog.id)}
                 />
               </div>
             </article>

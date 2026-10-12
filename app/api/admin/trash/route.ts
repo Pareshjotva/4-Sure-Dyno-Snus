@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth";
 import {
   getUserById,
+  purgeBlog,
+  purgeFaq,
+  purgeLead,
+  purgeOrder,
+  purgeProduct,
+  purgeUser,
+  purgeWholesaleInquiry,
   updateBlog,
   updateFaq,
   updateLead,
@@ -26,6 +33,7 @@ const schema = z
     id: z.string().min(1).optional(),
     ids: z.array(z.string().min(1)).min(1).optional(),
     restore: z.boolean().optional(),
+    permanent: z.boolean().optional(),
   })
   .refine((body) => Boolean(body.id) || Boolean(body.ids?.length), {
     message: "id or ids required",
@@ -39,12 +47,30 @@ export async function POST(req: Request) {
 
   try {
     const body = schema.parse(await req.json());
-    const trashedAt = body.restore ? null : new Date().toISOString();
     const ids = body.ids?.length ? body.ids : body.id ? [body.id] : [];
     let updated = 0;
 
     for (const id of ids) {
       let saved = false;
+
+      if (body.permanent) {
+        if (body.kind === "product") saved = await purgeProduct(id);
+        if (body.kind === "blog") saved = await purgeBlog(id);
+        if (body.kind === "faq") saved = await purgeFaq(id);
+        if (body.kind === "order") saved = await purgeOrder(id);
+        if (body.kind === "lead") saved = await purgeLead(id);
+        if (body.kind === "wholesale") saved = await purgeWholesaleInquiry(id);
+        if (body.kind === "retailer") {
+          const user = await getUserById(id);
+          if (user && user.role === "retailer" && user.id !== session.id) {
+            saved = await purgeUser(id);
+          }
+        }
+        if (saved) updated += 1;
+        continue;
+      }
+
+      const trashedAt = body.restore ? null : new Date().toISOString();
       if (body.kind === "product") {
         saved = Boolean(await updateProduct(id, { trashedAt }));
       }

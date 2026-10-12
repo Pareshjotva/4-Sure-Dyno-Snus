@@ -108,6 +108,12 @@ export async function deleteProduct(id: string): Promise<boolean> {
   return Boolean(product);
 }
 
+export async function purgeProduct(id: string): Promise<boolean> {
+  const products = await collection<Product>("products");
+  const result = await products.deleteOne({ id });
+  return result.deletedCount > 0;
+}
+
 export async function getPricing(provinceCode?: string) {
   const pricing = await collection<ProvincePricing>("pricing");
   const filter = provinceCode
@@ -204,6 +210,12 @@ export async function updateUser(id: string, patch: Partial<User>) {
   return strip(updated);
 }
 
+export async function purgeUser(id: string): Promise<boolean> {
+  const users = await collection<User>("users");
+  const result = await users.deleteOne({ id });
+  return result.deletedCount > 0;
+}
+
 export async function syncOrderVerification(userId: string, status: ProfileStatus) {
   const orders = await collection<Order>("orders");
   await orders.updateMany(
@@ -281,6 +293,12 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
   return strip(updated);
 }
 
+export async function purgeOrder(id: string): Promise<boolean> {
+  const orders = await collection<Order>("orders");
+  const result = await orders.deleteOne({ id });
+  return result.deletedCount > 0;
+}
+
 export async function getLeads(scope: ListScope = "active") {
   const leads = await collection<ContactLead>("leads");
   const rows = await leads
@@ -312,6 +330,12 @@ export async function updateLead(id: string, patch: Partial<ContactLead>) {
     { returnDocument: "after" }
   );
   return strip(updated);
+}
+
+export async function purgeLead(id: string): Promise<boolean> {
+  const leads = await collection<ContactLead>("leads");
+  const result = await leads.deleteOne({ id });
+  return result.deletedCount > 0;
 }
 
 export async function getWholesaleInquiries(scope: ListScope = "active") {
@@ -349,6 +373,12 @@ export async function updateWholesaleInquiry(
     { returnDocument: "after" }
   );
   return strip(updated);
+}
+
+export async function purgeWholesaleInquiry(id: string): Promise<boolean> {
+  const col = await collection<WholesaleInquiry>("wholesaleInquiries");
+  const result = await col.deleteOne({ id });
+  return result.deletedCount > 0;
 }
 
 export async function getBlogs(publishedOnly = true, scope: ListScope = "active") {
@@ -402,6 +432,12 @@ export async function updateBlog(id: string, patch: Partial<Blog>) {
 export async function deleteBlog(id: string) {
   const blog = await updateBlog(id, { trashedAt: new Date().toISOString() });
   return Boolean(blog);
+}
+
+export async function purgeBlog(id: string): Promise<boolean> {
+  const blogs = await collection<Blog>("blogs");
+  const result = await blogs.deleteOne({ id });
+  return result.deletedCount > 0;
 }
 
 export async function getFaqs(publishedOnly = true, scope: ListScope = "active") {
@@ -459,6 +495,11 @@ export async function deleteFaq(id: string) {
   return Boolean(faq);
 }
 
+export async function purgeFaq(id: string): Promise<boolean> {
+  const faqs = await collection<Faq>("faqs");
+  const result = await faqs.deleteOne({ id });
+  return result.deletedCount > 0;
+}
 export async function getDashboardStats() {
   const [products, users, orders, leads, wholesaleInquiries] =
     await Promise.all([

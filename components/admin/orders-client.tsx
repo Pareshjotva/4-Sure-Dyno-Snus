@@ -5,6 +5,8 @@ import {
   ListSelectCheckbox,
   TrashAction,
   TrashBinButton,
+  purgeTrash,
+  purgeTrashMany,
   setTrash,
   setTrashMany,
   useListSelection,
@@ -134,6 +136,46 @@ export function AdminOrdersClient({
     );
     selection.removeIds(ids);
   }
+  async function onPurge(id: string) {
+    if (
+      !(await confirmAction(
+        "Permanently delete this order? This cannot be undone.",
+        { danger: true, confirmLabel: "Yes, delete forever" }
+      ))
+    ) {
+      return;
+    }
+    setBusy(id);
+    try {
+      await purgeTrash("order", id);
+    } catch {
+      setBusy(null);
+      return;
+    }
+    setBusy(null);
+    setRows((prev) => prev.filter((row) => row.id !== id));
+    selection.removeIds([id]);
+  }
+
+  async function onBulkPurge() {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      `Permanently delete ${ids.length} selected order${ids.length === 1 ? "" : "s"}? This cannot be undone.`,
+      { danger: true, confirmLabel: "Yes, delete forever" }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    try {
+      await purgeTrashMany("order", ids);
+    } catch {
+      setBulkBusy(false);
+      return;
+    }
+    setBulkBusy(false);
+    setRows((prev) => prev.filter((row) => !ids.includes(row.id)));
+    selection.removeIds(ids);
+  }
 
   return (
     <div className="space-y-4">
@@ -190,6 +232,7 @@ export function AdminOrdersClient({
           archivedView={bin}
           busy={bulkBusy}
           onArchive={() => onBulk(false)}
+          onPurge={onBulkPurge}
           onRestore={() => onBulk(true)}
           onClear={selection.clear}
         />
@@ -275,6 +318,7 @@ export function AdminOrdersClient({
                 busy={busy === order.id}
                 onTrash={() => onTrash(order.id)}
                 onRestore={() => onTrash(order.id, true)}
+                onPurge={() => onPurge(order.id)}
               />
             </div>
           </article>

@@ -5,6 +5,8 @@ import {
   ListSelectCheckbox,
   TrashAction,
   TrashBinButton,
+  purgeTrash,
+  purgeTrashMany,
   setTrash,
   setTrashMany,
   useListSelection,
@@ -98,6 +100,46 @@ export function AdminRetailersClient({ retailers }: { retailers: RetailerCard[] 
     );
     selection.removeIds(ids);
   }
+  async function onPurge(id: string) {
+    if (
+      !(await confirmAction(
+        "Permanently delete this retailer? This cannot be undone.",
+        { danger: true, confirmLabel: "Yes, delete forever" }
+      ))
+    ) {
+      return;
+    }
+    setBusy(id);
+    try {
+      await purgeTrash("retailer", id);
+    } catch {
+      setBusy(null);
+      return;
+    }
+    setBusy(null);
+    setRows((prev) => prev.filter((row) => row.id !== id));
+    selection.removeIds([id]);
+  }
+
+  async function onBulkPurge() {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      `Permanently delete ${ids.length} selected retailer${ids.length === 1 ? "" : "s"}? This cannot be undone.`,
+      { danger: true, confirmLabel: "Yes, delete forever" }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    try {
+      await purgeTrashMany("retailer", ids);
+    } catch {
+      setBulkBusy(false);
+      return;
+    }
+    setBulkBusy(false);
+    setRows((prev) => prev.filter((row) => !ids.includes(row.id)));
+    selection.removeIds(ids);
+  }
 
   return (
     <div className="mt-6 space-y-4">
@@ -133,6 +175,7 @@ export function AdminRetailersClient({ retailers }: { retailers: RetailerCard[] 
           archivedView={bin}
           busy={bulkBusy}
           onArchive={() => onBulk(false)}
+          onPurge={onBulkPurge}
           onRestore={() => onBulk(true)}
           onClear={selection.clear}
         />
@@ -185,6 +228,7 @@ export function AdminRetailersClient({ retailers }: { retailers: RetailerCard[] 
                 busy={busy === user.id}
                 onTrash={() => onTrash(user.id)}
                 onRestore={() => onTrash(user.id, true)}
+                onPurge={() => onPurge(user.id)}
               />
             </div>
           </div>

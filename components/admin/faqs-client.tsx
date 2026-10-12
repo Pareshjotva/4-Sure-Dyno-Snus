@@ -5,6 +5,8 @@ import {
   ListSelectCheckbox,
   TrashAction,
   TrashBinButton,
+  purgeTrash,
+  purgeTrashMany,
   setTrash,
   setTrashMany,
   useListSelection,
@@ -215,6 +217,48 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
     selection.removeIds(ids);
     router.refresh();
   }
+  async function onPurge(id: string) {
+    if (
+      !(await confirmAction(
+        "Permanently delete this question? This cannot be undone.",
+        { danger: true, confirmLabel: "Yes, delete forever" }
+      ))
+    ) {
+      return;
+    }
+    setBusy(true);
+    try {
+      await purgeTrash("faq", id);
+    } catch {
+      setBusy(false);
+      return;
+    }
+    setBusy(false);
+    setRows((prev) => prev.filter((row) => row.id !== id));
+    selection.removeIds([id]);
+    router.refresh();
+  }
+
+  async function onBulkPurge() {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      `Permanently delete ${ids.length} selected question${ids.length === 1 ? "" : "s"}? This cannot be undone.`,
+      { danger: true, confirmLabel: "Yes, delete forever" }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    try {
+      await purgeTrashMany("faq", ids);
+    } catch {
+      setBulkBusy(false);
+      return;
+    }
+    setBulkBusy(false);
+    setRows((prev) => prev.filter((row) => !ids.includes(row.id)));
+    selection.removeIds(ids);
+    router.refresh();
+  }
 
   if (mode === "list") {
     return (
@@ -264,6 +308,7 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
             archivedView={bin}
             busy={bulkBusy || busy}
             onArchive={() => onBulk(false)}
+          onPurge={onBulkPurge}
             onRestore={() => onBulk(true)}
             onClear={selection.clear}
           />
@@ -300,6 +345,7 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
                   busy={busy}
                   onTrash={() => onTrash(faq.id)}
                   onRestore={() => onTrash(faq.id, true)}
+                  onPurge={() => onPurge(faq.id)}
                 />
               </div>
             </article>

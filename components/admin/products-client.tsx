@@ -5,6 +5,8 @@ import {
   ListSelectCheckbox,
   TrashAction,
   TrashBinButton,
+  purgeTrash,
+  purgeTrashMany,
   setTrash,
   setTrashMany,
   useListSelection,
@@ -271,6 +273,56 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
     selection.removeIds(ids);
     await refreshList();
   }
+  async function onPurge(id: string) {
+    if (
+      !(await confirmAction(
+        "Permanently delete this product? This cannot be undone.",
+        { danger: true, confirmLabel: "Yes, delete forever" }
+      ))
+    ) {
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      await purgeTrash("product", id);
+    } catch {
+      setBusy(false);
+      setError("Could not permanently delete the product.");
+      return;
+    }
+    setBusy(false);
+    const next = rows.filter((row) => row.id !== id);
+    setRows(next);
+    setMessage("Product permanently deleted");
+    selection.removeIds([id]);
+    if (editingId === id) backToList(next);
+    await refreshList();
+  }
+
+  async function onBulkPurge() {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      `Permanently delete ${ids.length} selected product${ids.length === 1 ? "" : "s"}? This cannot be undone.`,
+      { danger: true, confirmLabel: "Yes, delete forever" }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    setError("");
+    try {
+      await purgeTrashMany("product", ids);
+    } catch {
+      setBulkBusy(false);
+      setError("Could not permanently delete products.");
+      return;
+    }
+    setBulkBusy(false);
+    setRows((prev) => prev.filter((row) => !ids.includes(row.id)));
+    setMessage("Products permanently deleted");
+    selection.removeIds(ids);
+    await refreshList();
+  }
 
   async function uploadPhoto(field: "image" | "overviewImage", file: File) {
     setBusy(true);
@@ -399,6 +451,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
             archivedView={bin}
             busy={bulkBusy || busy}
             onArchive={() => onBulk(false)}
+          onPurge={onBulkPurge}
             onRestore={() => onBulk(true)}
             onClear={selection.clear}
           />
@@ -475,6 +528,7 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
                         busy={busy}
                         onTrash={() => onTrash(product.id)}
                         onRestore={() => onTrash(product.id, true)}
+                        onPurge={() => onPurge(product.id)}
                       />
                     </div>
                   </td>
@@ -721,14 +775,24 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
               : "Update product"}
         </Button>
         {mode === "edit" && editingId && (
-          <Button
-            type="button"
-            variant="danger"
-            disabled={busy}
-            onClick={() => onTrash(editingId)}
-          >
-            <Archive size={14} /> Archive
-          </Button>
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy}
+              onClick={() => onTrash(editingId)}
+            >
+              <Archive size={14} /> Archive
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              disabled={busy}
+              onClick={() => onPurge(editingId)}
+            >
+              <Trash2 size={14} /> Delete permanently
+            </Button>
+          </>
         )}
       </div>
     </form>

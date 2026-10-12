@@ -5,6 +5,8 @@ import {
   ListSelectCheckbox,
   TrashAction,
   TrashBinButton,
+  purgeTrash,
+  purgeTrashMany,
   setTrash,
   setTrashMany,
   useListSelection,
@@ -114,6 +116,46 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
     );
     selection.removeIds(ids);
   }
+  async function onPurge(id: string) {
+    if (
+      !(await confirmAction(
+        "Permanently delete this lead? This cannot be undone.",
+        { danger: true, confirmLabel: "Yes, delete forever" }
+      ))
+    ) {
+      return;
+    }
+    setBusy(id);
+    try {
+      await purgeTrash("lead", id);
+    } catch {
+      setBusy(null);
+      return;
+    }
+    setBusy(null);
+    setRows((prev) => prev.filter((row) => row.id !== id));
+    selection.removeIds([id]);
+  }
+
+  async function onBulkPurge() {
+    const ids = selection.selectedVisible;
+    if (!ids.length) return;
+    const ok = await confirmAction(
+      `Permanently delete ${ids.length} selected lead${ids.length === 1 ? "" : "s"}? This cannot be undone.`,
+      { danger: true, confirmLabel: "Yes, delete forever" }
+    );
+    if (!ok) return;
+    setBulkBusy(true);
+    try {
+      await purgeTrashMany("lead", ids);
+    } catch {
+      setBulkBusy(false);
+      return;
+    }
+    setBulkBusy(false);
+    setRows((prev) => prev.filter((row) => !ids.includes(row.id)));
+    selection.removeIds(ids);
+  }
 
   return (
     <div className="space-y-4">
@@ -150,6 +192,7 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
           archivedView={bin}
           busy={bulkBusy}
           onArchive={() => onBulk(false)}
+          onPurge={onBulkPurge}
           onRestore={() => onBulk(true)}
           onClear={selection.clear}
         />
@@ -197,6 +240,7 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
               busy={busy === lead.id}
               onTrash={() => onTrash(lead.id)}
               onRestore={() => onTrash(lead.id, true)}
+              onPurge={() => onPurge(lead.id)}
             />
           </div>
           <p className="mt-3 text-sm leading-relaxed text-white/90">
