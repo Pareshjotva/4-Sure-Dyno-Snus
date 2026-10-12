@@ -5,6 +5,16 @@ import { Suspense, useEffect, useState } from "react";
 
 type Box = { top: number; left: number; width: number; height: number };
 
+function pageContent(page: Element): Element {
+  if (page.tagName !== "MAIN") return page;
+  const child = page.firstElementChild;
+  if (!child) return page;
+  const pageWidth = page.getBoundingClientRect().width;
+  const childWidth = child.getBoundingClientRect().width;
+  if (childWidth > 80 && childWidth < pageWidth - 32) return child;
+  return page;
+}
+
 function visibleBox(el: Element): Box {
   const rect = el.getBoundingClientRect();
   const header = document.querySelector("header");
@@ -106,7 +116,7 @@ function ClickFeedbackInner() {
         anchor.setAttribute("data-click-loading", "");
         const section = anchor.closest("[data-section-loading]");
         const page = document.querySelector("[data-page-loading]");
-        const next = section || page;
+        const next = section || (page ? pageContent(page) : null);
         if (next) reveal(next);
         return;
       }
@@ -116,7 +126,7 @@ function ClickFeedbackInner() {
       control.setAttribute("data-click-loading", "");
       if (control.hasAttribute("data-page-action")) {
         const page = document.querySelector("[data-page-loading]");
-        if (page) reveal(page);
+        if (page) reveal(pageContent(page));
         return;
       }
 

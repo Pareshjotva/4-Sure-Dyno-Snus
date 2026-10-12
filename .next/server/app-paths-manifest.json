@@ -1,16 +1,24 @@
 {
+  "/about/page": "app/about/page.js",
   "/admin/(panel)/analytics/page": "app/admin/(panel)/analytics/page.js",
   "/admin/(panel)/blogs/page": "app/admin/(panel)/blogs/page.js",
+  "/admin/(panel)/faqs/page": "app/admin/(panel)/faqs/page.js",
   "/admin/(panel)/leads/page": "app/admin/(panel)/leads/page.js",
   "/admin/(panel)/orders/[id]/invoice/page": "app/admin/(panel)/orders/[id]/invoice/page.js",
   "/admin/(panel)/orders/page": "app/admin/(panel)/orders/page.js",
   "/admin/(panel)/products/page": "app/admin/(panel)/products/page.js",
+  "/admin/(panel)/profile/page": "app/admin/(panel)/profile/page.js",
   "/admin/(panel)/reports/page": "app/admin/(panel)/reports/page.js",
   "/admin/(panel)/retailers/page": "app/admin/(panel)/retailers/page.js",
   "/admin/(panel)/wholesale-inquiries/page": "app/admin/(panel)/wholesale-inquiries/page.js",
   "/api/admin/analytics/route": "app/api/admin/analytics/route.js",
+  "/api/admin/profile/route": "app/api/admin/profile/route.js",
+  "/api/admin/trash/route": "app/api/admin/trash/route.js",
   "/api/analytics/collect/route": "app/api/analytics/collect/route.js",
   "/blogs/page": "app/blogs/page.js",
+  "/contact/page": "app/contact/page.js",
   "/faq/page": "app/faq/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/products/[slug]/page": "app/products/[slug]/page.js",
+  "/products/page": "app/products/page.js"
 }
