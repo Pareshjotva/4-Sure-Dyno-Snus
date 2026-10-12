@@ -1,6 +1,7 @@
 "use client";
 
 import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Badge } from "@/components/ui/badge";
 import { PROFILE_STATUS_LABEL } from "@/lib/profile-status";
@@ -33,7 +34,15 @@ export function AdminRetailersClient({ retailers }: { retailers: RetailerCard[] 
   );
 
   async function onTrash(id: string, restore = false) {
-    if (!restore && !confirm("Move this retailer to trash? They will not be able to sign in.")) return;
+    if (
+      !restore &&
+      !(await confirmAction(
+        "Move this retailer to trash? They will not be able to sign in.",
+        { danger: true, confirmLabel: "Yes, move to trash" }
+      ))
+    ) {
+      return;
+    }
     setBusy(id);
     try {
       await setTrash("retailer", id, restore);

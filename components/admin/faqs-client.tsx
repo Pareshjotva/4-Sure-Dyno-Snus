@@ -1,6 +1,7 @@
 "use client";
 
 import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
@@ -96,6 +97,11 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
       return;
     }
     setFieldErrors({});
+    const ok = await confirmAction(
+      mode === "create" ? "Create this FAQ?" : "Save FAQ changes?",
+      { confirmLabel: mode === "create" ? "Yes, create" : "Yes, save" }
+    );
+    if (!ok) return;
     setBusy(true);
     try {
       const res = await fetch(
@@ -132,7 +138,15 @@ export function AdminFaqsClient({ faqs }: { faqs: Faq[] }) {
   }
 
   async function onTrash(id: string, restore = false) {
-    if (!restore && !confirm("Move this question to trash?")) return;
+    if (
+      !restore &&
+      !(await confirmAction("Move this question to trash?", {
+        danger: true,
+        confirmLabel: "Yes, move to trash",
+      }))
+    ) {
+      return;
+    }
     setBusy(true);
     setError("");
     try {

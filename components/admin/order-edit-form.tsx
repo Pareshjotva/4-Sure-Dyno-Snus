@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -107,7 +108,12 @@ export function AdminOrderEditForm({
     ]);
   }
 
-  function removeLine(index: number) {
+  async function removeLine(index: number) {
+    const ok = await confirmAction("Remove this line item from the order?", {
+      danger: true,
+      confirmLabel: "Yes, remove",
+    });
+    if (!ok) return;
     setLines((current) => current.filter((_, i) => i !== index));
   }
 
@@ -129,6 +135,12 @@ export function AdminOrderEditForm({
         return;
       }
     }
+
+    const ok = await confirmAction(
+      `Save this order with status "${orderStatusLabel(status)}"?`,
+      { confirmLabel: "Yes, save order" }
+    );
+    if (!ok) return;
 
     setSaving(true);
     const items: OrderItem[] = lines.map((line) => ({

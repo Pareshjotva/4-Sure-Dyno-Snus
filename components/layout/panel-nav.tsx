@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -41,6 +42,10 @@ export function PanelNav({
   const links = mode === "admin" ? adminLinks : accountLinks;
 
   async function logout() {
+    const ok = await confirmAction("Sign out of your account?", {
+      confirmLabel: "Yes, sign out",
+    });
+    if (!ok) return;
     await fetch("/api/auth/logout", { method: "POST" });
     router.push(mode === "admin" ? "/admin/login" : "/login");
     router.refresh();

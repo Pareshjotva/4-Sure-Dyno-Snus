@@ -3,6 +3,7 @@
 import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
 import { OrderItemList } from "@/components/orders/order-item-list";
 import { OrderTotals } from "@/components/orders/order-totals";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Select } from "@/components/ui/select";
 import {
@@ -53,6 +54,11 @@ export function AdminOrdersClient({
   });
 
   async function updateStatus(id: string, status: OrderStatus) {
+    const ok = await confirmAction(
+      `Update this order status to "${orderStatusLabel(status)}"?`,
+      { confirmLabel: "Yes, update status" }
+    );
+    if (!ok) return;
     setBusy(id);
     await fetch(`/api/orders/${id}`, {
       method: "PATCH",
@@ -64,7 +70,15 @@ export function AdminOrdersClient({
   }
 
   async function onTrash(id: string, restore = false) {
-    if (!restore && !confirm("Move this order to trash?")) return;
+    if (
+      !restore &&
+      !(await confirmAction("Move this order to trash?", {
+        danger: true,
+        confirmLabel: "Yes, move to trash",
+      }))
+    ) {
+      return;
+    }
     setBusy(id);
     try {
       await setTrash("order", id, restore);

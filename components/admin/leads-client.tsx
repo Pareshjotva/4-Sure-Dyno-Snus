@@ -1,6 +1,7 @@
 "use client";
 
 import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Select } from "@/components/ui/select";
 import type { ContactLead } from "@/lib/types";
@@ -34,6 +35,10 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
     id: string,
     status: ContactLead["status"]
   ) {
+    const ok = await confirmAction(`Update this lead status to "${status}"?`, {
+      confirmLabel: "Yes, update status",
+    });
+    if (!ok) return;
     setBusy(id);
     await fetch(`/api/admin/leads/${id}`, {
       method: "PATCH",
@@ -45,7 +50,15 @@ export function AdminLeadsClient({ leads }: { leads: ContactLead[] }) {
   }
 
   async function onTrash(id: string, restore = false) {
-    if (!restore && !confirm("Move this lead to trash?")) return;
+    if (
+      !restore &&
+      !(await confirmAction("Move this lead to trash?", {
+        danger: true,
+        confirmLabel: "Yes, move to trash",
+      }))
+    ) {
+      return;
+    }
     setBusy(id);
     try {
       await setTrash("lead", id, restore);

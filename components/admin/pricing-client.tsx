@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import type { ProvincePricing } from "@/lib/types";
 import { useRouter } from "next/navigation";
@@ -18,6 +19,10 @@ export function AdminPricingClient({
   const [saving, setSaving] = useState<string | null>(null);
 
   async function save(row: ProvincePricing) {
+    const ok = await confirmAction("Save these pricing changes?", {
+      confirmLabel: "Yes, save",
+    });
+    if (!ok) return;
     setSaving(row.id);
     await fetch(`/api/admin/pricing/${row.id}`, {
       method: "PATCH",

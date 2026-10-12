@@ -2,6 +2,7 @@
 
 import { DownloadInvoiceButton } from "@/components/orders/download-invoice-button";
 import { Button } from "@/components/ui/button";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import {
   INVOICE_LETTERHEAD,
   type InvoiceDocumentModel,
@@ -100,6 +101,10 @@ export function InvoiceDocument({
       setError("Each line needs a description.");
       return;
     }
+    const ok = await confirmAction("Save these invoice changes?", {
+      confirmLabel: "Yes, save invoice",
+    });
+    if (!ok) return;
     setSaving(true);
     setError("");
     const res = await fetch(`/api/orders/${orderId}`, {

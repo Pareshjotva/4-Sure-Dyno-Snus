@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
@@ -42,6 +43,10 @@ export function AdminProfileForm({
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    const ok = await confirmAction("Save admin profile changes?", {
+      confirmLabel: "Yes, save",
+    });
+    if (!ok) return;
     setSaving(true);
     setMessage("");
     setError("");

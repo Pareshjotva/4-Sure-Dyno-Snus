@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { PROFILE_STATUS_LABEL } from "@/lib/profile-status";
 import type { ProfileAuditEntry, ProfileStatus, StoredLicense } from "@/lib/types";
@@ -26,6 +27,17 @@ export function RetailerReview({
   const [loading, setLoading] = useState<"approved" | "rejected" | null>(null);
 
   async function decide(decision: "approved" | "rejected") {
+    const ok = await confirmAction(
+      decision === "approved"
+        ? "Approve this retailer profile and licenses?"
+        : "Reject this retailer profile?",
+      {
+        confirmLabel:
+          decision === "approved" ? "Yes, approve" : "Yes, reject",
+        danger: decision === "rejected",
+      }
+    );
+    if (!ok) return;
     setError("");
     setLoading(decision);
     const res = await fetch(`/api/admin/retailers/${userId}/verification`, {

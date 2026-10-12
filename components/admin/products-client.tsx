@@ -1,6 +1,7 @@
 "use client";
 
 import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
@@ -131,6 +132,11 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
       return;
     }
     setFieldErrors({});
+    const ok = await confirmAction(
+      mode === "create" ? "Create this product?" : "Save product changes?",
+      { confirmLabel: mode === "create" ? "Yes, create" : "Yes, save" }
+    );
+    if (!ok) return;
     setBusy(true);
     try {
       if (mode === "create") {
@@ -178,7 +184,15 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   }
 
   async function onTrash(id: string, restore = false) {
-    if (!restore && !confirm("Move this product to trash?")) return;
+    if (
+      !restore &&
+      !(await confirmAction("Move this product to trash?", {
+        danger: true,
+        confirmLabel: "Yes, move to trash",
+      }))
+    ) {
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -234,7 +248,14 @@ export function AdminProductsClient({ products }: { products: Product[] }) {
   }
 
   async function deletePhoto(field: "image" | "overviewImage") {
-    if (!confirm("Remove this product photo?")) return;
+    if (
+      !(await confirmAction("Remove this product photo?", {
+        danger: true,
+        confirmLabel: "Yes, remove",
+      }))
+    ) {
+      return;
+    }
     if (!editingId) {
       const current = draft[field];
       if (current.startsWith("/uploads/products/")) {

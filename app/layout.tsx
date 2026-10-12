@@ -1,5 +1,6 @@
 import { SiteAnalytics } from "@/components/analytics/site-analytics";
 import { ClickFeedback } from "@/components/layout/click-feedback";
+import { ConfirmDialogHost } from "@/components/ui/confirm-dialog";
 import type { Metadata } from "next";
 import { Bebas_Neue, Bangers, Outfit } from "next/font/google";
 import "./globals.css";
@@ -76,6 +77,7 @@ export default function RootLayout({
         className={`${display.variable} ${brand.variable} ${body.variable} antialiased`}
       >
         {children}
+        <ConfirmDialogHost />
         <ClickFeedback />
         <SiteAnalytics />
       </body>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -78,6 +79,12 @@ export function OrderForm({
       setErrors(next);
       return;
     }
+
+    const ok = await confirmAction(
+      `Place this order for ${packCount} packs?`,
+      { confirmLabel: "Yes, place order" }
+    );
+    if (!ok) return;
 
     setErrors({});
     setLoading(true);

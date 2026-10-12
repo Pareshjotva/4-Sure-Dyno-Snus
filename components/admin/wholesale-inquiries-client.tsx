@@ -1,6 +1,7 @@
 "use client";
 
 import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Select } from "@/components/ui/select";
 import type { WholesaleInquiry } from "@/lib/types";
@@ -39,6 +40,11 @@ export function AdminWholesaleInquiriesClient({
     id: string,
     status: WholesaleInquiry["status"]
   ) {
+    const ok = await confirmAction(
+      `Update this inquiry status to "${status}"?`,
+      { confirmLabel: "Yes, update status" }
+    );
+    if (!ok) return;
     setBusy(id);
     await fetch(`/api/admin/wholesale-inquiries/${id}`, {
       method: "PATCH",
@@ -50,7 +56,15 @@ export function AdminWholesaleInquiriesClient({
   }
 
   async function onTrash(id: string, restore = false) {
-    if (!restore && !confirm("Move this inquiry to trash?")) return;
+    if (
+      !restore &&
+      !(await confirmAction("Move this inquiry to trash?", {
+        danger: true,
+        confirmLabel: "Yes, move to trash",
+      }))
+    ) {
+      return;
+    }
     setBusy(id);
     try {
       await setTrash("wholesale", id, restore);

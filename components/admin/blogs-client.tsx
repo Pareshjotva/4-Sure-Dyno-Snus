@@ -1,6 +1,7 @@
 "use client";
 
 import { TrashAction, TrashBinButton, setTrash } from "@/components/admin/trash-bin";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 import { FilterBar, matchesQuery } from "@/components/ui/filter-bar";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
@@ -100,6 +101,11 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
       return;
     }
     setFieldErrors({});
+    const ok = await confirmAction(
+      mode === "create" ? "Create this blog post?" : "Save blog post changes?",
+      { confirmLabel: mode === "create" ? "Yes, create" : "Yes, save" }
+    );
+    if (!ok) return;
     setBusy(true);
     try {
       const res = await fetch(
@@ -134,7 +140,15 @@ export function AdminBlogsClient({ blogs }: { blogs: Blog[] }) {
   }
 
   async function onTrash(id: string, restore = false) {
-    if (!restore && !confirm("Move this blog post to trash?")) return;
+    if (
+      !restore &&
+      !(await confirmAction("Move this blog post to trash?", {
+        danger: true,
+        confirmLabel: "Yes, move to trash",
+      }))
+    ) {
+      return;
+    }
     setBusy(true);
     setError("");
     try {
