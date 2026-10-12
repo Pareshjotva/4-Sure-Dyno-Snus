@@ -1,59 +1,53 @@
 import type { IncentiveTier, Order } from "./types";
+import {
+  monthOrders,
+  packCountOf,
+  quoteCumulativeDiscount,
+} from "./volume-discount";
 
-export function resolveIncentive(
-  packCount: number,
-  tiers: IncentiveTier[]
-): IncentiveTier | null {
-  const sorted = [...tiers].sort((a, b) => b.minPacks - a.minPacks);
-  return sorted.find((tier) => {
-    if (packCount < tier.minPacks) return false;
-    if (tier.maxPacks === null) return true;
-    return packCount <= tier.maxPacks;
-  }) ?? null;
-}
+export { resolveIncentive } from "./volume-discount";
 
+/** Preview / place-order helper using cumulative monthly discount rules. */
 export function quoteVolumeDiscount(
   orderPacks: number,
   monthPacksBefore: number,
   tiers: IncentiveTier[],
-  subtotal: number
+  subtotal: number,
+  extras?: {
+    monthSubtotalBefore?: number;
+    previouslyGranted?: number;
+    priorMonthOrders?: Order[];
+  }
 ) {
-  const qualifyingPacks = Math.max(0, orderPacks) + Math.max(0, monthPacksBefore);
-  const tier = resolveIncentive(qualifyingPacks, tiers);
-  const discountPercent = tier?.discountPercent ?? 0;
-  const discountAmount =
-    Math.round(subtotal * (discountPercent / 100) * 100) / 100;
-  const total = Math.round((subtotal - discountAmount) * 100) / 100;
+  const quote = quoteCumulativeDiscount({
+    orderPacks,
+    orderSubtotal: subtotal,
+    priorMonthOrders: extras?.priorMonthOrders,
+    monthPacksBefore,
+    monthSubtotalBefore: extras?.monthSubtotalBefore,
+    previouslyGranted: extras?.previouslyGranted,
+    tiers,
+  });
+
   return {
-    qualifyingPacks,
-    tier,
-    discountPercent,
-    discountAmount,
-    total,
+    qualifyingPacks: quote.qualifyingPacks,
+    tier: quote.tier,
+    discountPercent: quote.discountPercent,
+    discountAmount: quote.discountAmount,
+    discountAdjustment: quote.discountAdjustment,
+    totalDiscountOnOrder: quote.totalDiscountOnOrder,
+    finalMonthlyDiscount: quote.finalMonthlyDiscount,
+    previouslyGranted: quote.previouslyGranted,
+    monthSubtotalBefore: quote.monthSubtotalBefore,
+    total: quote.total,
   };
 }
 
 export function packsThisMonth(orders: Order[], now = new Date()) {
-  const start = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-  const end = new Date(
-    now.getFullYear(),
-    now.getMonth() + 1,
-    0,
-    23,
-    59,
-    59,
-    999
-  ).getTime();
-  return orders.reduce((sum, order) => {
-    if (order.status === "cancelled") return sum;
-    const created = new Date(order.createdAt).getTime();
-    if (!Number.isFinite(created) || created < start || created > end) return sum;
-    const packs = (order.items || []).reduce(
-      (packsSum, item) => packsSum + (Number(item.quantity) || 0),
-      0
-    );
-    return sum + packs;
-  }, 0);
+  return monthOrders(orders, now).reduce(
+    (sum, order) => sum + packCountOf(order),
+    0
+  );
 }
 
 export function discountTierLabel(percent: number, stored?: string) {

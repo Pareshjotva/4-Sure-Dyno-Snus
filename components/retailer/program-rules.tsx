@@ -72,10 +72,10 @@ export function ProgramRules({
             do not carry forward.
           </li>
           <li>
-            The unlocked discount applies to{" "}
-            <strong className="text-white">this order only</strong> (based on
-            earlier packs this month plus packs on the new order). Earlier
-            invoices keep the discount they already received.
+            Discount is based on{" "}
+            <strong className="text-white">cumulative packs this calendar month</strong>.
+            When a higher slab unlocks, catch-up credit for earlier orders is
+            applied on the new invoice. Earlier invoices are not rewritten.
           </li>
         </ul>
       </div>

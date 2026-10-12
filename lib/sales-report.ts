@@ -1,4 +1,5 @@
 import type { Order } from "@/lib/types";
+import { orderGrantedDiscount } from "@/lib/volume-discount";
 
 export type ReportMode = "overall" | "monthly" | "yearly" | "custom";
 
@@ -207,7 +208,7 @@ export function buildSalesReport(
 
   for (const order of active) {
     subtotal = money(subtotal + order.subtotal);
-    discountAmount = money(discountAmount + order.discountAmount);
+    discountAmount = money(discountAmount + orderGrantedDiscount(order));
     total = money(total + order.total);
 
     let orderPacks = 0;
@@ -241,7 +242,7 @@ export function buildSalesReport(
     provinceRow.packs += orderPacks;
     provinceRow.subtotal = money(provinceRow.subtotal + order.subtotal);
     provinceRow.discountAmount = money(
-      provinceRow.discountAmount + order.discountAmount
+      provinceRow.discountAmount + orderGrantedDiscount(order)
     );
     provinceRow.total = money(provinceRow.total + order.total);
     provinces.set(province, provinceRow);
@@ -268,7 +269,7 @@ export function buildSalesReport(
       customerRow.packs += packs;
       customerRow.subtotal = money(customerRow.subtotal + order.subtotal);
       customerRow.discountAmount = money(
-        customerRow.discountAmount + order.discountAmount
+        customerRow.discountAmount + orderGrantedDiscount(order)
       );
       customerRow.total = money(customerRow.total + order.total);
     }
@@ -296,7 +297,7 @@ export function buildSalesReport(
         0
       ),
       discountPercent: Number(order.discountPercent) || 0,
-      discountAmount: money(order.discountAmount),
+      discountAmount: orderGrantedDiscount(order),
       discountTier: order.discountTier?.trim() || "",
       total: money(order.total),
     }));

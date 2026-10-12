@@ -1,11 +1,11 @@
 import type { OrderStatus } from "./types";
 
-/** Volume discount milestones — matches client Retailer Incentive Program PPT. */
+/** Fallback volume milestones when DB tiers are unavailable (UI only). */
 export const VOLUME_MILESTONES = [
-  { packs: 20, maxPacks: 40, percent: 5, label: "Tier 1", name: "Growth" },
-  { packs: 41, maxPacks: 60, percent: 10, label: "Tier 2", name: "Partner" },
+  { packs: 20, maxPacks: 39, percent: 5, label: "Tier 1", name: "Growth" },
+  { packs: 40, maxPacks: 59, percent: 10, label: "Tier 2", name: "Partner" },
   {
-    packs: 80,
+    packs: 60,
     maxPacks: null as number | null,
     percent: 15,
     label: "Tier 3",

@@ -128,9 +128,34 @@ export async function updatePricing(id: string, patch: Partial<ProvincePricing>)
 }
 
 export async function getIncentives() {
+  const { DEFAULT_INCENTIVE_TIERS } = await import("@/lib/volume-discount");
   const incentives = await collection<IncentiveTier>("incentives");
   const rows = await incentives.find().toArray();
-  return rows.map((row) => strip(row)!);
+  const cleaned = rows.map((row) => strip(row)!).filter(Boolean);
+  if (cleaned.length === 0) {
+    await incentives.insertMany(DEFAULT_INCENTIVE_TIERS);
+    return DEFAULT_INCENTIVE_TIERS.map((tier) => ({ ...tier }));
+  }
+  return cleaned.sort((a, b) => a.minPacks - b.minPacks);
+}
+
+export async function saveIncentives(tiers: IncentiveTier[]) {
+  const incentives = await collection<IncentiveTier>("incentives");
+  await incentives.deleteMany({});
+  if (tiers.length) {
+    await incentives.insertMany(tiers);
+  }
+  return getIncentives();
+}
+
+export async function updateIncentive(id: string, patch: Partial<IncentiveTier>) {
+  const incentives = await collection<IncentiveTier>("incentives");
+  const updated = await incentives.findOneAndUpdate(
+    { id },
+    { $set: { ...patch, id } },
+    { returnDocument: "after" }
+  );
+  return strip(updated);
 }
 
 export async function getUsers() {

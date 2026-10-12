@@ -166,6 +166,26 @@ export function buildInvoice(
   const address = user?.address?.trim() || province || "—";
   const phone = user?.phone?.trim() || "";
 
+  // Prefer stored cumulative credit (this-order % + prior-order adjustment).
+  const storedDiscount = money(
+    (Number(order.discountAmount) || 0) +
+      (Number(order.discountAdjustment) || 0)
+  );
+  const discountAmount = overrides?.discountAmount ?? storedDiscount;
+  const subtotal = overrides?.subtotal ?? priced.subtotal;
+  const ptt = overrides?.ptt ?? priced.ptt;
+  const totalAmount =
+    overrides?.totalAmount ?? money(subtotal - discountAmount + ptt);
+  const gst = overrides?.gst ?? money(totalAmount * GST_RATE);
+  const amountDue = overrides?.amountDue ?? money(totalAmount + gst);
+
+  const adjustment = Number(order.discountAdjustment) || 0;
+  const tierBase = order.discountTier?.trim() || "";
+  const discountTier =
+    adjustment > 0
+      ? `${tierBase || `${order.discountPercent}%`} (incl. prior-order adjustment $${adjustment.toFixed(2)})`
+      : tierBase;
+
   return {
     number: invoiceNumber(order, orders),
     dateLabel: invoiceDateParts(order.createdAt).label,
@@ -178,13 +198,13 @@ export function buildInvoice(
     shipToPhone: overrides?.shipToPhone?.trim() || phone,
     province,
     lines,
-    subtotal: overrides?.subtotal ?? priced.subtotal,
-    discountAmount: overrides?.discountAmount ?? priced.discountAmount,
-    discountPercent: priced.discountPercent,
-    discountTier: order.discountTier?.trim() || "",
-    ptt: overrides?.ptt ?? priced.ptt,
-    totalAmount: overrides?.totalAmount ?? priced.totalAmount,
-    gst: overrides?.gst ?? priced.gst,
-    amountDue: overrides?.amountDue ?? priced.amountDue,
+    subtotal,
+    discountAmount,
+    discountPercent: order.discountPercent || priced.discountPercent,
+    discountTier,
+    ptt,
+    totalAmount,
+    gst,
+    amountDue,
   };
 }

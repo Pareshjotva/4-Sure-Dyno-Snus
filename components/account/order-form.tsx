@@ -8,8 +8,8 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { VolumeProgress } from "@/components/orders/volume-progress";
 import type { FieldErrors } from "@/lib/form-errors";
-import { quoteVolumeDiscount } from "@/lib/site";
 import type { IncentiveTier } from "@/lib/types";
+import { quoteCumulativeDiscount } from "@/lib/volume-discount";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
@@ -27,6 +27,8 @@ export function OrderForm({
   pendingNotice = "",
   tiers,
   monthPacks,
+  monthSubtotal = 0,
+  previouslyGranted = 0,
 }: {
   products: ProductOption[];
   defaultProvince: string;
@@ -34,6 +36,8 @@ export function OrderForm({
   pendingNotice?: string;
   tiers: IncentiveTier[];
   monthPacks: number;
+  monthSubtotal?: number;
+  previouslyGranted?: number;
 }) {
   const router = useRouter();
   const [qty, setQty] = useState<Record<string, number>>(
@@ -48,7 +52,14 @@ export function OrderForm({
     [qty]
   );
   const subtotal = packCount * 40;
-  const quote = quoteVolumeDiscount(packCount, monthPacks, tiers, subtotal);
+  const quote = quoteCumulativeDiscount({
+    orderPacks: packCount,
+    orderSubtotal: subtotal,
+    monthPacksBefore: monthPacks,
+    monthSubtotalBefore: monthSubtotal,
+    previouslyGranted,
+    tiers,
+  });
   const sortedTiers = [...tiers].sort((a, b) => a.minPacks - b.minPacks);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -112,7 +123,11 @@ export function OrderForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5">
-      <VolumeProgress monthPacks={monthPacks} thisOrderPacks={packCount} />
+      <VolumeProgress
+        monthPacks={monthPacks}
+        thisOrderPacks={packCount}
+        tiers={tiers}
+      />
 
       <div className="surface space-y-4 rounded-2xl p-5">
         {products.map((product) => (
@@ -180,26 +195,34 @@ export function OrderForm({
           </p>
           <p className="mt-1">
             Counted together: <strong>{quote.qualifyingPacks} packs</strong>
-          </p>
-          <p className="mt-1 text-xs text-navy/70">
-            This order’s discount uses that combined total. Earlier orders keep
-            the discount they already received.
+            {quote.tier
+              ? ` · ${quote.tier.name} ${quote.discountPercent}%`
+              : " · no volume discount yet"}
           </p>
           <p className="mt-1">
             Subtotal: <strong>${subtotal.toFixed(2)}</strong>
           </p>
-          <p className={`mt-1 ${quote.discountAmount > 0 ? "font-semibold text-cyan" : ""}`}>
+          <p
+            className={`mt-1 ${quote.discountAmount > 0 ? "font-semibold text-cyan" : ""}`}
+          >
             Discount on this order:{" "}
-            <strong>
-              {quote.discountAmount > 0 && quote.tier
-                ? `${quote.tier.name} ${quote.discountPercent}% (−$${quote.discountAmount.toFixed(2)})`
-                : "$0.00"}
-            </strong>
+            <strong>−${quote.discountAmount.toFixed(2)}</strong>
+          </p>
+          <p
+            className={`mt-1 ${quote.discountAdjustment > 0 ? "font-semibold text-cyan" : ""}`}
+          >
+            Prior-order adjustment:{" "}
+            <strong>−${quote.discountAdjustment.toFixed(2)}</strong>
+          </p>
+          <p className="mt-1 text-xs text-navy/70">
+            Already granted this month: ${previouslyGranted.toFixed(2)} · month
+            target at current slab: ${quote.finalMonthlyDiscount.toFixed(2)}
           </p>
           <p className="mt-1 font-semibold">
-            Total: ${quote.total.toFixed(2)}
+            Payable: ${quote.total.toFixed(2)}
           </p>
           <ul className="mt-3 space-y-1 text-xs text-navy/70">
+            <li>1–{sortedTiers[0] ? sortedTiers[0].minPacks - 1 : 19} packs · 0%</li>
             {sortedTiers.map((tier) => (
               <li key={tier.id}>
                 {tier.maxPacks == null
@@ -210,10 +233,9 @@ export function OrderForm({
             ))}
           </ul>
           <p className="mt-2 text-xs text-navy/60">
-            Example: 45 packs earlier this month got 5% on that invoice. A
-            later order of 20 packs is counted as 65, so that new order gets
-            10%. Last month does not carry forward. 10% starts at 60 packs
-            combined, 15% at 80.
+            Catch-up credit is applied on this invoice only. Earlier invoices
+            keep the discount they already received. Totals reset each calendar
+            month.
           </p>
           <FieldError message={errors.packs} />
         </div>

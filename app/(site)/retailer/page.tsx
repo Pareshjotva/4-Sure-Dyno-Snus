@@ -29,8 +29,9 @@ export default async function RetailerProgramPage() {
       </p>
       <p className="mt-3 max-w-2xl text-slate-ink">
         For licensed retailers with a retailer account. Calendar-month pack
-        volume unlocks {maxOff ? `up to ${maxOff}%` : "volume"} off on the
-        qualifying order. Separate wholesale inquiries use the{" "}
+        volume unlocks {maxOff ? `up to ${maxOff}%` : "volume"} off, with
+        catch-up credit on the new order when a higher slab unlocks. Separate
+        wholesale inquiries use the{" "}
         <Link
           href="/wholesale"
           className="text-cyan underline-offset-2 hover:underline"

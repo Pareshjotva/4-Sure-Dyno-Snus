@@ -1,17 +1,38 @@
 "use client";
 
-import { activeVolumeMilestone, VOLUME_MILESTONES } from "@/lib/orders";
+import { VOLUME_MILESTONES } from "@/lib/orders";
+import type { IncentiveTier } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { resolveIncentive } from "@/lib/volume-discount";
 import { Check } from "lucide-react";
 
-/** Line fill 0–100 between equally spaced milestone nodes. */
-function lineFillPercent(totalPacks: number) {
-  const steps = VOLUME_MILESTONES;
-  const n = steps.length;
-  if (totalPacks <= 0) return 0;
-  if (totalPacks >= steps[n - 1].packs) return 100;
+type Milestone = {
+  packs: number;
+  maxPacks: number | null;
+  percent: number;
+};
 
-  // Before first milestone: keep line empty until 5% node unlocks
+function toMilestones(tiers?: IncentiveTier[]): Milestone[] {
+  if (tiers && tiers.length > 0) {
+    return [...tiers]
+      .sort((a, b) => a.minPacks - b.minPacks)
+      .map((tier) => ({
+        packs: tier.minPacks,
+        maxPacks: tier.maxPacks,
+        percent: tier.discountPercent,
+      }));
+  }
+  return VOLUME_MILESTONES.map((m) => ({
+    packs: m.packs,
+    maxPacks: m.maxPacks,
+    percent: m.percent,
+  }));
+}
+
+function lineFillPercent(totalPacks: number, steps: Milestone[]) {
+  const n = steps.length;
+  if (n === 0 || totalPacks <= 0) return 0;
+  if (totalPacks >= steps[n - 1].packs) return 100;
   if (totalPacks < steps[0].packs) return 0;
 
   for (let i = 0; i < n - 1; i++) {
@@ -19,31 +40,38 @@ function lineFillPercent(totalPacks: number) {
     const b = steps[i + 1].packs;
     const segStart = (i / (n - 1)) * 100;
     const segEnd = ((i + 1) / (n - 1)) * 100;
-
     if (totalPacks >= b) continue;
     if (totalPacks <= a) return segStart;
     const t = (totalPacks - a) / (b - a);
     return segStart + t * (segEnd - segStart);
   }
-
   return 100;
 }
 
 export function VolumeProgress({
   monthPacks,
   thisOrderPacks = 0,
+  tiers,
   className,
 }: {
   monthPacks: number;
   thisOrderPacks?: number;
+  tiers?: IncentiveTier[];
   className?: string;
 }) {
+  const steps = toMilestones(tiers);
   const earlier = Math.max(0, monthPacks);
   const currentOrder = Math.max(0, thisOrderPacks);
   const combined = earlier + currentOrder;
-  const fillPct = lineFillPercent(combined);
-  const current = activeVolumeMilestone(combined);
-  const next = VOLUME_MILESTONES.find((m) => combined < m.packs);
+  const fillPct = lineFillPercent(combined, steps);
+  const current = tiers?.length
+    ? resolveIncentive(combined, tiers)
+    : null;
+  const currentPercent =
+    current?.discountPercent ??
+    [...steps].reverse().find((m) => combined >= m.packs)?.percent ??
+    0;
+  const next = steps.find((m) => combined < m.packs);
   const packsToNext = next ? next.packs - combined : 0;
 
   return (
@@ -60,16 +88,17 @@ export function VolumeProgress({
           together {combined}
         </p>
         <p className="mt-1 text-sm text-white/65">
-          {current
-            ? `Eligible now: ${current.percent}% off`
+          {currentPercent > 0
+            ? `Eligible now: ${currentPercent}% off`
             : "Not eligible for a volume discount yet"}
           {next
             ? ` · ${packsToNext} more pack${packsToNext === 1 ? "" : "s"} to unlock ${next.percent}%`
-            : " · Top tier unlocked"}
+            : steps.length
+              ? " · Top tier unlocked"
+              : ""}
         </p>
       </div>
 
-      {/* Reference-style stepper: check circles on one horizontal line */}
       <div className="relative mx-auto mt-10 max-w-lg px-1">
         <div className="absolute left-[16.5%] right-[16.5%] top-5 h-[3px] bg-[#3a3a3a] sm:top-6" />
         <div
@@ -79,8 +108,11 @@ export function VolumeProgress({
           }}
         />
 
-        <ol className="relative z-10 grid grid-cols-3">
-          {VOLUME_MILESTONES.map((milestone) => {
+        <ol
+          className="relative z-10 grid"
+          style={{ gridTemplateColumns: `repeat(${Math.max(steps.length, 1)}, minmax(0, 1fr))` }}
+        >
+          {steps.map((milestone) => {
             const reached = combined >= milestone.packs;
             return (
               <li key={milestone.packs} className="flex flex-col items-center">

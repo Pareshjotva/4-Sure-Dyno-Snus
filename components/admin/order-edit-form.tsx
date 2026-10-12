@@ -365,8 +365,23 @@ export function AdminOrderEditForm({
         <p className="mt-4 text-sm text-white/70">
           Packs: <strong className="text-white">{packCount}</strong> · Subtotal:{" "}
           <strong className="text-white">${subtotal.toFixed(2)}</strong> · Discount:{" "}
-          <strong className="text-white">−${discountAmount.toFixed(2)}</strong> ·
-          Total: <strong className="text-white">${total.toFixed(2)}</strong>
+          <strong className="text-white">−${discountAmount.toFixed(2)}</strong>
+          {(order.discountAdjustment || 0) > 0 ? (
+            <>
+              {" "}
+              · Prior-order adjustment:{" "}
+              <strong className="text-white">
+                −${Number(order.discountAdjustment).toFixed(2)}
+              </strong>
+            </>
+          ) : null}{" "}
+          · Total:{" "}
+          <strong className="text-white">
+            $
+            {(
+              total - (Number(order.discountAdjustment) || 0)
+            ).toFixed(2)}
+          </strong>
         </p>
         <p className="mt-1 text-xs text-white/45">
           Admin edits are not limited by the retailer 20-pack minimum.

@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { requireSession } from "@/lib/auth";
 import { getIncentives, getOrders, getProducts, getSite, getUserById } from "@/lib/db";
 import { orderEligibility } from "@/lib/profile-status";
-import { packsThisMonth } from "@/lib/site";
+import {
+  monthOrders,
+  orderGrantedDiscount,
+  packCountOf,
+} from "@/lib/volume-discount";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -19,16 +23,33 @@ export default async function NewOrderPage() {
   ]);
   if (!user) redirect("/login");
 
-  const monthPacks = packsThisMonth(orders);
+  const priorMonth = monthOrders(orders);
+  const monthPacks = priorMonth.reduce((sum, order) => sum + packCountOf(order), 0);
+  const monthSubtotal = priorMonth.reduce(
+    (sum, order) => sum + (Number(order.subtotal) || 0),
+    0
+  );
+  const previouslyGranted = priorMonth.reduce(
+    (sum, order) => sum + orderGrantedDiscount(order),
+    0
+  );
   const gate = orderEligibility(user);
+  const tierHint = incentives
+    .map((tier) =>
+      tier.maxPacks == null
+        ? `${tier.minPacks}+ → ${tier.discountPercent}%`
+        : `${tier.minPacks}–${tier.maxPacks} → ${tier.discountPercent}%`
+    )
+    .join(", ");
 
   return (
     <div>
       <h1 className="font-display text-3xl text-navy">Place an order</h1>
       <p className="mt-2 text-sm text-slate-ink">
-        Minimum {site.minOrderPacks} packs for free shipping. Each order’s
-        discount uses packs already bought this month plus the packs on this
-        order. 20–40 combined is 5% off, 41–60 is 10% off, and 80+ is 15% off.
+        Minimum {site.minOrderPacks} packs for free shipping. Discount uses this
+        calendar month&apos;s cumulative packs. When you unlock a higher slab,
+        catch-up credit for earlier orders is applied on the new invoice — prior
+        invoices stay unchanged. Slabs: {tierHint || "configured by admin"}.
       </p>
 
       <div className="mt-6">
@@ -53,6 +74,8 @@ export default async function NewOrderPage() {
             pendingNotice={gate.pending ? gate.message : ""}
             tiers={incentives}
             monthPacks={monthPacks}
+            monthSubtotal={monthSubtotal}
+            previouslyGranted={previouslyGranted}
           />
         )}
       </div>

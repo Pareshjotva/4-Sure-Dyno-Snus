@@ -1,6 +1,7 @@
+import { MonthlyDiscountPanel } from "@/components/admin/monthly-discount-panel";
 import { RetailerReview } from "@/components/admin/retailer-review";
 import { requireSession } from "@/lib/auth";
-import { getUserById } from "@/lib/db";
+import { getIncentives, getOrders, getUserById } from "@/lib/db";
 import { profileStatus, PROFILE_STATUS_LABEL } from "@/lib/profile-status";
 import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -27,7 +28,11 @@ export default async function AdminRetailerPage({
   const session = await requireSession("admin");
   if (!session) redirect("/admin/login");
   const { id } = await params;
-  const user = await getUserById(id);
+  const [user, orders, tiers] = await Promise.all([
+    getUserById(id),
+    getOrders(id),
+    getIncentives(),
+  ]);
   if (!user || user.role !== "retailer") notFound();
   const status = profileStatus(user);
   const fields = [
@@ -58,6 +63,7 @@ export default async function AdminRetailerPage({
           </div>
         ))}
       </div>
+      <MonthlyDiscountPanel orders={orders} tiers={tiers} />
       <RetailerReview
         userId={user.id}
         status={status}

@@ -187,6 +187,11 @@ export async function PATCH(
         body.order.discountPercent
       );
       const status = normalizeOrderStatus(body.order.status) as OrderStatus;
+      // Keep prior-order catch-up credit unless admin clears the tier/percent path.
+      const discountAdjustment =
+        body.order.discountPercent === (current.discountPercent || 0)
+          ? Number(current.discountAdjustment) || 0
+          : 0;
       const order = await updateOrder(id, {
         status,
         province: body.order.province.toUpperCase(),
@@ -195,8 +200,12 @@ export async function PATCH(
         subtotal: priced.subtotal,
         discountPercent: priced.discountPercent,
         discountAmount: priced.discountAmount,
+        discountAdjustment,
         discountTier: body.order.discountTier || "",
-        total: Math.round((priced.subtotal - priced.discountAmount) * 100) / 100,
+        total:
+          Math.round(
+            (priced.subtotal - priced.discountAmount - discountAdjustment) * 100
+          ) / 100,
         invoiceOverrides: {
           billToName: body.order.billToName,
           billToAddress: body.order.billToAddress,

@@ -165,9 +165,15 @@ export interface Order {
   items: OrderItem[];
   subtotal: number;
   discountPercent: number;
+  /** Percent discount applied to this order's subtotal. */
   discountAmount: number;
+  /** Catch-up credit for earlier month orders at the unlocked rate. */
+  discountAdjustment?: number;
   discountTier?: string;
   monthPacksBefore?: number;
+  monthSubtotalBefore?: number;
+  previouslyGrantedDiscount?: number;
+  finalMonthlyDiscount?: number;
   qualifyingPacks?: number;
   total: number;
   status: OrderStatus;

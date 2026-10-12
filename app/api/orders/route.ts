@@ -12,7 +12,7 @@ import {
 import { zodFieldErrors } from "@/lib/form-errors";
 import { orderSchema } from "@/lib/form-schemas";
 import { orderEligibility, PROFILE_STATUS_LABEL } from "@/lib/profile-status";
-import { packsThisMonth, quoteVolumeDiscount } from "@/lib/site";
+import { monthOrders, quoteCumulativeDiscount } from "@/lib/volume-discount";
 import { z } from "zod";
 
 export async function POST(req: Request) {
@@ -73,13 +73,13 @@ export async function POST(req: Request) {
       0
     );
     const priorOrders = await getOrders(session.id);
-    const monthPacksBefore = packsThisMonth(priorOrders);
-    const quote = quoteVolumeDiscount(
-      packCount,
-      monthPacksBefore,
-      incentives,
-      subtotal
-    );
+    const priorMonthOrders = monthOrders(priorOrders);
+    const quote = quoteCumulativeDiscount({
+      orderPacks: packCount,
+      orderSubtotal: subtotal,
+      priorMonthOrders,
+      tiers: incentives,
+    });
 
     const order = await createOrder({
       userId: session.id,
@@ -90,8 +90,12 @@ export async function POST(req: Request) {
       subtotal,
       discountPercent: quote.discountPercent,
       discountAmount: quote.discountAmount,
+      discountAdjustment: quote.discountAdjustment,
       discountTier: quote.tier?.name || "",
-      monthPacksBefore,
+      monthPacksBefore: quote.monthPacksBefore,
+      monthSubtotalBefore: quote.monthSubtotalBefore,
+      previouslyGrantedDiscount: quote.previouslyGranted,
+      finalMonthlyDiscount: quote.finalMonthlyDiscount,
       qualifyingPacks: quote.qualifyingPacks,
       total: quote.total,
       status: "pending",
