@@ -76,7 +76,7 @@ export function AdminIncentivesClient({ tiers }: { tiers: IncentiveTier[] }) {
 
       {rows.map((row, index) => (
         <div key={row.id} className="surface rounded-2xl p-5">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <div className="lg:col-span-2">
               <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-navy/60">
                 Name
@@ -130,20 +130,6 @@ export function AdminIncentivesClient({ tiers }: { tiers: IncentiveTier[] }) {
                   update(index, {
                     discountPercent: Number(e.target.value || 0),
                   })
-                }
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-navy/60">
-                Save $ / pack
-              </label>
-              <Input
-                type="number"
-                min={0}
-                step="0.01"
-                value={row.savePerPack}
-                onChange={(e) =>
-                  update(index, { savePerPack: Number(e.target.value || 0) })
                 }
               />
             </div>
